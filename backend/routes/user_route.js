@@ -1,14 +1,11 @@
-import express from "express";
-import {signUpUser, logInUser} from "../controller/user_controller.js";
+import express from 'express';
+import {isAuthenticated} from '../middleware/authenticateUser.js'
+import {signUpUser, logInUser, logOutUser} from '../controller/user_controller.js';
 
 const router = express.Router();
-// const app = express();
-// app.get("/signup", (req, res)=>{
 
-//     res.send("radhe radhe");
-// })
 router.route('/signup').post(signUpUser);
 router.route('/login').post(logInUser);
-// router.route('/logout').post(logOutUser);
+router.route('/logout').post(isAuthenticated, logOutUser);
 
 export default router;

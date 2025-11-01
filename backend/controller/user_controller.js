@@ -118,3 +118,18 @@ export const logInUser = async (req, res) => {
     return res.status(400).json({ error: "Invalid credentials" });
   }
 };
+
+// Logout user
+export const logOutUser = async (req, res) => {
+  try {
+    res.clearCookie("jwttoken", {
+      httpOnly: false,
+      secure: true,
+      sameSite: "none",
+      path: "/",
+    });
+    res.status(200).json({ message: "User loggedOut successfully " });
+  } catch (errro) {
+    return res.status(500).json({ message: "Internal server error " });
+  }
+};
