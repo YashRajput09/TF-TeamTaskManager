@@ -85,3 +85,36 @@ export const signUpUser = async(req, res) =>{
     res.status(500).json({ message: "Internal server error", error });
   }
 }
+
+
+// Login User
+export const logInUser = async (req, res) => {
+  const { email, password, rememberMe } = req.body;
+  try {
+    if (!email || !password) {
+      return res.status(400).json({ message: "Please fill required fields" });
+    }
+    const user = await userModel.findOne({ email }).select("+password");
+    if (!user.password) {
+      return res.status(400).json({ message: "User password is missing" });
+    }
+    const isValidPassword = await bcrypt.compare(password, user.password);
+    if (!user || !isValidPassword) {
+      return res.status(400).json({ message: "Invalid email or password" });
+    }
+    const token = await createTokenAndSaveCookie(user._id, res, rememberMe);
+    // console.log(token);
+
+    res.status(200).json({
+      message: "User loggedIn successfully",
+      user: {
+        id: user._id,
+        name: user.name,
+        email: user.email,
+      },
+      token: token,
+    });
+  } catch (error) {
+    return res.status(400).json({ error: "Invalid credentials" });
+  }
+};
