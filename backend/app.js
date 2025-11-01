@@ -1,9 +1,37 @@
 import dotenv from 'dotenv';
 dotenv.config();
 
-import express from "express";
+import express from 'express';
 import mongoose from 'mongoose';
+import session from 'express-session';
+import fileUpload from 'express-fileupload';
+import cookieParser from 'cookie-parser';
+import userRoute from '../backend/routes/user_route.js';
 const app = express();
+
+// define session options
+const sessionOptions = {
+    secret: "secret code",
+    resave: false,
+    saveUninitialized: true,
+    cookie: {
+        expires: Date.now() + 28 * 24 * 60 * 60 * 1000,
+    maxAge: 28 * 24 * 60 * 60 * 1000,
+    httpOnly: true,
+    } 
+}
+
+//MIDDLEWARES
+app.use(session(sessionOptions));
+app.use(express.json()); // Parse application/json
+app.use(express.urlencoded({ extended: true })); // Parse application/x-www-form-urlencoded
+app.use(cookieParser());
+
+// Express-fileupload middleware for normal uploads
+const fileUploadMiddleware = fileUpload({
+  useTempFiles: true,
+  tempFileDir: '/tmp/'
+});
 
 
 const port = process.env.PORT;
@@ -22,6 +50,4 @@ async function dbConnection() {
 }
 dbConnection();
 
-app.use("/",(req, res)=>{
-    res.send("Radhe Radhe");
-})
+app.use("/user",fileUploadMiddleware, userRoute);
