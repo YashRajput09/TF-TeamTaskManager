@@ -52,7 +52,7 @@ export const createTask = async (req, res) => {
           resource_type: "auto",
         }
       );
-      // console.log(cloudinaryResponse);
+      console.log(cloudinaryResponse);
     }
     // console.log(title, description, priority, status, assignedTo, deadline);
     // console.log(cloudinaryResponse?.public_id);
@@ -79,11 +79,11 @@ export const createTask = async (req, res) => {
 
     find_group?.allTasks?.push(newTask?._id)
     
-    if (assignedTo) find_assignedUser?.assignedTasks?.push(newTask);
+    if (assignedTo) find_assignedUser?.assignedTasks?.push(newTask?._id);
      await find_assignedUser?.save();
     
     const findAdmin=await User.findById(adminId);
-    if(adminId) findAdmin?.createdTasks?.push(newTask);
+    if(adminId) findAdmin?.createdTasks?.push(newTask?._id);
 
     await find_group.save();
     await findAdmin.save();
@@ -94,3 +94,39 @@ export const createTask = async (req, res) => {
     return res.status(500).json({ mwssage: "Internal Server Error", error });
   }
 };
+
+export const assignTask= async (req,res)=>{
+  try {
+    const {assignedUserId,taskId}=req.body;
+    const {groupId}=req.params;
+ 
+    const find_task=await Task.findById(taskId);
+    if(!find_task) return res.status(404).json({message:"Task Not Found !!"})
+      
+      const find_group=await groupModel.findById(groupId);
+      if(!find_group)  return res.status(404).json({message:"group Not Found !!"})
+
+      let find_assignedUser = null;
+    if (assignedUserId) {
+      if (!find_group?.members?.some((m) => m.toString() === assignedUserId))
+        return res.status(404).json({ message: "User not in group yet !!" });
+
+      find_assignedUser = await User.findById(assignedUserId);
+    }
+
+     if (assignedUserId) find_assignedUser?.assignedTasks?.push(taskId);
+     await find_assignedUser?.save();
+
+
+      return res.status(200).json({message:"Task Assigned",find_task})
+      
+    } catch (error) {
+      console.log(error)
+      return res.status(500).json({message:"Internal Server error"})
+
+  }
+
+
+
+
+}
