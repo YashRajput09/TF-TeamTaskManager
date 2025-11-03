@@ -1,3 +1,4 @@
+import { groupModel } from '../models/group.model.js';
 import userModel from '../models/user_model.js';
 import jwt from 'jsonwebtoken';
 
@@ -28,3 +29,29 @@ export const isAuthenticated = async (req, res, next) => {
     return res.status(401).json({ message: "Unauthorized" });
   }
 };
+
+export const isAdmin =async(req,res,next)=>{
+  try {
+    const {groupId}=req.params;
+    const loggedUserId=req.user._id;
+    
+    const find_group=await groupModel.findById(groupId);
+
+    if(!find_group) return res.status(404).json({message:"Group Not Found"});
+
+    console.log(find_group?.createdBy,loggedUserId )
+
+    if(find_group?.createdBy?.toString() != loggedUserId){
+      return res.status(404).json({message:"Only Admin Of Group Have Permission"})
+    }
+    next();
+    
+  } catch (error) {
+    console.log(error);
+    
+    return res.status(404).json({message:"Internal Server Error"})
+  }
+
+
+
+}

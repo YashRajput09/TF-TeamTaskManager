@@ -7,6 +7,7 @@ import session from 'express-session';
 import fileUpload from 'express-fileupload';
 import cookieParser from 'cookie-parser';
 import userRoute from '../backend/routes/user_route.js';
+import groupRoute from '../backend/routes/group.route.js';
 const app = express();
 
 // define session options
@@ -51,3 +52,4 @@ async function dbConnection() {
 dbConnection();
 
 app.use("/user",fileUploadMiddleware, userRoute);
+app.use("/group",groupRoute);
