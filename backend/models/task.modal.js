@@ -4,19 +4,25 @@ const taskSchema=new mongoose.Schema(
     {
       groupId:{
         type:mongoose.Schema.ObjectId,
-        ref:"group"
+        ref:"Group"
       },        // Which board this task belongs to
       title: String,
       description: String,
       priority: { type: String, enum: ["High", "Medium", "Low"], default: "Low" },
-      assignedTo: ObjectId,      // User ID
+      assignedTo:{
+        type:mongoose.Schema.ObjectId,
+        ref:"User"
+      },      // User ID
       status: { type: String, enum: ["To Do", "In Progress", "Review", "Done"], default: "To Do" },
       deadline: Date,
       attachments: [String],    // URLs
       history: [
         { message: String, date: Date }
       ],
-      createdBy: ObjectId,
+      createdBy:{
+        type:mongoose.Schema.ObjectId,
+        ref:"User"
+      },
       createdAt: Date
     }
 
