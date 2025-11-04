@@ -77,13 +77,13 @@ export const createTask = async (req, res) => {
 
     await newTask.save();
 
-    find_group?.allTasks?.push(newTask?._id)
-    
+    find_group?.allTasks?.push(newTask?._id);
+
     if (assignedTo) find_assignedUser?.assignedTasks?.push(newTask?._id);
-     await find_assignedUser?.save();
-    
-    const findAdmin=await User.findById(adminId);
-    if(adminId) findAdmin?.createdTasks?.push(newTask?._id);
+    await find_assignedUser?.save();
+
+    const findAdmin = await User.findById(adminId);
+    if (adminId) findAdmin?.createdTasks?.push(newTask?._id);
 
     await find_group.save();
     await findAdmin.save();
@@ -95,18 +95,20 @@ export const createTask = async (req, res) => {
   }
 };
 
-export const assignTask= async (req,res)=>{
+export const assignTask = async (req, res) => {
   try {
-    const {assignedUserId,taskId}=req.body;
-    const {groupId}=req.params;
- 
-    const find_task=await Task.findById(taskId);
-    if(!find_task) return res.status(404).json({message:"Task Not Found !!"})
-      
-      const find_group=await groupModel.findById(groupId);
-      if(!find_group)  return res.status(404).json({message:"group Not Found !!"})
+    const { assignedUserId, taskId } = req.body;
+    const { groupId } = req.params;
 
-      let find_assignedUser = null;
+    const find_task = await Task.findById(taskId);
+    if (!find_task)
+      return res.status(404).json({ message: "Task Not Found !!" });
+
+    const find_group = await groupModel.findById(groupId);
+    if (!find_group)
+      return res.status(404).json({ message: "group Not Found !!" });
+
+    let find_assignedUser = null;
     if (assignedUserId) {
       if (!find_group?.members?.some((m) => m.toString() === assignedUserId))
         return res.status(404).json({ message: "User not in group yet !!" });
@@ -114,19 +116,64 @@ export const assignTask= async (req,res)=>{
       find_assignedUser = await User.findById(assignedUserId);
     }
 
-     if (assignedUserId) find_assignedUser?.assignedTasks?.push(taskId);
-     await find_assignedUser?.save();
+    if (assignedUserId) find_assignedUser?.assignedTasks?.push(taskId);
+    await find_assignedUser?.save();
 
-
-      return res.status(200).json({message:"Task Assigned",find_task})
-      
-    } catch (error) {
-      console.log(error)
-      return res.status(500).json({message:"Internal Server error"})
-
+    return res.status(200).json({ message: "Task Assigned", find_task });
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({ message: "Internal Server error" });
   }
+};
 
+export const getAllTask = async (req, res) => {
+  try {
+    const { groupId } = req.params;
 
+    const find_group = await groupModel.findById(groupId).populate("allTasks");
+    if (!find_group) return res.status(404).json({ message: "No Group Found" });
 
+    const groupName = find_group?.name;
+    const groupTasks = find_group.allTasks;
+
+    return res.status(200).json({ groupName, groupTasks });
+  } catch (error) {
+    console.log(error);
+    return res.status(404).json({ message: "Internal server error", error });
+  }
+};
+export const getUserAllTask = async (req, res) => {
+  try {
+    const loggedUserId = req?.user?._id;
+
+    console.log(loggedUserId);
+    const find_user = await User.findById(loggedUserId)
+      .populate("createdTasks")
+      .populate("assignedTasks");
+    if (!find_user) return res.status(404).json({ message: "User Not Found" });
+    
+    const userTasks = {
+      userName: find_user?.name,
+      createdTasks: find_user?.createdTasks,
+      assignedTasks: find_user?.assignedTasks,
+    };
+    
+    return res.status(200).json(userTasks);
+  } catch (error) {
+    console.log(error);
+    return res.status(404).json({ message: "Internal server error", error });
+  }
+};
+
+export const getSingleAllTask = async (req, res) =>{
+ const {taskId}=req.params;
+
+ const find_task=await Task.findById(taskId).populate('createdBy').populate('assignedTo');
+ if(!find_task)  return res.status(404).json({ message: "Task Not Found" });
+ 
+ 
+  return res.status(404).json(find_task);
+
+  
 
 }
