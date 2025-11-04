@@ -55,18 +55,24 @@ const userSchema = new mongoose.Schema(
   },
 
     // optional: store references for quick user-task queries
-    // createdTasks: [
-    //   {
-    //     type: mongoose.Schema.Types.ObjectId,
-    //     ref: "Task",
-    //   },
-    // ],
-    // assignedTasks: [
-    //   {
-    //     type: mongoose.Schema.Types.ObjectId,
-    //     ref: "Task",
-    //   },
-    // ],
+    createdTasks: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Task",
+      },
+    ],
+    assignedTasks: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Task",
+      },
+    ],
+    groups: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Group",
+      },
+    ],
   },
   
   { timestamps: true }

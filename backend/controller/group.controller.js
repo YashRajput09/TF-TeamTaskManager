@@ -108,3 +108,20 @@ export const removeMember = async (req, res) => {
     res.status(200).json({ message: "Internal Server Error", error });
   }
 };
+
+export const getUserGroups = async (req, res) => {
+try {
+  const {userId}=req.params;
+
+    const find_user=await User.findById(userId).populate('groups')
+    if(!find_user) return res.status(404).json({message:"User NOut Found"})
+      
+      return res.status(200).json(find_user.groups);
+      
+    } catch (error) {
+      console.log(error)
+      return res.status(500).json({message:"Internal Server Error"});
+    }
+      
+
+}

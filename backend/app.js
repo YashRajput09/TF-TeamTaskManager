@@ -6,9 +6,9 @@ import mongoose from 'mongoose';
 import session from 'express-session';
 import fileUpload from 'express-fileupload';
 import cookieParser from 'cookie-parser';
-import userRoute from './routes/user.route.js';
-import groupRoute from './routes/group.route.js';
-import categoryRoute from './routes/category.routes.js'
+import userRoute from '../backend/routes/user_route.js';
+import groupRoute from '../backend/routes/group.route.js';
+import taskRoute from '../backend/routes/task.route.js';
 const app = express();
 
 // define session options
@@ -32,7 +32,9 @@ app.use(cookieParser());
 // Express-fileupload middleware for normal uploads
 const fileUploadMiddleware = fileUpload({
   useTempFiles: true,
-  tempFileDir: '/tmp/'
+  tempFileDir: '/tmp/',
+//   parseNested: true,      // ✅ important
+//   preserveExtension: true 
 });
 
 
@@ -52,6 +54,6 @@ async function dbConnection() {
 }
 dbConnection();
 
-app.use("/user", fileUploadMiddleware, userRoute);
-app.use("/group", groupRoute);
-app.use("/category", categoryRoute);
+app.use("/user",fileUploadMiddleware, userRoute);
+app.use("/group",groupRoute);
+app.use("/task",fileUploadMiddleware,taskRoute);

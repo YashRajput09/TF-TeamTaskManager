@@ -39,7 +39,7 @@ export const isAdmin =async(req,res,next)=>{
 
     if(!find_group) return res.status(404).json({message:"Group Not Found"});
 
-    console.log(find_group?.createdBy,loggedUserId )
+    // console.log(find_group?.createdBy,loggedUserId )
 
     if(find_group?.createdBy?.toString() != loggedUserId){
       return res.status(404).json({message:"Only Admin Of Group Have Permission"})
