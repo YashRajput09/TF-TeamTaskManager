@@ -2,7 +2,22 @@ import express from "express";
 import cloudinary from "../config/cloudConfig.js";
 import { groupModel } from "../models/group.model.js";
 import { Task } from "../models/task.modal.js";
+import {generateSearchQuery} from "../utils/search.js";
 import User from "../models/user_model.js";
+
+export const searchBlogs = async(req, res) =>{
+  const searchQuery = req.query.search || "" ; // Default to an empty string if search is not provided
+  // console.log(req.query.search);
+  if(searchQuery){
+    const searchTasks = generateSearchQuery(searchQuery);
+    // console.log("searchBlogs", searchBlogs)
+    const allSearchTasks = await Task.find(searchTasks);
+    return res.status(200).json(allSearchTasks); // Return search results as JSON
+  }  else {
+    return res.status(400).json({ message: "Search query is required" }); // Handle missing query
+  }
+};
+
 
 export const createTask = async (req, res) => {
   try {
