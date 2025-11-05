@@ -7,8 +7,8 @@ const taskSchema = new mongoose.Schema(
       ref: "Group",
     }, // Which board this task belongs to
     title: {
-      type: String,
-      required: true,
+      type:String,
+      required:true
     },
     description: String,
     priority: { type: String, enum: ["High", "Medium", "Low"], default: "Low" },
@@ -33,30 +33,33 @@ const taskSchema = new mongoose.Schema(
         },
       },
     ], // URLs
-    submitMessage: {
-      type: String,
-    },
-    declineMessage: {
-      type: String,
-    },
+ submitMessage:{
+  type:String,
+ },
+ declineMessage:{
+  type:String,
+ },
 
-    // comment:[
-    //   {
-    //     commentedBy:{
-    //         type:mongoose.Schema.ObjectId,
-    //         ref:'user'
-    //     },
-    //     message:{
-    //       type:String,
-    //     },
-    //     date:Date.now()
-    //   }
-    // ],
+    comment:[
+      {
+        commentedBy:{
+            type:mongoose.Schema.ObjectId,
+            ref:'user'
+        },
+        message:{
+          type:String,
+        },
+        date:{
+          type:Date,
+          default:Date.now()
+        }
+      }
+    ],
 
     history: [{ message: String, date: Date }],
     createdBy: {
       type: mongoose.Schema.ObjectId,
-      required: true,
+      required:true,
       ref: "User",
     },
   },

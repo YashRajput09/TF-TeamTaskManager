@@ -9,6 +9,7 @@ import cookieParser from 'cookie-parser';
 import userRoute from '../backend/routes/user_route.js';
 import groupRoute from '../backend/routes/group.route.js';
 import taskRoute from '../backend/routes/task.route.js';
+import commentRoute from '../backend/routes/comment.route.js';
 const app = express();
 
 // define session options
@@ -57,3 +58,4 @@ dbConnection();
 app.use("/user",fileUploadMiddleware, userRoute);
 app.use("/group",groupRoute);
 app.use("/task",fileUploadMiddleware,taskRoute);
+app.use("/comment",commentRoute);

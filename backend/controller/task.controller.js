@@ -190,6 +190,8 @@ export const getSingleAllTask = async (req, res) => {
   return res.status(404).json(find_task);
 };
 
+
+//used when member accept task and start to work on
 export const updateTaskStatus = async (req, res) => {
   try {
     const { taskId } = req.params;
@@ -230,7 +232,7 @@ export const updateTaskStatus = async (req, res) => {
 export const submitTask = async (req, res) => {
   try {
     const { taskId } = req.params;
-    const { url } = req.body;
+    const { url , message } = req.body;
     const loggedUserId = req?.user?._id;
     const { attachment } = req.files;
 
