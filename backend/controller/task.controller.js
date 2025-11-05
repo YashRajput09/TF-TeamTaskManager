@@ -151,13 +151,13 @@ export const getUserAllTask = async (req, res) => {
       .populate("createdTasks")
       .populate("assignedTasks");
     if (!find_user) return res.status(404).json({ message: "User Not Found" });
-    
+
     const userTasks = {
       userName: find_user?.name,
       createdTasks: find_user?.createdTasks,
       assignedTasks: find_user?.assignedTasks,
     };
-    
+
     return res.status(200).json(userTasks);
   } catch (error) {
     console.log(error);
@@ -165,15 +165,97 @@ export const getUserAllTask = async (req, res) => {
   }
 };
 
-export const getSingleAllTask = async (req, res) =>{
- const {taskId}=req.params;
+export const getSingleAllTask = async (req, res) => {
+  const { taskId } = req.params;
 
- const find_task=await Task.findById(taskId).populate('createdBy').populate('assignedTo');
- if(!find_task)  return res.status(404).json({ message: "Task Not Found" });
- 
- 
+  const find_task = await Task.findById(taskId)
+    .populate("createdBy")
+    .populate("assignedTo");
+  if (!find_task) return res.status(404).json({ message: "Task Not Found" });
+
   return res.status(404).json(find_task);
+};
 
-  
+export const updateTaskStatus = async (req, res) => {
+  try {
+    const { taskId } = req.params;
+    const { status } = req.body;
+    const loggedUserId = req.user._id;
 
-}
+    // 1. Find Task
+    const task = await Task.findById(taskId).populate("createdBy assignedTo");
+    if (!task) return res.status(404).json({ message: "Task not found" });
+
+    // 3. Permission Check
+    const isGroupAdmin = task.createdBy.toString() === loggedUserId.toString();
+    const isAssignedUser =
+      task.assignedTo.toString() === loggedUserId.toString();
+
+    if (!isGroupAdmin && !isAssignedUser) {
+      return res.status(403).json({
+        message:
+          "Permission denied. Only admin or assigned user can update task status.",
+      });
+    }
+
+    // 4. Update Status
+    task.status = status;
+    await task.save();
+
+    return res.status(200).json({
+      message: "Task status updated successfully",
+      task,
+    });
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({ message: "Error updating status", error });
+  }
+};
+
+export const submitTask = async (req, res) => {
+  const { taskId } = req.params;
+  const {url}=req.body;
+  const loggedUserId = req?.user?._id;
+  const { attachment } = req.files;
+
+  const find_task = await Task.findById(taskId);
+  if (!find_task) return res.status(404).json({ message: "Task not found" });
+
+  if (find_task.assignedTo !== loggedUserId)
+    return res.status(404).json({ message: "Only asssigned user can submit" });
+
+  let cloudinaryResponse = null;
+  if (attachment) {
+    const allowedFormates = [
+      "image/jpeg",
+      "image/png",
+      "image/pdf",
+      "image/txt",
+    ];
+    if (!allowedFormates.includes(attachment.mimetype)) {
+      return res.status(400).json({
+        message: "Invalid image formate, only jpg, png, pdf are allowed",
+      });
+    }
+
+    cloudinaryResponse = await cloudinary.uploader.upload(
+      attachment.tempFilePath,
+      {
+        folder: "TF-TeamTaskManager/attachments",
+        resource_type: "auto",
+      }
+    );
+    console.log(cloudinaryResponse);
+
+    find_task.attachments.push({
+      public_id: cloudinaryResponse?.public_id || "none",
+      url: cloudinaryResponse?.secure_url,
+    });
+    
+  }
+
+  if(url){}
+
+
+  find_task.status = "Pending";
+};
