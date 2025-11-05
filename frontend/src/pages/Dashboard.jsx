@@ -1,4 +1,5 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import Card from '../components/Card';
 import { TrendingUp, CheckCircle, Clock, Users, ArrowUpRight, Calendar } from 'lucide-react';
 
@@ -11,31 +12,15 @@ const Dashboard = () => {
     { label: 'Team Members', value: '12', change: '+2', icon: Users, color: 'text-orange-500' },
   ];
 
-  const recentTasks = [
-    { id: 1, title: 'Update landing page design', team: 'Design Team', priority: 'High', dueDate: '2024-11-15', status: 'In Progress' },
-    { id: 2, title: 'Fix authentication bug', team: 'Dev Team', priority: 'Critical', dueDate: '2024-11-12', status: 'In Progress' },
-    { id: 3, title: 'Prepare Q4 presentation', team: 'Marketing', priority: 'Medium', dueDate: '2024-11-20', status: 'Pending' },
-    { id: 4, title: 'Code review for PR #234', team: 'Dev Team', priority: 'Low', dueDate: '2024-11-18', status: 'Completed' },
+  // Teams overview shown on Dashboard instead of "Quick Stats"
+  const teams = [
+    { id: 1, name: 'Design Team', members: 5, activeTasks: 12, progress: 78, color: 'bg-purple-500' },
+    { id: 2, name: 'Dev Team', members: 8, activeTasks: 23, progress: 65, color: 'bg-blue-500' },
+    { id: 3, name: 'Marketing', members: 4, activeTasks: 8,  progress: 82, color: 'bg-green-500' },
+    { id: 4, name: 'Product',   members: 6, activeTasks: 15, progress: 71, color: 'bg-orange-500' },
   ];
 
-  const getPriorityColor = (priority) => {
-    const colors = {
-      'Critical': 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400',
-      'High': 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400',
-      'Medium': 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400',
-      'Low': 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400',
-    };
-    return colors[priority] || colors['Medium'];
-  };
-
-  const getStatusColor = (status) => {
-    const colors = {
-      'Completed': 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400',
-      'In Progress': 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400',
-      'Pending': 'bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300',
-    };
-    return colors[status] || colors['Pending'];
-  };
+  const navigate = useNavigate();
 
   return (
     <div className="space-y-6">
@@ -77,9 +62,9 @@ const Dashboard = () => {
         })}
       </div>
 
-      {/* Recent Tasks Section */}
+      {/* My Recent Tasks + Teams Overview */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* My Recent Tasks */}
+        {/* My Recent Tasks (unchanged) */}
         <Card className="lg:col-span-2">
           <div className="flex items-center justify-between mb-6">
             <h2 className="text-xl font-bold text-gray-900 dark:text-white">My Recent Tasks</h2>
@@ -88,8 +73,13 @@ const Dashboard = () => {
             </a>
           </div>
           <div className="space-y-3">
-            {recentTasks.map((task) => (
-              <div 
+            {[
+              { id: 1, title: 'Update landing page design', team: 'Design Team', priority: 'High',    dueDate: '2024-11-15', status: 'In Progress' },
+              { id: 2, title: 'Fix authentication bug',      team: 'Dev Team',    priority: 'Critical',dueDate: '2024-11-12', status: 'In Progress' },
+              { id: 3, title: 'Prepare Q4 presentation',     team: 'Marketing',   priority: 'Medium', dueDate: '2024-11-20', status: 'Pending' },
+              { id: 4, title: 'Code review for PR #234',     team: 'Dev Team',    priority: 'Low',    dueDate: '2024-11-18', status: 'Completed' },
+            ].map((task) => (
+              <div
                 key={task.id}
                 className="flex items-center justify-between p-4 rounded-lg bg-gray-50 dark:bg-gray-700/50 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors cursor-pointer"
               >
@@ -102,10 +92,10 @@ const Dashboard = () => {
                   </div>
                 </div>
                 <div className="flex items-center space-x-2 ml-4">
-                  <span className={`px-2 py-1 rounded-md text-xs font-medium ${getPriorityColor(task.priority)}`}>
+                  <span className="px-2 py-1 rounded-md text-xs font-medium bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400">
                     {task.priority}
                   </span>
-                  <span className={`px-2 py-1 rounded-md text-xs font-medium ${getStatusColor(task.status)}`}>
+                  <span className="px-2 py-1 rounded-md text-xs font-medium bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400">
                     {task.status}
                   </span>
                 </div>
@@ -114,26 +104,42 @@ const Dashboard = () => {
           </div>
         </Card>
 
-        {/* Quick Stats */}
+        {/* All Teams Overview (replaces Quick Stats) */}
         <Card>
-          <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-6">Quick Stats</h2>
-          <div className="space-y-4">
-            <div className="flex items-center justify-between p-3 rounded-lg bg-gray-50 dark:bg-gray-700/50">
-              <span className="text-sm text-gray-600 dark:text-gray-400">Tasks This Week</span>
-              <span className="text-lg font-bold text-gray-900 dark:text-white">18</span>
-            </div>
-            <div className="flex items-center justify-between p-3 rounded-lg bg-gray-50 dark:bg-gray-700/50">
-              <span className="text-sm text-gray-600 dark:text-gray-400">Completion Rate</span>
-              <span className="text-lg font-bold text-green-600 dark:text-green-400">87%</span>
-            </div>
-            <div className="flex items-center justify-between p-3 rounded-lg bg-gray-50 dark:bg-gray-700/50">
-              <span className="text-sm text-gray-600 dark:text-gray-400">Overdue Tasks</span>
-              <span className="text-lg font-bold text-red-600 dark:text-red-400">3</span>
-            </div>
-            <div className="flex items-center justify-between p-3 rounded-lg bg-gray-50 dark:bg-gray-700/50">
-              <span className="text-sm text-gray-600 dark:text-gray-400">Team Avg. Time</span>
-              <span className="text-lg font-bold text-gray-900 dark:text-white">2.4h</span>
-            </div>
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-xl font-bold text-gray-900 dark:text-white">All Teams Overview</h2>
+            <button
+              onClick={() => navigate('/teams')}
+              className="text-sm font-medium text-primary-600 dark:text-primary-400 hover:underline"
+            >
+              View all teams
+            </button>
+          </div>
+
+          <div className="space-y-3">
+            {teams.map((t) => (
+              <button
+                key={t.id}
+                onClick={() => navigate(`/teams?team=${t.id}`)}
+                className="w-full text-left p-3 rounded-lg bg-gray-50 dark:bg-gray-700/50 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+              >
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center space-x-3">
+                    <div className={`w-8 h-8 ${t.color} rounded-lg`} />
+                    <div>
+                      <p className="text-sm font-semibold text-gray-900 dark:text-white">{t.name}</p>
+                      <p className="text-xs text-gray-600 dark:text-gray-400">{t.members} members • {t.activeTasks} active</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <div className="w-24 bg-gray-200 dark:bg-gray-700 rounded-full h-2 overflow-hidden">
+                      <div className={`h-full ${t.color}`} style={{ width: `${t.progress}%` }} />
+                    </div>
+                    <span className="text-xs font-medium text-gray-700 dark:text-gray-300">{t.progress}%</span>
+                  </div>
+                </div>
+              </button>
+            ))}
           </div>
         </Card>
       </div>
