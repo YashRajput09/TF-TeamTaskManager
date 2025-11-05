@@ -10,6 +10,7 @@ import cors from 'cors';
 import userRoute from '../backend/routes/user.route.js';
 import groupRoute from '../backend/routes/group.route.js';
 import taskRoute from '../backend/routes/task.route.js';
+import commentRoute from '../backend/routes/comment.route.js';
 // import categoryRoute from '../backend/routes/category.routes.js';
 const app = express();
 
@@ -79,4 +80,5 @@ dbConnection();
 app.use(["/", "/user"],fileUploadMiddleware, userRoute);
 app.use("/group",groupRoute);
 app.use("/task",fileUploadMiddleware,taskRoute);
+app.use("/comment",commentRoute);
 // app.use("/category",categoryRoute);
