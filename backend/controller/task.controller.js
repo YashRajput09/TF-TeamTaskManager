@@ -6,8 +6,10 @@ import User from "../models/user_model.js";
 
 export const createTask = async (req, res) => {
   try {
-    const { title, description, priority, assignedTo, status, deadline } =
+    const { title, description, priority, assignedTo, status, deadline, category } =
       req.body;
+      // console.log(req.body);
+      
     const { groupId } = req.params;
     const adminId = req?.user?._id;
     const attachment = req.files?.attachment;
@@ -67,23 +69,25 @@ export const createTask = async (req, res) => {
       createdBy: adminId,
       assignedTo: assignedTo ? assignedTo : null,
       deadline,
+      category,
       attachments: attachment
         ? {
             public_id: cloudinaryResponse?.public_id || "None",
             url: cloudinaryResponse?.secure_url || "None",
           }
         : null,
-        history:{
-          message:`Task Created by ${adminId} `,
-          date:Date.now()
-        }
+      history: {
+        message: `Task Created by ${adminId} `,
+        date: Date.now(),
+      },
     });
 
-    
     await newTask.save();
 
-    if(find_assignedUser!==null){
-      newTask.history.push({message:`Assigned to ${find_assignedUser?.name} `})
+    if (find_assignedUser !== null) {
+      newTask.history.push({
+        message: `Assigned to ${find_assignedUser?.name} `,
+      });
     }
 
     find_group?.allTasks?.push(newTask?._id);
@@ -125,9 +129,11 @@ export const assignTask = async (req, res) => {
       find_assignedUser = await User.findById(assignedUserId);
     }
 
-    if (assignedUserId){ 
+    if (assignedUserId) {
       find_assignedUser?.assignedTasks?.push(taskId);
-      find_task.history.push({message:`Assigned to ${find_assignedUser?.name} `})
+      find_task.history.push({
+        message: `Assigned to ${find_assignedUser?.name} `,
+      });
     }
 
     await find_assignedUser?.save();
@@ -195,17 +201,20 @@ export const getSingleAllTask = async (req, res) => {
 export const updateTaskStatus = async (req, res) => {
   try {
     const { taskId } = req.params;
-    const { status } = req.body;
-    const loggedUserId = req.user._id;
+    const {status} = req.body;
+    const loggedUserId = req?.user?._id;
 
+  console.log(loggedUserId)
+    console.log("hello")
     // 1. Find Task
     const task = await Task.findById(taskId).populate("createdBy assignedTo");
     if (!task) return res.status(404).json({ message: "Task not found" });
 
+    console.log(task.createdBy.id,task.assignedTo.id,loggedUserId)
     // 3. Permission Check
-    const isGroupAdmin = task.createdBy.toString() === loggedUserId.toString();
-    const isAssignedUser =
-      task.assignedTo.toString() === loggedUserId.toString();
+    const isGroupAdmin = task.createdBy.id === loggedUserId.toString();
+    const isAssignedUser =task.assignedTo.id === loggedUserId.toString();
+
 
     if (!isGroupAdmin && !isAssignedUser) {
       return res.status(403).json({
@@ -216,11 +225,11 @@ export const updateTaskStatus = async (req, res) => {
 
     // 4. Update Status
     task.status = status;
-    task?.history.push({message:`In progess By ${task?.assignedTo}`})
+    task?.history.push({ message: `In progess By ${task?.assignedTo}` });
     await task.save();
 
     return res.status(200).json({
-      message: "Task status updated successfully",
+      message: "Task status updated ,  In progress by member",
       task,
     });
   } catch (error) {
@@ -232,14 +241,18 @@ export const updateTaskStatus = async (req, res) => {
 export const submitTask = async (req, res) => {
   try {
     const { taskId } = req.params;
-    const { url , message } = req.body;
+    const url = req.body.url ? req.body?.url : null;
+    const message = req.body.message ? req.body?.message : null;
     const loggedUserId = req?.user?._id;
-    const { attachment } = req.files;
+    
+    const attachment  = req.files ? req.files.attachment : null;
 
     const find_task = await Task.findById(taskId);
     if (!find_task) return res.status(404).json({ message: "Task not found" });
 
-    if (find_task.assignedTo !== loggedUserId)
+    console.log(find_task.assignedTo,loggedUserId);
+
+    if (find_task.assignedTo.toString() !== loggedUserId.toString())
       return res
         .status(404)
         .json({ message: "Only asssigned user can submit" });
@@ -279,34 +292,62 @@ export const submitTask = async (req, res) => {
         url: url,
       });
     }
+    if (message) {
+      find_task.submitMessage = message;
+    }
 
     find_task.status = "Pending";
-    find_task.history.push({message:"Send For Review",date:Date.now()});
+    find_task.history.push({ message: "Send For Review", date: Date.now() });
     await find_task.save();
 
-   return res.status(200).json({message:"Task Submitted"});
+    return res.status(200).json({ message: "Task Submitted and In review" });
   } catch (error) {
-    console.log(error)
-    return res.status(500).json({message:"Internal Server Error",error});
+    console.log(error);
+    return res.status(500).json({ message: "Internal Server Error", error });
   }
 };
 
 //Task Approval Only by Admin
-export const approveTask=async (req,res)=>{
-      const {taskId}=req.params;
-      const loggedUserId=req?.user?._id;  //Admin and creator of project of Group
+export const approveTask = async (req, res) => {
+  try {
+    const { taskId } = req.params;
+    const { isAccept, declineMessage } = req.body;
+    const loggedUserId = req?.user?._id; //Admin and creator of project of Group
 
-      const find_task=await Task.findById(taskId);
-      if(!find_task) return res.status(400).json({message:"Task not found"});
-      
-      //Check if logged user is creator of group or not 
-      const find_loggedUser=await User.findById(loggedUserId);
-      if(find_task?.createdBy!==loggedUserId) return res.status(400).json({message:"Only Admin can approve"});
+    const find_task = await Task.findById(taskId);
+    if (!find_task) return res.status(400).json({ message: "Task not found" });
 
-      find_task.history.push({message:"Task completed", date:Date.now()});
+    console.log(find_task.createdBy,loggedUserId)
+    //Check if logged user is creator of group or not
+    const find_loggedUser = await User.findById(loggedUserId);
+    if (find_task?.createdBy.toString() !== loggedUserId.toString())
+      return res.status(400).json({ message: "Only Admin can approve" });
 
-      await find_task.save();
+    if (isAccept !== "yes" || isAccept !== "no") {
+    }
 
-      
+    if (isAccept !== "yes") {
+      if (declineMessage) {
+        find_task.declineMessage = declineMessage;
+      }
 
-}
+      find_task.history.push({
+        message: "submission declined ",
+        date: Date.now(),
+      });
+
+      return res
+        .status(400)
+        .json({ message: "Submission Declined", declineMessage });
+    }
+    find_task.history.push({ message: "Task completed", date: Date.now() });
+
+    await find_task.save();
+
+    return res.status(200).json({ message: "Task Completed", find_task });
+  } catch (error) {
+    console.log(error);
+    
+    return res.status(500).json({ message: "Internal Server Error", error });
+  }
+};

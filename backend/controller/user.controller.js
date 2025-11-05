@@ -133,3 +133,11 @@ export const logOutUser = async (req, res) => {
     return res.status(500).json({ message: "Internal server error " });
   }
 };
+
+export const getMyProfile = async (req, res) => {
+  // console.log(req);
+
+  const profileDetails = await req.user;
+  // console.log(profileDetails);
+  res.status(200).json(profileDetails);
+};
