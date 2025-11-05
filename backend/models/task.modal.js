@@ -18,7 +18,7 @@ const taskSchema = new mongoose.Schema(
     }, // User ID
     status: {
       type: String,
-      enum: ["Assigned", "In Progress", "Pending", "Done"],
+      enum: ["Assigned", "In-progress", "Pending", "Done"],
       default: "Assigned",
     },
     deadline: Date,

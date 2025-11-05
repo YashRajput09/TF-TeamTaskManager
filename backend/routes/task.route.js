@@ -1,7 +1,7 @@
 
 import express from 'express'
 import { isAdmin, isAuthenticated } from '../middleware/authenticateUser.js';
-import { assignTask, createTask, getAllTask, getSingleAllTask, getUserAllTask, submitTask, updateTaskStatus } from '../controller/task.controller.js';
+import { approveTask, assignTask, createTask, getAllTask, getSingleAllTask, getUserAllTask, submitTask, updateTaskStatus } from '../controller/task.controller.js';
 
 
 const router=express.Router();
@@ -13,7 +13,8 @@ router.get("/get-user-task",isAuthenticated,getUserAllTask);  //  get all task o
 router.get("/get-single-task/:taskId",isAuthenticated,getSingleAllTask);  //  get all task of loggedIn user
 
 //update status
-router.put("/task/update-status/:taskId",updateTaskStatus)
-router.put("/task/:taskId/submit",submitTask)
+router.put("/update-status/:taskId",isAuthenticated,updateTaskStatus)
+router.put("/:taskId/submit",isAuthenticated,submitTask)
+router.put("/:taskId/approve",isAuthenticated,approveTask)
 
 export default router;
