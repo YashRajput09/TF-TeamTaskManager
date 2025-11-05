@@ -294,6 +294,17 @@ export const approveTask=async (req,res)=>{
       const {taskId}=req.params;
       const loggedUserId=req?.user?._id;  //Admin and creator of project of Group
 
-    
+      const find_task=await Task.findById(taskId);
+      if(!find_task) return res.status(400).json({message:"Task not found"});
+      
+      //Check if logged user is creator of group or not 
+      const find_loggedUser=await User.findById(loggedUserId);
+      if(find_task?.createdBy!==loggedUserId) return res.status(400).json({message:"Only Admin can approve"});
+
+      find_task.history.push({message:"Task completed", date:Date.now()});
+
+      await find_task.save();
+
+      
 
 }
