@@ -6,8 +6,10 @@ import User from "../models/user_model.js";
 
 export const createTask = async (req, res) => {
   try {
-    const { title, description, priority, assignedTo, status, deadline } =
+    const { title, description, priority, assignedTo, status, deadline, category } =
       req.body;
+      // console.log(req.body);
+      
     const { groupId } = req.params;
     const adminId = req?.user?._id;
     const attachment = req.files?.attachment;
@@ -67,6 +69,7 @@ export const createTask = async (req, res) => {
       createdBy: adminId,
       assignedTo: assignedTo ? assignedTo : null,
       deadline,
+      category,
       attachments: attachment
         ? {
             public_id: cloudinaryResponse?.public_id || "None",

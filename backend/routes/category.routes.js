@@ -8,8 +8,8 @@ import { isAuthenticated } from "../middleware/authenticateUser.js"; // if you u
 
 const router = express.Router();
 
-router.post("/create", isAuthenticated, createCategory);
-router.get("/get-all-categories", isAuthenticated, getAllCategories);
+router.post("/create/:groupId", isAuthenticated, createCategory);
+router.get("/get-all-categories/:groupId", isAuthenticated, getAllCategories);
 router.get("/get-all-categories/with-tasks", isAuthenticated, getCategoriesWithTasks);
 
 export default router;

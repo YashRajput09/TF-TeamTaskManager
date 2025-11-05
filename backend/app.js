@@ -6,9 +6,10 @@ import mongoose from 'mongoose';
 import session from 'express-session';
 import fileUpload from 'express-fileupload';
 import cookieParser from 'cookie-parser';
-import userRoute from '../backend/routes/user_route.js';
+import userRoute from '../backend/routes/user.route.js';
 import groupRoute from '../backend/routes/group.route.js';
 import taskRoute from '../backend/routes/task.route.js';
+import categoryRoute from '../backend/routes/category.routes.js';
 const app = express();
 
 // define session options
@@ -57,3 +58,4 @@ dbConnection();
 app.use("/user",fileUploadMiddleware, userRoute);
 app.use("/group",groupRoute);
 app.use("/task",fileUploadMiddleware,taskRoute);
+// app.use("/category",categoryRoute);
