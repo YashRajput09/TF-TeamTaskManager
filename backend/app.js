@@ -6,7 +6,7 @@ import mongoose from 'mongoose';
 import session from 'express-session';
 import fileUpload from 'express-fileupload';
 import cookieParser from 'cookie-parser';
-import userRoute from '../backend/routes/user_route.js';
+import userRoute from '../backend/routes/user.route.js';
 import groupRoute from '../backend/routes/group.route.js';
 import taskRoute from '../backend/routes/task.route.js';
 import commentRoute from '../backend/routes/comment.route.js';
