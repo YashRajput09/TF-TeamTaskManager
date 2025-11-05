@@ -1,7 +1,7 @@
 
 import express from 'express'
 import { isAdmin, isAuthenticated } from '../middleware/authenticateUser.js';
-import { approveTask, assignTask, createTask, getAllTask, getSingleAllTask, getUserAllTask, submitTask, updateTaskStatus } from '../controller/task.controller.js';
+import { approveTask, assignTask, createTask, getAllTask, getSingleAllTask, getUserAllTask, submitTask, updateTaskStatus, searchBlogs } from '../controller/task.controller.js';
 
 
 const router=express.Router();
@@ -16,5 +16,9 @@ router.get("/get-single-task/:taskId",isAuthenticated,getSingleAllTask);  //  ge
 router.put("/update-status/:taskId",isAuthenticated,updateTaskStatus)
 router.put("/:taskId/submit",isAuthenticated,submitTask)
 router.put("/:taskId/approve",isAuthenticated,approveTask)
+
+// search
+router.route("/api/search").get(searchBlogs);
+
 
 export default router;

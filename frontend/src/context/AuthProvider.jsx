@@ -30,7 +30,7 @@ export const AuthProvider = ({ children }) => {
         );
         setIsAuthenticated(true);
         setProfile(data);
-        // console.log("profiledata : ",data);
+        console.log("profiledata : ",data);
 
         // }
       }  catch (error) {
@@ -42,19 +42,19 @@ export const AuthProvider = ({ children }) => {
     //   }
     };
 
-    const fetchBlogs = async () => {
-      try {
-        const { data } = await axios.get(
-          //fetch Blogs using axios
-          `${import.meta.env.VITE_APP_BACKEND_URL}/blog/all-blogs`
-        );
-        setBlogs(data); // store the data in the state, using setBlogs().
-        // console.log(data);
-      } catch (error) {
-        console.log(error);
-      }
-    };
-    fetchBlogs();
+    // const fetchBlogs = async () => {
+    //   try {
+    //     const { data } = await axios.get(
+    //       //fetch Blogs using axios
+    //       `${import.meta.env.VITE_APP_BACKEND_URL}/blog/all-blogs`
+    //     );
+    //     setBlogs(data); // store the data in the state, using setBlogs().
+    //     // console.log(data);
+    //   } catch (error) {
+    //     console.log(error);
+    //   }
+    // };
+    // fetchBlogs();
     fetchProfile();
   }, []); // '[]' indicates useEffect will run only once after component mounts.
   return (
