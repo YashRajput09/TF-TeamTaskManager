@@ -39,6 +39,11 @@ const taskSchema = new mongoose.Schema(
       required:true,
       ref: "User",
     },
+   category: {
+ type: String,
+ default: "uncategorized" 
+}
+
   },
   { timestamps: true }
 );
