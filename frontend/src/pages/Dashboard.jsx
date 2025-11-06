@@ -26,6 +26,7 @@ const Dashboard = () => {
     const {data}=await axiosInstance.get(`/user/myprofile`);
     console.log(data?.groups)
     setUserGroups(data?.groups);
+    
    }
 
    allUserTask();
