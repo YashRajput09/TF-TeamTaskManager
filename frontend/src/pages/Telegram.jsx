@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import Card from '../components/Card';
 import { MessageCircle, CheckCircle, XCircle, Send, Bot, Bell, RefreshCw, Users } from 'lucide-react';
 
-const API_BASE = 'http://localhost:5000'; // Add this line
+const API_BASE = 'http://localhost:3000'; // Add this line
 
 const TelegramPage = () => {
   const [chatId, setChatId] = useState('');
