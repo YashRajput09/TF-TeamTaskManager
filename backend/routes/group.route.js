@@ -1,5 +1,5 @@
 import expresss from "express"
-import { addMember, createGroup, getUserGroups, removeMember } from "../controller/group.controller.js";
+import { addMember, createGroup, getSingleGroup, getUserGroups, removeMember } from "../controller/group.controller.js";
 import { isAuthenticated, isAdmin } from "../middleware/authenticateUser.js";
 
 const router=expresss.Router();
@@ -9,6 +9,7 @@ router.post("/add-member/:groupId",isAuthenticated,isAdmin,addMember);
 router.post("/remove-member/:groupId",isAuthenticated,isAdmin,removeMember);
 
 //get all group of logged in user associated with
+router.get("/get-single-group/:groupId",isAuthenticated,getSingleGroup)
 router.get("/get-allUserGroup/:userId",isAuthenticated,getUserGroups);
 
 
