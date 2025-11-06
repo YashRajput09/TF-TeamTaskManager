@@ -1,8 +1,17 @@
-import React, { useMemo, useState } from 'react';
-import { useLocation, useNavigate, useParams } from 'react-router-dom';
-import Card from '../components/Card';
-import { ArrowLeft, Calendar, Flag, MessageSquare, UploadCloud, Paperclip, User } from 'lucide-react';
-
+import React, { useEffect, useMemo, useState } from "react";
+import { useLocation, useNavigate, useParams } from "react-router-dom";
+import Card from "../components/Card";
+import {
+  ArrowLeft,
+  Calendar,
+  Flag,
+  MessageSquare,
+  UploadCloud,
+  Paperclip,
+  User,
+} from "lucide-react";
+import axiosInstance from "./utility/axiosInstance";
+import { useAuth } from "../context/AuthProvider";
 
 // 🧠 Utility: Format and colorize due date
 const formatDueDate = (dateString) => {
@@ -42,7 +51,6 @@ const formatDueDate = (dateString) => {
   }
 };
 
-
 /**
  * TaskDetail expects to be navigated with `state.task` from Dashboard/MyTasks/Teams/AssignedTasks.
  * viewerRole in state controls who can upload:
@@ -54,21 +62,107 @@ export default function TaskDetail() {
   const navigate = useNavigate();
   const { taskId } = useParams();
   const location = useLocation();
+
+  const { profile } = useAuth();
+
+  console.log(profile);
+
   const taskFromState = location.state?.task || null;
-  const viewerRole = location.state?.viewerRole === 'admin' ? 'admin' : 'member'; // <-- role gate
+  const viewerRole =
+    location.state?.viewerRole === "admin" ? "admin" : "member"; // <-- role gate
 
   const [adminFiles, setAdminFiles] = useState([]);
   const [memberFiles, setMemberFiles] = useState([]);
-  const [comments, setComments] = useState([
-    { id: 'c1', author: 'Sarah Williams', text: 'Please align this with the new branding.' },
-    { id: 'c2', author: 'Vishal Patidar', text: 'Noted. I\'ll update by EOD.' },
-  ]);
-  const [newComment, setNewComment] = useState('');
+  const [task, setTask] = useState();
+  const [comments, setComments] = useState();
+  const [newComment, setNewComment] = useState("");
 
   // For member uploads, optional display name
-  const [memberUploadName, setMemberUploadName] = useState('');
+  const [memberUploadName, setMemberUploadName] = useState("");
 
-  const task = useMemo(() => taskFromState, [taskFromState]);
+  // const task = useMemo(() => taskFromState, [taskFromState]);
+
+  console.log(task);
+
+  // useEffect(() => {
+  //  const getTask=async()=>{
+  //   try {
+  //     const {data}=await axiosInstance.get(`/task/get-single-task/${taskId}`)
+  //     console.log(data);
+  //     setTask(data);
+  //   } catch (error) {
+  //     console.log(error)
+  //   }
+  //  }
+
+  //  getTask();
+
+  // }, [])
+
+  useEffect(() => {
+    const getTask = async () => {
+      try {
+        const { data } = await axiosInstance.get(
+          `/task/get-single-task/${taskId}`
+        );
+
+        setTask(data);
+
+        if (data.attachments && Array.isArray(data.attachments)) {
+          const admin = [];
+          const member = [];
+
+          data.attachments.forEach((file) => {
+            // const role = file.uploadedBy?.role?.toLowerCase();
+            const role =
+              file?.uploadedBy?._id === task?.createdBy?.id
+                ? "admin"
+                : "member";
+
+            console.log(role);
+
+            console.log(file);
+            const fileObj = {
+              id: file?._id,
+              // name: file?.fileUrl?.split("/").pop(), // extract filename
+              size: null, // optional if you don't store it
+              from: file.uploadedBy?.name || "Unknown",
+              url: file?.url,
+            };
+
+            if (role === "admin") admin.push(fileObj);
+            else member.push(fileObj);
+          });
+
+          setAdminFiles(admin);
+          setMemberFiles(member);
+        }
+      } catch (error) {
+        console.log(error);
+      }
+    };
+    const getComments = async () => {
+      try {
+        const { data } = await axiosInstance.get(
+          `/comment/getAll-comment/${taskId}`
+        );
+        const sorted = data?.allComments?.sort(
+          (a, b) => new Date(b.date) - new Date(a.date) // newest first
+        );
+        setComments(sorted || []);
+      } catch (error) {
+        console.log(error);
+      }
+    };
+
+    getTask();
+    getComments();
+  }, [taskId, newComment]);
+
+  console.log(adminFiles);
+  console.log(memberFiles);
+
+  console.log(task);
 
   const onUploadAdmin = (e) => {
     const files = Array.from(e.target.files || []);
@@ -76,10 +170,10 @@ export default function TaskDetail() {
       id: `admin-${f.name}-${Date.now()}`,
       name: f.name,
       size: f.size,
-      from: 'Admin',
+      from: "Admin",
     }));
     setAdminFiles((prev) => [...mapped, ...prev]);
-    e.target.value = '';
+    e.target.value = "";
   };
 
   const onUploadMember = (e) => {
@@ -88,17 +182,32 @@ export default function TaskDetail() {
       id: `member-${f.name}-${Date.now()}`,
       name: f.name,
       size: f.size,
-      from: memberUploadName?.trim() || 'Member',
+      from: memberUploadName?.trim() || "Member",
     }));
     setMemberFiles((prev) => [...mapped, ...prev]);
-    e.target.value = '';
+    e.target.value = "";
   };
 
-  const addComment = (e) => {
-    e.preventDefault();
-    if (!newComment.trim()) return;
-    setComments((prev) => [{ id: `c-${Date.now()}`, author: 'You', text: newComment.trim() }, ...prev ]);
-    setNewComment('');
+  const addComment = async (e) => {
+    try {
+      e.preventDefault();
+      if (!newComment.trim()) return;
+
+      const { data } = await axiosInstance.post(
+        `/comment/add-comment/${taskId}`,
+        { message: newComment }
+      );
+      console.log(data);
+      alert("Comment added");
+
+      setComments((prev) => [
+        { id: `c-${Date.now()}`, author: "You", text: newComment.trim() },
+        ...prev,
+      ]);
+      setNewComment("");
+    } catch (error) {
+      console.log(error);
+    }
   };
 
   if (!task) {
@@ -113,16 +222,20 @@ export default function TaskDetail() {
             <ArrowLeft className="w-5 h-5 text-gray-600 dark:text-gray-300" />
           </button>
           <div>
-            <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Task</h1>
+            <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
+              Task
+            </h1>
             <p className="mt-1 text-gray-600 dark:text-gray-400">
-              We couldn’t load this task. Try opening it from Dashboard or My Tasks.
+              We couldn’t load this task. Try opening it from Dashboard or My
+              Tasks.
             </p>
           </div>
         </div>
 
         <Card className="p-6">
           <p className="text-sm text-gray-600 dark:text-gray-400">
-            If you plan to deep link directly, store tasks in a global store / backend and fetch by <code>ID</code> ({taskId}).
+            If you plan to deep link directly, store tasks in a global store /
+            backend and fetch by <code>ID</code> ({taskId}).
           </p>
         </Card>
       </div>
@@ -142,11 +255,13 @@ export default function TaskDetail() {
             <ArrowLeft className="w-5 h-5 text-gray-600 dark:text-gray-300" />
           </button>
           <div>
-            <h1 className="text-3xl font-bold text-gray-900 dark:text-white">{task.title}</h1>
+            <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
+              {task?.title}
+            </h1>
             <div className="mt-1 flex flex-wrap items-center gap-3 text-sm text-gray-600 dark:text-gray-400">
-              {task.assignee && (
+              {task?.assignedTo && (
                 <span className="inline-flex items-center gap-1">
-                  <User className="w-4 h-4" /> {task.assignee}
+                  <User className="w-4 h-4" /> {task?.assignedTo?.name}
                 </span>
               )}
               {task.team && (
@@ -154,15 +269,21 @@ export default function TaskDetail() {
                   <Flag className="w-4 h-4" /> {task.team}
                 </span>
               )}
-              {(() => {
-  const due = formatDueDate(task.dueDate);
-  return (
-    <span className={`inline-flex items-center gap-1 ${due.color}`}>
-      <Calendar className="w-4 h-4" /> {due.text}
-    </span>
-  );
-})()}
-
+              {!!task.deadline && (
+                <span className="inline-flex items-center gap-1">
+                  <Calendar className="w-4 h-4" /> Due {task?.deadline}
+                </span>
+              )}
+              {/* {(() => {
+                const due = formatDueDate(task.dueDate);
+                return (
+                  <span
+                    className={`inline-flex items-center gap-1 ${due.color}`}
+                  >
+                    <Calendar className="w-4 h-4" /> {due.text}
+                  </span>
+                );
+              })()} */}
             </div>
           </div>
         </div>
@@ -170,9 +291,11 @@ export default function TaskDetail() {
 
       {/* Description */}
       <Card className="p-6">
-        <h2 className="text-lg font-bold text-gray-900 dark:text-white">Description</h2>
+        <h2 className="text-lg font-bold text-gray-900 dark:text-white">
+          Description
+        </h2>
         <p className="mt-2 text-gray-700 dark:text-gray-300">
-          {task.description || 'No description provided.'}
+          {task.description || "No description provided."}
         </p>
       </Card>
 
@@ -195,18 +318,29 @@ export default function TaskDetail() {
               rows={3}
             />
             <div className="mt-2 flex justify-end">
-              <button type="submit" className="btn-primary">Add Comment</button>
+              <button type="submit" className="btn-primary">
+                Add Comment
+              </button>
             </div>
           </form>
 
           <div className="space-y-3">
-            {comments.length === 0 ? (
-              <p className="text-sm text-gray-500 dark:text-gray-400">No comments yet.</p>
+            {comments?.length === 0 ? (
+              <p className="text-sm text-gray-500 dark:text-gray-400">
+                No comments yet.
+              </p>
             ) : (
-              comments.map((c) => (
-                <div key={c.id} className="p-3 rounded-lg bg-gray-50 dark:bg-gray-700/50">
-                  <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">{c.author}</p>
-                  <p className="text-sm text-gray-900 dark:text-gray-100">{c.text}</p>
+              comments?.map((c) => (
+                <div
+                  key={c.id}
+                  className="p-3 rounded-lg bg-gray-50 dark:bg-gray-700/50"
+                >
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">
+                    {c?.commentedBy?.name}
+                  </p>
+                  <p className="text-sm text-gray-900 dark:text-gray-100">
+                    {c.message}
+                  </p>
                 </div>
               ))
             )}
@@ -223,7 +357,7 @@ export default function TaskDetail() {
               </h2>
 
               {/* Admin can upload to admin files; members cannot */}
-              {viewerRole === 'admin' && (
+              {viewerRole === "admin" && (
                 <label className="btn-secondary cursor-pointer inline-flex items-center gap-2">
                   <UploadCloud className="w-4 h-4" />
                   <span>Upload</span>
@@ -237,14 +371,24 @@ export default function TaskDetail() {
               )}
             </div>
 
+            {console.log(adminFiles)}
             {adminFiles.length === 0 ? (
-              <p className="text-sm text-gray-500 dark:text-gray-400">No files yet.</p>
+              <p className="text-sm text-gray-500 dark:text-gray-400">
+                No files yet.
+              </p>
             ) : (
               <ul className="divide-y divide-gray-200 dark:divide-gray-700">
                 {adminFiles.map((f) => (
-                  <li key={f.id} className="py-2 flex items-center justify-between">
-                    <span className="text-sm text-gray-900 dark:text-gray-100">{f.name}</span>
-                    <span className="text-xs text-gray-500 dark:text-gray-400">{Math.ceil(f.size / 1024)} KB</span>
+                  <li
+                    key={f.id}
+                    className="py-2 flex items-center justify-between"
+                  >
+                    <span className="text-sm text-gray-900 dark:text-gray-100">
+                      {f.name}
+                    </span>
+                    <span className="text-xs text-gray-500 dark:text-gray-400">
+                      {Math.ceil(f.size / 1024)} KB
+                    </span>
                   </li>
                 ))}
               </ul>
@@ -259,7 +403,7 @@ export default function TaskDetail() {
               </h2>
 
               {/* Members can upload to members files; admin cannot */}
-              {viewerRole !== 'admin' && (
+              {viewerRole !== "admin" && (
                 <div className="flex items-center gap-2">
                   <input
                     type="text"
@@ -283,23 +427,34 @@ export default function TaskDetail() {
             </div>
 
             {memberFiles.length === 0 ? (
-              <p className="text-sm text-gray-500 dark:text-gray-400">No files yet.</p>
+              <p className="text-sm text-gray-500 dark:text-gray-400">
+                No files yet.
+              </p>
             ) : (
               <ul className="divide-y divide-gray-200 dark:divide-gray-700">
                 {memberFiles.map((f) => (
-                  <li key={f.id} className="py-2 flex items-center justify-between">
+                  <li
+                    key={f.id}
+                    className="py-2 flex items-center justify-between"
+                  >
                     <div className="flex items-center gap-2">
-                      <span className="text-sm text-gray-900 dark:text-gray-100">{f.name}</span>
-                      <span className="text-xs text-gray-500 dark:text-gray-400">• by {f.from}</span>
+                      <span className="text-sm text-gray-900 dark:text-gray-100">
+                        {f.name}
+                      </span>
+                      <span className="text-xs text-gray-500 dark:text-gray-400">
+                        • by {f.from}
+                      </span>
                     </div>
-                    <span className="text-xs text-gray-500 dark:text-gray-400">{Math.ceil(f.size / 1024)} KB</span>
+                    <span className="text-xs text-gray-500 dark:text-gray-400">
+                      {Math.ceil(f.size / 1024)} KB
+                    </span>
                   </li>
                 ))}
               </ul>
             )}
 
             {/* Mobile-friendly member input */}
-            {viewerRole !== 'admin' && (
+            {viewerRole !== "admin" && (
               <div className="mt-4 md:hidden">
                 <input
                   type="text"

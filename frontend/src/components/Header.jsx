@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Search, Bell, Moon, Sun, Menu, Loader2 } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
-import axiosInstance from "../utility/axiosInstance";
+import axiosInstance from "../pages/utility/axiosInstance";
 
 const Header = ({ toggleDarkMode, darkMode, toggleSidebar }) => {
   const [searchTerm, setSearchTerm] = useState("");

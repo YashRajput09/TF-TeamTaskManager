@@ -5,7 +5,7 @@ import { useNavigate, Link } from 'react-router-dom';
 import Card from '../components/Card';
 import { LogIn, User, Lock, Mail } from 'lucide-react';
 import { useAuth } from '../context/AuthProvider';
-import axiosInstance from '../utility/axiosInstance';
+import axiosInstance from './utility/axiosInstance';
 import toast from 'react-hot-toast';
 
 

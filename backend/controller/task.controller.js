@@ -21,14 +21,19 @@ export const searchBlogs = async(req, res) =>{
 
 export const createTask = async (req, res) => {
   try {
+    console.log(req.body)
     const { title, description, priority, assignedTo, status, deadline, category } =
       req.body;
       // console.log(req.body);
       
     const { groupId } = req.params;
     const adminId = req?.user?._id;
-    const attachment = req.files?.attachment;
+    const attachment = req.files?.profileImage;
 
+    if(attachment){
+      console.log(attachment)
+      console.log("file aa gyi")
+    }
     // if (!req.files || Object.keys(req.files).length === 0) {
     //   return res
     //     .status(400)
@@ -87,7 +92,7 @@ export const createTask = async (req, res) => {
       category,
       attachments: attachment
         ? {
-            public_id: cloudinaryResponse?.public_id || "None",
+            uploadedBy:loggedUserId,
             url: cloudinaryResponse?.secure_url || "None",
           }
         : null,
@@ -103,6 +108,7 @@ export const createTask = async (req, res) => {
       newTask.history.push({
         message: `Assigned to ${find_assignedUser?.name} `,
       });
+      
     }
 
     find_group?.allTasks?.push(newTask?._id);
@@ -201,14 +207,20 @@ export const getUserAllTask = async (req, res) => {
 };
 
 export const getSingleAllTask = async (req, res) => {
-  const { taskId } = req.params;
-
-  const find_task = await Task.findById(taskId)
-    .populate("createdBy")
-    .populate("assignedTo");
-  if (!find_task) return res.status(404).json({ message: "Task Not Found" });
-
-  return res.status(404).json(find_task);
+  try {
+    const { taskId } = req.params;
+  
+    const find_task = await Task.findById(taskId)
+      .populate("createdBy")
+      .populate('attachments.uploadedBy')
+      .populate("assignedTo");
+    if (!find_task) return res.status(404).json({ message: "Task Not Found" });
+  
+    return res.status(200).json(find_task);
+    
+  } catch (error) {
+    return res.status(200).json({message:"Internal Error",error});
+  }
 };
 
 
@@ -262,7 +274,7 @@ export const submitTask = async (req, res) => {
     
     const attachment  = req.files ? req.files.attachment : null;
 
-    const find_task = await Task.findById(taskId);
+    const find_task = await Task.findById(taskId).populate('attachments.uploadedBy');
     if (!find_task) return res.status(404).json({ message: "Task not found" });
 
     console.log(find_task.assignedTo,loggedUserId);
@@ -279,6 +291,7 @@ export const submitTask = async (req, res) => {
         "image/png",
         "image/pdf",
         "image/txt",
+        "image/csv",
       ];
       if (!allowedFormates.includes(attachment.mimetype)) {
         return res.status(400).json({
@@ -296,14 +309,14 @@ export const submitTask = async (req, res) => {
       console.log(cloudinaryResponse);
 
       find_task.attachments.push({
-        public_id: cloudinaryResponse?.public_id || "none",
+        uploadedBy:loggedUserId,
         url: cloudinaryResponse?.secure_url,
       });
     }
 
     if (url) {
       find_task.attachments.push({
-        public_id: "Url",
+       uploadedBy:loggedUserId,
         url: url,
       });
     }
@@ -315,7 +328,7 @@ export const submitTask = async (req, res) => {
     find_task.history.push({ message: "Send For Review", date: Date.now() });
     await find_task.save();
 
-    return res.status(200).json({ message: "Task Submitted and In review" });
+    return res.status(200).json({ message: "Task Submitted and In review" ,find_task});
   } catch (error) {
     console.log(error);
     return res.status(500).json({ message: "Internal Server Error", error });

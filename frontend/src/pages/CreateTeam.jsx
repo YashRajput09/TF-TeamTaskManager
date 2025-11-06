@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import Card from '../components/Card';
 import { Save, X, Calendar, Flag, Users } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import axiosInstance from '../utility/axiosInstance';
+import axiosInstance from './utility/axiosInstance';
 import toast from 'react-hot-toast';
 
 const CreateTask = () => {

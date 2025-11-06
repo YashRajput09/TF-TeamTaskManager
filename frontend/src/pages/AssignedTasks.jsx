@@ -1,7 +1,8 @@
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import Card from '../components/Card';
 import { Search, Calendar, Flag, User } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import axiosInstance from './utility/axiosInstance';
 
 // current user (assigner)
 const currentUser = 'Vishal Patidar';
@@ -34,12 +35,30 @@ const getStatusColor = (status) => {
 export default function AssignedTasks() {
   const navigate = useNavigate();
   const [query, setQuery] = useState('');
-  const [tasks] = useState(sampleTasks);
+  const [tasks,setTasks] = useState();
 
+  useEffect(() => {
+    const allUserTask=async ()=>{
+         try {
+          const {data}=await axiosInstance.get(`/task/get-user-task`);
+          console.log(data?.assignedTasks)
+          console.log(data?.createdTasks)
+        setTasks(data?.assignedTasks);
+        // setCreatedTasks(data?.createdTasks);
+         } catch (error) {
+          console.log(error)
+         }
+   }
+   allUserTask();
+  }, [])
   const assignedByMe = useMemo(
-    () => tasks.filter(t => (t.assignedBy || '').toLowerCase() === currentUser.toLowerCase()),
+    () => tasks?.filter(t => (t.assignedBy || '').toLowerCase() === currentUser.toLowerCase()),
     [tasks]
   );
+
+
+
+
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
@@ -80,12 +99,12 @@ export default function AssignedTasks() {
 
       {/* List */}
       <div className="space-y-3">
-        {filtered.length === 0 ? (
+        {tasks?.length === 0 ? (
           <Card className="py-10 text-center">
             <p className="text-gray-600 dark:text-gray-400">No tasks assigned by you.</p>
           </Card>
         ) : (
-          filtered.map(task => (
+          tasks?.map(task => (
             <Card
               key={task.id}
               hover
@@ -109,10 +128,10 @@ export default function AssignedTasks() {
                   <h3 className="text-sm font-semibold text-gray-900 dark:text-white truncate">{task.title}</h3>
                   <div className="mt-2 flex flex-wrap items-center gap-3 text-xs text-gray-600 dark:text-gray-400">
                     <span className="inline-flex items-center gap-1">
-                      <User className="w-4 h-4" /> {task.assignee}
+                      <User className="w-4 h-4" /> {task.assignedTo?.name}
                     </span>
                     <span className="inline-flex items-center gap-1">
-                      <Calendar className="w-4 h-4" /> {task.dueDate ? `Due ${task.dueDate}` : 'No due date'}
+                      <Calendar className="w-4 h-4" /> {task.deadline ? `Due ${task?.deadline}` : 'No due date'}
                     </span>
                     <span className="inline-flex items-center gap-1">
                       <Flag className="w-4 h-4" /> {task.team}

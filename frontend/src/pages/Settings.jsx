@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useRef } from "react";
 import Card from "../components/Card";
 import { User, Bell, Lock, Palette, Globe, Save } from "lucide-react";
-import axiosInstance from "../utility/axiosInstance";
+import axiosInstance from "./utility/axiosInstance";
 import toast from "react-hot-toast";
 
 const Settings = () => {

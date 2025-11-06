@@ -25,8 +25,9 @@ const taskSchema = new mongoose.Schema(
     calendarEventId: { type: String },
     attachments: [
       {
-        public_id: {
-          type: String,
+        uploadedBy: {
+          type:mongoose.Schema.ObjectId,
+          ref:"User"
         },
         url: {
           type: String,
@@ -44,7 +45,7 @@ const taskSchema = new mongoose.Schema(
       {
         commentedBy: {
           type: mongoose.Schema.ObjectId,
-          ref: "user",
+          ref: "User",
         },
         message: {
           type: String,

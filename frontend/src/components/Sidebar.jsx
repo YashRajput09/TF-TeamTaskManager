@@ -14,7 +14,7 @@ import {
   LogOut,
   CheckSquare as BrandIcon
 } from "lucide-react";
-import axiosInstance from "../utility/axiosInstance";
+import axiosInstance from "../pages/utility/axiosInstance";
 import toast from "react-hot-toast";
 import { useAuth } from "../context/AuthProvider";
 

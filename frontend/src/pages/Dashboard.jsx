@@ -9,7 +9,7 @@ import {
   ArrowUpRight,
   Calendar,
 } from "lucide-react";
-import axiosInstance from "../utility/axiosInstance";
+import axiosInstance from "./utility/axiosInstance";
 
 const Dashboard = () => {
   const navigate = useNavigate();
@@ -19,32 +19,25 @@ const Dashboard = () => {
   const [userCreatedTask, setUserCreatedTask] = useState([]);
   const [userGroups, setUserGroups] = useState([]);
 
-  // ✅ Properly scoped useEffect (only one)
-  useEffect(() => {
-    const allUserTask = async () => {
-      try {
-        const { data } = await axiosInstance.get("/task/get-user-task");
-        console.log("Assigned Tasks:", data?.assignedTasks);
-        console.log("Created Tasks:", data?.createdTasks);
-        setUserAssignedTask(data?.assignedTasks || []);
-        setUserCreatedTask(data?.createdTasks || []);
-      } catch (error) {
-        console.log("get-user-task error:", error);
-        setUserAssignedTask([]);
-        setUserCreatedTask([]);
-      }
-    };
+ useEffect(() => {
+   const allUserTask=async ()=>{
+         try {
+          const {data}=await axiosInstance.get(`/task/get-user-task`);
+          console.log(data?.assignedTasks)
+          console.log(data?.createdTasks)
+        setUserAssignedTask(data?.assignedTasks)
+        setUserCreatedTask(data?.createdTasks)
+         } catch (error) {
+          console.log(error)
+         }
+   }
+   const getUserGroups=async ()=>{
+    const {data}=await axiosInstance.get(`/user/myprofile`);
+    console.log(data?.groups)
+    setUserGroups(data?.groups);
 
-    const getUserGroups = async () => {
-      try {
-        const { data } = await axiosInstance.get("/user/myprofile");
-        console.log("Groups:", data?.groups);
-        setUserGroups(data?.groups || []);
-      } catch (error) {
-        console.log("myprofile error:", error);
-        setUserGroups([]);
-      }
-    };
+   }
+
 
     // Call both in parallel
     allUserTask();
@@ -286,10 +279,10 @@ const formatDueDate = (dateString) => {
           </div>
 
           <div className="space-y-3">
-            {teams.map((t) => (
+            {userGroups?.map((t) => (
               <Link
-                key={t.id}
-                to={`/teams/${t.id}`}
+                key={t._id}
+                to={`/teams/${t._id}`}
                 className="w-full text-left p-3 rounded-lg bg-gray-50 dark:bg-gray-700/50 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
               >
                 <div className="flex items-center justify-between">

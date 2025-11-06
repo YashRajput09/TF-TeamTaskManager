@@ -14,7 +14,7 @@ import {
   Search,
   ArrowLeft,
 } from "lucide-react";
-import axiosInstance from "../utility/axiosInstance";
+import axiosInstance from "./utility/axiosInstance";
 
 // Helper to read ?team= from URL
 const useQuery = () => new URLSearchParams(useLocation().search);
@@ -357,25 +357,25 @@ const Teams = () => {
           </div>
         </div>
 
-        <div className="mt-4 md:mt-0 flex items-center gap-2">
+        <div className="mt-4 md:mt-0 flex items-center gap-4">
           <button
-            className="btn-primary flex items-center space-x-2"
-            onClick={() => setShowCreate(true)}
+            className="btn-primary hover:opacity-60 flex items-center space-x-2"
+            onClick={() => navigate(`/create-task`,{state: {teamData}})}
           >
             <Plus className="w-4 h-4" />
-            <span>Create Group</span>
+            <span>Create Task</span>
           </button>
           {!selectedTeam && (
             <>
               <button
-                className="btn-secondary flex items-center space-x-2"
+                className="btn-secondary hover:opacity-60 flex items-center space-x-2"
                 onClick={() => setShowAdd(true)}
               >
                 <UserPlus className="w-4 h-4" />
                 <span>Add Member</span>
               </button>
               <button
-                className="btn-secondary flex items-center space-x-2"
+                className="btn-secondary hover:opacity-60 flex items-center space-x-2"
                 onClick={() => setShowRemove(true)}
               >
                 <UserMinus className="w-4 h-4" />
@@ -562,14 +562,15 @@ const Teams = () => {
                 <tbody>
                   {visibleTasks?.map((task) => (
                     <tr
-                      key={task.id}
+                      onClick={() => navigate(`/tasks/${task._id}`)}
+                      key={task?._id}
                       className="border-b border-gray-100 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors"
                     >
                       <td className="py-3 px-4 text-sm text-gray-900 dark:text-white">
                         {task.title}
                       </td>
                       <td className="py-3 px-4 text-sm text-gray-700 dark:text-gray-300">
-                        {task.assignee}
+                        {task?.assignedTo}
                       </td>
                       <td className="py-3 px-4">
                         <span
@@ -640,11 +641,11 @@ const Teams = () => {
 
       {showRemove && teamData && (
         <InlineModal
-          title={`Add Member to ${teamData.name}`}
-          onClose={() => setShowAdd(false)}
+          title={`Remove Member from ${teamData.name}`}
+          onClose={() => setShowRemove(false)}
         >
-          <AddMemberForm
-            onAdd={{ alluser: alluser, groupId: teamId }}
+          <RemoveMemberForm
+            onAdd={{ groupUsers: teamData?.members, groupId: teamId }}
             onCancel={() => setShowAdd(false)}
           />
         </InlineModal>
@@ -757,6 +758,8 @@ const AddMemberForm = ({ onAdd, onCancel }) => {
     );
   };
 
+  console.log(selectedMembers);
+
   console.log(onAdd?.groupId);
   // ✅ Handle form submit
   const handleSubmit = async (e) => {
@@ -767,9 +770,10 @@ const AddMemberForm = ({ onAdd, onCancel }) => {
     }
     const { data } = await axiosInstance.post(
       `/group/add-member/${onAdd?.groupId}`,
-      { memberId: selectedMembers }
+      { membersId: selectedMembers }
     );
     console.log(data);
+    alert("User Added successsfully");
   };
 
   return (
@@ -806,7 +810,7 @@ const AddMemberForm = ({ onAdd, onCancel }) => {
   );
 };
 
-const removeMemberForm = ({ onAdd, onCancel }) => {
+const RemoveMemberForm = ({ onAdd, onCancel }) => {
   const [selectedMembers, setSelectedMembers] = useState("");
   const [role, setRole] = useState("Member");
 
@@ -843,16 +847,16 @@ const removeMemberForm = ({ onAdd, onCancel }) => {
           Select Members
         </label>
         <div className="space-y-2 max-h-48 overflow-y-auto border rounded-md p-2 bg-gray-50 dark:bg-gray-700/30">
-          {onAdd?.alluser?.length > 0 ? (
-            onAdd.alluser.map((user) => (
+          {onAdd?.groupUsers?.length > 0 ? (
+            onAdd.groupUsers.map((user) => (
               <label
                 key={user._id}
                 className="flex items-center gap-2 cursor-pointer text-gray-800 dark:text-gray-200"
               >
                 <input
                   type="checkbox"
-                  checked={selectedMember === user._id}
-                  onChange={() => setSelectedMember(user._id)}
+                  checked={selectedMembers === user._id}
+                  onChange={() => setSelectedMembers(user._id)}
                   className="accent-blue-600"
                 />
                 <span>{user.name || user.email}</span>
@@ -862,7 +866,10 @@ const removeMemberForm = ({ onAdd, onCancel }) => {
             <p className="text-sm text-gray-500">No users available</p>
           )}
         </div>
-        <button className=" btn" type="submit">
+        <button
+          className=" px-4 py-2 w-full justify-center hover:bg-red-900 items-center bg-red-700 mt-4 rounded-md "
+          type="submit"
+        >
           Remove{" "}
         </button>
       </div>
