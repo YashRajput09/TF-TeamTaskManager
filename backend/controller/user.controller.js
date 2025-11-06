@@ -1,5 +1,5 @@
 import userModel from '../models/user_model.js';
-import  mongoose from 'mongoose';
+import  mongoose, { trusted } from 'mongoose';
 import cloudinary from '../config/cloudConfig.js';
 import createTokenAndSaveCookie from '../jwt/authenticateToken.js'
 import bcrypt from 'bcryptjs';
@@ -143,3 +143,16 @@ export const getMyProfile = async (req, res) => {
   // console.log(profileDetails);
   res.status(200).json(profileDetails);
 };
+
+export const getAllUsers=async (req,res)=>{
+  try {
+
+    const allusers=await User.find();
+
+    if(!allusers) return res.status(404).json({message:"NO User found"})
+
+    return res.status(200).json(allusers);
+  } catch (error) {
+console.log(error)
+  }
+}
