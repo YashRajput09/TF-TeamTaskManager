@@ -3,6 +3,7 @@ import  mongoose from 'mongoose';
 import cloudinary from '../config/cloudConfig.js';
 import createTokenAndSaveCookie from '../jwt/authenticateToken.js'
 import bcrypt from 'bcryptjs';
+import User from '../models/user_model.js';
 
 // signup user
 export const signUpUser = async(req, res) =>{
@@ -136,8 +137,9 @@ export const logOutUser = async (req, res) => {
 
 export const getMyProfile = async (req, res) => {
   // console.log(req);
+  const userId=req.user?._id;
 
-  const profileDetails = await req.user;
+  const profileDetails = await User.findById(userId).populate('groups');
   // console.log(profileDetails);
   res.status(200).json(profileDetails);
 };

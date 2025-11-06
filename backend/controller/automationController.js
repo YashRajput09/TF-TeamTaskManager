@@ -1,5 +1,5 @@
 import { GoogleGenerativeAI } from '@google/generative-ai';
-import { Task } from '../models/task.model.js';
+import { Task } from '../models/task.modal.js';
 import { groupModel } from '../models/group.model.js';
 import userModel from '../models/user_model.js';
 import { sendTelegramMessage } from './telegramController.js';

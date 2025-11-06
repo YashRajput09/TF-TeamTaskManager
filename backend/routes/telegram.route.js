@@ -1,6 +1,6 @@
 import express from 'express';
-import { isAuthenticated } from '../middlewares/auth.js';
-import { registerTelegram, testTelegram } from '../controllers/telegramController.js';
+import { isAuthenticated } from '../middleware/authenticateUser.js';
+import { registerTelegram, testTelegram } from '../controller/telegramController.js';
 
 const router = express.Router();
 
