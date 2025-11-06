@@ -6,6 +6,8 @@ import Card from '../components/Card';
 import { LogIn, User, Lock, Mail } from 'lucide-react';
 import { useAuth } from '../context/AuthProvider';
 import axiosInstance from '../utility/axiosInstance';
+import toast from 'react-hot-toast';
+
 
 
 export default function Login() {
@@ -23,6 +25,7 @@ export default function Login() {
     setError('');
     
     if (!form.email.trim() || !form.password.trim()) {
+      toast.error('email and password are required.')
       setError('email and password are required.');
       return;
     }
@@ -38,12 +41,14 @@ export default function Login() {
       const {data}=await axiosInstance.post("/user/login",form);
       // pretend API call
       console.log(data);
+      toast.success("loged in successfully")
       await new Promise((r) => setTimeout(r, 600));
       localStorage.setItem('auth_user', JSON.stringify({ email: form.email }));
       navigate('/dashboard');
       
     } catch (err) {
-      console.error("❌ Login error:", err);
+      // console.error("❌ Login error:", err);
+      toast.error(err.response?.data?.message || 'Invalid credentials. Please try again.')
       setError(err.response?.data?.message || 'Invalid credentials. Please try again.');
     } finally {
       setSubmitting(false);

@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import Card from '../components/Card';
 import { Save, X, Calendar, Flag, Users } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import toast from 'react-hot-toast';
 
 const CreateTask = () => {
   const navigate = useNavigate();
@@ -31,7 +32,8 @@ const CreateTask = () => {
     console.log('Creating task:', formData);
     
     // Simulate success and navigate back
-    alert('Task created successfully!');
+    // alert('Task created successfully!');
+    toast.success('Task created successfully!');
     navigate('/my-tasks');
   };
 
