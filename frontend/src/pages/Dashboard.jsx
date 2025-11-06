@@ -112,6 +112,47 @@ const Dashboard = () => {
     raw: t,
   }));
 
+// date formate
+// 🧠 Utility: Format date and calculate relative due status
+const formatDueDate = (dateString) => {
+  if (!dateString) return { text: "No due date", color: "text-gray-400" };
+
+  const date = new Date(dateString);
+  const now = new Date();
+
+  // Format: 25 Nov 2025
+  const formattedDate = date.toLocaleDateString("en-GB", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+  });
+
+  const diffDays = Math.ceil((date - now) / (1000 * 60 * 60 * 24));
+
+  if (diffDays > 3) {
+    return {
+      text: `Due in ${diffDays} days (${formattedDate})`,
+      color: "text-green-600 dark:text-green-400",
+    };
+  } else if (diffDays > 0) {
+    return {
+      text: `Due soon (${formattedDate})`,
+      color: "text-orange-500 dark:text-orange-400",
+    };
+  } else if (diffDays === 0) {
+    return {
+      text: `Due today (${formattedDate})`,
+      color: "text-yellow-500 dark:text-yellow-400",
+    };
+  } else {
+    return {
+      text: `Overdue ${Math.abs(diffDays)} days (${formattedDate})`,
+      color: "text-red-500 dark:text-red-400",
+    };
+  }
+};
+
+
   return (
     <div className="space-y-6">
       {/* Page Header */}
@@ -203,9 +244,16 @@ const Dashboard = () => {
                       <span>{task.team}</span>
                       <span>•</span>
                       <span>
-                        {task.dueDate
-                          ? `Due ${task.dueDate}`
-                          : "No due date"}
+                         {/* {task.dueDate ? `Due ${task.dueDate}` : "No due date"} */}
+                         {(() => {
+  const due = formatDueDate(task.dueDate);
+  return (
+    <span className={`flex items-center gap-1 text-xs ${due.color}`}>
+      <Calendar className="w-3 h-3" />
+      {due.text}
+    </span>
+  );
+})()}
                       </span>
                     </div>
                   </div>
