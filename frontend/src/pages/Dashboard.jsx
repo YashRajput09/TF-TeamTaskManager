@@ -7,7 +7,7 @@ import axiosInstance from '../utility/axiosInstance';
 const Dashboard = () => {
   const navigate = useNavigate();
 
-  // --- NEW: API-driven state (from incoming branch) ---
+  // Backend-driven state
   const [userAssignedTask, setUserAssignedTask] = useState([]);
   const [userCreatedTask, setUserCreatedTask] = useState([]);
   const [userGroups, setUserGroups] = useState([]);
@@ -15,8 +15,7 @@ const Dashboard = () => {
   useEffect(() => {
     const allUserTask = async () => {
       try {
-        const { data } = await axiosInstance.get(`/task/get-user-task`);
-        // Expecting data.assignedTasks, data.createdTasks
+        const { data } = await axiosInstance.get('/task/get-user-task');
         setUserAssignedTask(Array.isArray(data?.assignedTasks) ? data.assignedTasks : []);
         setUserCreatedTask(Array.isArray(data?.createdTasks) ? data.createdTasks : []);
       } catch (error) {
@@ -28,8 +27,7 @@ const Dashboard = () => {
 
     const getUserGroups = async () => {
       try {
-        const { data } = await axiosInstance.get(`/user/myprofile`);
-        // Expecting data.groups
+        const { data } = await axiosInstance.get('/user/myprofile');
         setUserGroups(Array.isArray(data?.groups) ? data.groups : []);
       } catch (error) {
         console.log('myprofile error:', error);
@@ -41,57 +39,36 @@ const Dashboard = () => {
     getUserGroups();
   }, []);
 
-  // --- Stats (kept from HEAD) ---
+  // Stats (keep UI; wire to backend later if you expose an endpoint)
   const stats = [
-    { label: 'Total Tasks', value: '48', change: '+12%', icon: CheckCircle, color: 'text-green-500' },
-    { label: 'In Progress', value: '23', change: '+5%', icon: Clock, color: 'text-blue-500' },
-    { label: 'Completed', value: '25', change: '+8%', icon: TrendingUp, color: 'text-purple-500' },
-    { label: 'Team Members', value: '12', change: '+2', icon: Users, color: 'text-orange-500' },
+    { label: 'Total Tasks', value: String(userAssignedTask.length + userCreatedTask.length), change: '+0%', icon: CheckCircle, color: 'text-green-500' },
+    { label: 'In Progress', value: String((userAssignedTask || []).filter(t => t.status === 'In Progress').length), change: '+0%', icon: Clock, color: 'text-blue-500' },
+    { label: 'Completed', value: String((userAssignedTask || []).filter(t => t.status === 'Completed').length), change: '+0%', icon: TrendingUp, color: 'text-purple-500' },
+    { label: 'Teams', value: String((userGroups || []).length), change: '+0', icon: Users, color: 'text-orange-500' },
   ];
 
-  // --- Teams: use API groups when present, else fallback to demo teams from HEAD ---
-  const fallbackTeams = [
-    { id: 1, name: 'Design Team', members: 5, activeTasks: 12, progress: 78, color: 'bg-purple-500' },
-    { id: 2, name: 'Dev Team',    members: 8, activeTasks: 23, progress: 65, color: 'bg-blue-500' },
-    { id: 3, name: 'Marketing',   members: 4, activeTasks: 8,  progress: 82, color: 'bg-green-500' },
-    { id: 4, name: 'Product',     members: 6, activeTasks: 15, progress: 71, color: 'bg-orange-500' },
-  ];
+  // Normalize groups for UI
+  const teams = (userGroups || []).map((g, idx) => ({
+    id: g.id || g._id || idx + 1,
+    name: g.name || g.groupName || 'Untitled Group',
+    membersCount: Array.isArray(g.members) ? g.members.length : (g.membersCount ?? 0),
+    activeTasks: g.activeTasks ?? 0,
+    progress: typeof g.progress === 'number' ? g.progress : 0,
+    color: g.color || 'bg-blue-500',
+  }));
 
-  // Normalize potential API group shape to the fields UI expects
-  const teams = (userGroups && userGroups.length > 0
-    ? userGroups.map((g, idx) => ({
-        id: g.id || g._id || idx + 1,
-        name: g.name || g.groupName || 'Untitled Group',
-        members: Array.isArray(g.members) ? g.members.length : (g.membersCount ?? 0),
-        activeTasks: g.activeTasks ?? 0,
-        progress: g.progress ?? 0,
-        color: g.color || 'bg-blue-500',
-      }))
-    : fallbackTeams
-  );
-
-  // --- Recent tasks: use API assigned tasks when present, else fallback demo list ---
-  const recentFallback = [
-    { id: 1, title: 'Update landing page design', team: 'Design Team', priority: 'High',    dueDate: '2025-11-15', status: 'In Progress', description: 'Redesign the hero section with new branding', assignee: 'John Doe' },
-    { id: 2, title: 'Fix authentication bug',      team: 'Dev Team',    priority: 'Critical',dueDate: '2025-11-12', status: 'In Progress', description: 'Users unable to login with Google OAuth', assignee: 'Jane Smith' },
-    { id: 3, title: 'Prepare Q4 presentation',     team: 'Marketing',   priority: 'Medium', dueDate: '2025-11-20', status: 'Pending',     description: 'Quarterly results and future roadmap', assignee: 'John Doe' },
-    { id: 4, title: 'Code review for PR #234',     team: 'Dev Team',    priority: 'Low',    dueDate: '2025-11-18', status: 'Completed',   description: 'Review new feature implementation', assignee: 'Mike Johnson' },
-  ];
-
-  // Normalize API assignedTasks to UI shape (id/title/priority/status/deadline/team)
-  const recent = (userAssignedTask && userAssignedTask.length > 0
-    ? userAssignedTask.map((t, idx) => ({
-        id: t.id || t._id || idx + 1,
-        title: t.title || t.name || 'Untitled Task',
-        team: t.team?.name || t.team || 'Team',
-        priority: t.priority || 'Medium',
-        dueDate: t.deadline || t.dueDate || '',
-        status: t.status || 'Pending',
-        description: t.description || '',
-        assignee: t.assignee?.name || t.assignee || '',
-      }))
-    : recentFallback
-  );
+  // Normalize assigned tasks for "My Recent Tasks"
+  const recent = (userAssignedTask || []).map((t, idx) => ({
+    id: t.id || t._id || idx + 1,
+    title: t.title || t.name || 'Untitled Task',
+    team: t.team?.name || t.team || t.teamName || 'Team',
+    priority: t.priority || 'Medium',
+    dueDate: t.deadline || t.dueDate || '',
+    status: t.status || 'Pending',
+    description: t.description || '',
+    assignee: t.assignee?.name || t.assignee || '',
+    raw: t,
+  }));
 
   return (
     <div className="space-y-6">
@@ -144,30 +121,34 @@ const Dashboard = () => {
             </a>
           </div>
           <div className="space-y-3">
-            {recent.map((task) => (
-              <div
-                key={task.id}
-                onClick={() => navigate(`/tasks/${task.id}`, { state: { task, viewerRole: 'member' } })}
-                className="flex items-center justify-between p-4 rounded-lg bg-gray-50 dark:bg-gray-700/50 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors cursor-pointer"
-              >
-                <div className="flex-1 min-w-0">
-                  <h3 className="text-sm font-semibold text-gray-900 dark:text-white truncate">{task.title}</h3>
-                  <div className="mt-1 flex items-center space-x-3 text-xs text-gray-600 dark:text-gray-400">
-                    <span>{task.team || 'Team'}</span>
-                    <span>•</span>
-                    <span>{task.dueDate ? `Due ${task.dueDate}` : 'No due date'}</span>
+            {recent.length === 0 ? (
+              <p className="text-sm text-gray-600 dark:text-gray-400 px-4 pb-4">No tasks assigned to you yet.</p>
+            ) : (
+              recent.map((task) => (
+                <div
+                  key={task.id}
+                  onClick={() => navigate(`/tasks/${task.id}`, { state: { task, viewerRole: 'member' } })}
+                  className="flex items-center justify-between p-4 rounded-lg bg-gray-50 dark:bg-gray-700/50 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors cursor-pointer"
+                >
+                  <div className="flex-1 min-w-0">
+                    <h3 className="text-sm font-semibold text-gray-900 dark:text-white truncate">{task.title}</h3>
+                    <div className="mt-1 flex items-center space-x-3 text-xs text-gray-600 dark:text-gray-400">
+                      <span>{task.team}</span>
+                      <span>•</span>
+                      <span>{task.dueDate ? `Due ${task.dueDate}` : 'No due date'}</span>
+                    </div>
+                  </div>
+                  <div className="flex items-center space-x-2 ml-4">
+                    <span className="px-2 py-1 rounded-md text-xs font-medium bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400">
+                      {task.priority}
+                    </span>
+                    <span className="px-2 py-1 rounded-md text-xs font-medium bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400">
+                      {task.status}
+                    </span>
                   </div>
                 </div>
-                <div className="flex items-center space-x-2 ml-4">
-                  <span className="px-2 py-1 rounded-md text-xs font-medium bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400">
-                    {task.priority}
-                  </span>
-                  <span className="px-2 py-1 rounded-md text-xs font-medium bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400">
-                    {task.status}
-                  </span>
-                </div>
-              </div>
-            ))}
+              ))
+            )}
           </div>
         </Card>
 
@@ -184,36 +165,35 @@ const Dashboard = () => {
           </div>
 
           <div className="space-y-3">
-            {teams.map((t) => {
-              const progress = typeof t.progress === 'number' ? t.progress : 0;
-              const color = t.color || 'bg-blue-500';
-              const id = t.id;
-              return (
+            {teams.length === 0 ? (
+              <p className="text-sm text-gray-600 dark:text-gray-400 px-3 pb-3">You are not part of any team yet.</p>
+            ) : (
+              teams.map((t) => (
                 <button
-                  key={id}
-                  onClick={() => navigate(`/teams?team=${id}`)}
+                  key={t.id}
+                  onClick={() => navigate(`/teams?team=${t.id}`)}
                   className="w-full text-left p-3 rounded-lg bg-gray-50 dark:bg-gray-700/50 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
                 >
                   <div className="flex items-center justify-between">
                     <div className="flex items-center space-x-3">
-                      <div className={`w-8 h-8 ${color} rounded-lg`} />
+                      <div className={`w-8 h-8 ${t.color} rounded-lg`} />
                       <div>
                         <p className="text-sm font-semibold text-gray-900 dark:text-white">{t.name}</p>
                         <p className="text-xs text-gray-600 dark:text-gray-400">
-                          {(t.members ?? 0)} members • {(t.activeTasks ?? 0)} active
+                          {t.membersCount} members • {t.activeTasks} active
                         </p>
                       </div>
                     </div>
                     <div className="flex items-center space-x-2">
                       <div className="w-24 bg-gray-200 dark:bg-gray-700 rounded-full h-2 overflow-hidden">
-                        <div className={`h-full ${color}`} style={{ width: `${progress}%` }} />
+                        <div className={`h-full ${t.color}`} style={{ width: `${t.progress}%` }} />
                       </div>
-                      <span className="text-xs font-medium text-gray-700 dark:text-gray-300">{progress}%</span>
+                      <span className="text-xs font-medium text-gray-700 dark:text-gray-300">{t.progress}%</span>
                     </div>
                   </div>
                 </button>
-              );
-            })}
+              ))
+            )}
           </div>
         </Card>
       </div>
