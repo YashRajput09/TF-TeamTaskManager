@@ -1,15 +1,19 @@
 import React, { useMemo, useState, useEffect } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import Card from '../components/Card';
 import {
   Users, TrendingUp, Clock, CheckCircle, Plus, MoreVertical, UserPlus,
   UserMinus, ListChecks, Search, ArrowLeft
 } from 'lucide-react';
+import axiosInstance from '../utility/axiosInstance';
 
 // Helper to read ?team= from URL
 const useQuery = () => new URLSearchParams(useLocation().search);
 
-const initialTeams = [
+
+
+
+let initialTeams = [
   {
     id: 1,
     name: 'Design Team',
@@ -105,12 +109,15 @@ const Teams = () => {
   const query = useQuery();
   const navigate = useNavigate();
   const [teams, setTeams] = useState(initialTeams);
+  const [teamData,setTeamData]=useState();
   const [selectedId, setSelectedId] = useState(() => Number(query.get('team')) || null);
 
+  const [visibleTasks,setVisibleTasks]=useState();
   // UI state for simple modals/forms
   const [showCreate, setShowCreate] = useState(false);
   const [showAdd, setShowAdd] = useState(false);
   const [showRemove, setShowRemove] = useState(false);
+
 
   // NEW: create task modal state
   const [showCreateTask, setShowCreateTask] = useState(false); // <-- added
@@ -118,17 +125,47 @@ const Teams = () => {
   const [searchMember, setSearchMember] = useState('');
   const [onlyMine, setOnlyMine] = useState(false);
 
+  const {teamId}=useParams();
+  useEffect(() => {
+  const getSingleGroup=async()=>{
+       try {
+        const {data}=await axiosInstance.get(`/group/get-single-group/${teamId}`);
+
+        console.log(data)
+        setTeamData(data);
+      } catch (error) {
+        console.log(error)
+      }
+      
+    }
+    const getGroupTask=async () =>{
+      try {
+        const {data}=await axiosInstance.get(`/task/getAll-task/${teamId}`)
+        console.log(data?.groupTasks)
+
+        setVisibleTasks(data?.groupTasks);
+      } catch (error) {
+        console.log(error)
+      }
+    }
+    getSingleGroup();
+    getGroupTask();
+  }, [])
+  
+  console.log(teamData)
+  // console.log(teamData?.groupTasks)
+
   useEffect(() => {
     const id = Number(query.get('team')) || null;
     setSelectedId(id);
-  }, [query]);
+  }, [query]);  
 
   const selectedTeam = useMemo(() => teams.find(t => t.id === selectedId) || null, [teams, selectedId]);
 
   // owner check — either ownerUsername matches or role 'Owner' in members list (for newly created groups)
   const isOwner = (team) =>
     !!team &&
-    (team.ownerUsername === currentUser ||
+    (team?.createdBy === currentUser ||
      team.members.some(m => m.name === currentUser && m.role === 'Owner')); // <-- added
 
   const handleSelect = (id) => {
@@ -180,13 +217,13 @@ const Teams = () => {
     );
   }, [selectedTeam, searchMember]);
 
-  const visibleTasks = useMemo(() => {
-    if (!selectedTeam) return [];
-    const base = onlyMine
-      ? selectedTeam.tasks.filter(task => task.assignee === currentUser)
-      : selectedTeam.tasks;
-    return base;
-  }, [selectedTeam, onlyMine]);
+  // const visibleTasks = useMemo(() => {
+  //   if (!selectedTeam) return [];
+  //   const base = onlyMine
+  //     ? selectedTeam.tasks.filter(task => task.assignee === currentUser)
+  //     : selectedTeam.tasks;
+  //   return base;
+  // }, [selectedTeam, onlyMine]);
 
   return (
     <div className="space-y-6">
@@ -242,7 +279,7 @@ const Teams = () => {
       </div>
 
       {/* Content */}
-      {!selectedTeam ? (
+      {selectedTeam ? (
         // All Teams Grid (overview)
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {teams.map((team) => (
@@ -317,10 +354,10 @@ const Teams = () => {
               </div>
             </div>
             <ul className="divide-y divide-gray-200 dark:divide-gray-700">
-              {filteredMembers.map((m) => (
+              {teamData?.members?.map((m) => (
                 <li key={m.id} className="py-3 flex items-center justify-between">
                   <div className="flex items-center space-x-3">
-                    <div className={`w-8 h-8 rounded-lg ${selectedTeam.color}`} />
+                    {/* <div className={`w-8 h-8 rounded-lg ${selectedTeam.color}`} /> */}
                     <div>
                       <p className="text-sm font-semibold text-gray-900 dark:text-white">{m.name}</p>
                       <p className="text-xs text-gray-600 dark:text-gray-400">{m.role}</p>
@@ -328,7 +365,7 @@ const Teams = () => {
                   </div>
                 </li>
               ))}
-              {filteredMembers.length === 0 && (
+              {teamData?.members?.length === 0 && (
                 <p className="text-sm text-gray-500 dark:text-gray-400 py-6 text-center">No members found.</p>
               )}
             </ul>
@@ -351,7 +388,7 @@ const Teams = () => {
                 </label>
 
                 {/* Show Create Task only for owner */}
-                {isOwner(selectedTeam) && (
+                {isOwner(teamData) && (
                   <button className="btn-primary" onClick={() => setShowCreateTask(true)}>
                     Create Task
                   </button>
@@ -370,7 +407,7 @@ const Teams = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  {visibleTasks.map((task) => (
+                  {visibleTasks?.map((task) => (
                     <tr key={task.id} className="border-b border-gray-100 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
                       <td className="py-3 px-4 text-sm text-gray-900 dark:text-white">{task.title}</td>
                       <td className="py-3 px-4 text-sm text-gray-700 dark:text-gray-300">{task.assignee}</td>
@@ -382,7 +419,7 @@ const Teams = () => {
                             ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400'
                             : 'bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300'
                         }`}>
-                          {task.status}
+                          {task?.status}
                         </span>
                       </td>
                       <td className="py-3 px-4">
@@ -395,14 +432,14 @@ const Teams = () => {
                             ? 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400'
                             : 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400'
                         }`}>
-                          {task.priority}
+                          {task?.priority}
                         </span>
                       </td>
                     </tr>
                   ))}
                 </tbody>
               </table>
-              {visibleTasks.length === 0 && (
+              {visibleTasks?.length === 0 && (
                 <p className="text-sm text-gray-500 dark:text-gray-400 py-6 text-center">No tasks to show.</p>
               )}
             </div>

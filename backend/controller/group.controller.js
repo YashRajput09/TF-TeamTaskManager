@@ -132,3 +132,22 @@ try {
       
 
 }
+
+export const getSingleGroup = async (req, res) => {
+  try {
+    const {groupId}=req.params;
+ 
+    const find_group=await groupModel.findById(groupId).populate('members');
+    if(!find_group) return res.status(404).json({messaage:"Group not found"});
+    
+    return res.status(200).json(find_group);
+  
+  } catch (error) {
+  return res.status(404).json({messaage:"Internal Server Error",error});
+    
+  }
+
+
+
+
+}
