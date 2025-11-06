@@ -84,7 +84,7 @@ export default function Signup() {
   };
 
   return (
-    <div className="min-h-[80vh] flex flex-col items-center justify-center px-4">
+    <div className="min-h-[80vh] flex flex-col items-center justify-center px-4 bg-gray-900 ">
       {/* 🏷️ Signup heading */}
       <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-6 text-center">
         Sign up for <span className="text-primary-600 dark:text-primary-400">TeamTask</span>
