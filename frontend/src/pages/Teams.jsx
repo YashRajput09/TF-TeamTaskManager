@@ -644,7 +644,7 @@ const Teams = () => {
           onClose={() => setShowRemove(false)}
         >
           <RemoveMemberForm
-            onAdd={{ alluser: alluser, groupId: teamId }}
+            onAdd={{ groupUsers: teamData?.members, groupId: teamId }}
             onCancel={() => setShowAdd(false)}
           />
         </InlineModal>
@@ -846,8 +846,8 @@ const RemoveMemberForm = ({ onAdd, onCancel }) => {
           Select Members
         </label>
         <div className="space-y-2 max-h-48 overflow-y-auto border rounded-md p-2 bg-gray-50 dark:bg-gray-700/30">
-          {onAdd?.alluser?.length > 0 ? (
-            onAdd.alluser.map((user) => (
+          {onAdd?.groupUsers?.length > 0 ? (
+            onAdd.groupUsers.map((user) => (
               <label
                 key={user._id}
                 className="flex items-center gap-2 cursor-pointer text-gray-800 dark:text-gray-200"
@@ -865,7 +865,7 @@ const RemoveMemberForm = ({ onAdd, onCancel }) => {
             <p className="text-sm text-gray-500">No users available</p>
           )}
         </div>
-        <button className=" btn" type="submit">
+        <button className=" px-4 py-2 w-full justify-center hover:bg-red-900 items-center bg-red-700 mt-4 rounded-md " type="submit">
           Remove{" "}
         </button>
       </div>
