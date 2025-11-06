@@ -1,1 +1,14 @@
 @import "tailwindcss";
+@layer base {
+  /* default text color */
+  body { @apply text-gray-900 dark:text-gray-100; }
+
+  /* consistent placeholders */
+  input::placeholder,
+  textarea::placeholder {
+    @apply text-gray-500 dark:text-gray-400;
+  }
+
+  /* button text defaults (kept subtle so only neutral buttons change) */
+  button { @apply text-gray-900 dark:text-gray-100; }
+}
