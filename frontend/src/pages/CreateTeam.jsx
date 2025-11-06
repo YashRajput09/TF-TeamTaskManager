@@ -2,7 +2,8 @@ import React, { useState } from 'react';
 import Card from '../components/Card';
 import { Save, X, Calendar, Flag, Users } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import axiosInstance from '../utility/axiosInstance';
+import axiosInstance from './utility/axiosInstance';
+import toast from 'react-hot-toast';
 
 const CreateTask = () => {
   const navigate = useNavigate();
@@ -29,13 +30,14 @@ const CreateTask = () => {
 
        console.log(data)
     } catch (error) {
+       toast.error(error.response?.data?.message || "Failed to create group");
         console.log(error)
     }
 
     console.log('Creating task:', formData);
     
     // Simulate success and navigate back
-    alert('Task created successfully!');
+    toast.success('Team created successfully!')
     navigate('/my-tasks');
   };
 

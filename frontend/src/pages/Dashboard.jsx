@@ -9,7 +9,7 @@ import {
   ArrowUpRight,
   Calendar,
 } from "lucide-react";
-import axiosInstance from "../utility/axiosInstance";
+import axiosInstance from "./utility/axiosInstance";
 
 const Dashboard = () => {
   const navigate = useNavigate();

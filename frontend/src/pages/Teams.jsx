@@ -14,7 +14,7 @@ import {
   Search,
   ArrowLeft,
 } from "lucide-react";
-import axiosInstance from "../utility/axiosInstance";
+import axiosInstance from "./utility/axiosInstance";
 
 // Helper to read ?team= from URL
 const useQuery = () => new URLSearchParams(useLocation().search);

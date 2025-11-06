@@ -2,7 +2,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import Card from '../components/Card';
 import { Search, Calendar, Flag, User } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import axiosInstance from '../utility/axiosInstance';
+import axiosInstance from './utility/axiosInstance';
 
 // current user (assigner)
 const currentUser = 'Vishal Patidar';
