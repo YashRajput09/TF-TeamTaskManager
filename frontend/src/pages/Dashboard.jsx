@@ -4,7 +4,6 @@ import Card from '../components/Card';
 import { TrendingUp, CheckCircle, Clock, Users, ArrowUpRight, Calendar } from 'lucide-react';
 
 const Dashboard = () => {
-  // Sample data - replace with API calls
   const stats = [
     { label: 'Total Tasks', value: '48', change: '+12%', icon: CheckCircle, color: 'text-green-500' },
     { label: 'In Progress', value: '23', change: '+5%', icon: Clock, color: 'text-blue-500' },
@@ -12,7 +11,6 @@ const Dashboard = () => {
     { label: 'Team Members', value: '12', change: '+2', icon: Users, color: 'text-orange-500' },
   ];
 
-  // Teams overview shown on Dashboard instead of "Quick Stats"
   const teams = [
     { id: 1, name: 'Design Team', members: 5, activeTasks: 12, progress: 78, color: 'bg-purple-500' },
     { id: 2, name: 'Dev Team', members: 8, activeTasks: 23, progress: 65, color: 'bg-blue-500' },
@@ -21,6 +19,13 @@ const Dashboard = () => {
   ];
 
   const navigate = useNavigate();
+
+  const recent = [
+    { id: 1, title: 'Update landing page design', team: 'Design Team', priority: 'High',    dueDate: '2024-11-15', status: 'In Progress', description: 'Redesign the hero section with new branding', assignee: 'John Doe' },
+    { id: 2, title: 'Fix authentication bug',      team: 'Dev Team',    priority: 'Critical',dueDate: '2024-11-12', status: 'In Progress', description: 'Users unable to login with Google OAuth', assignee: 'Jane Smith' },
+    { id: 3, title: 'Prepare Q4 presentation',     team: 'Marketing',   priority: 'Medium', dueDate: '2024-11-20', status: 'Pending',     description: 'Quarterly results and future roadmap', assignee: 'John Doe' },
+    { id: 4, title: 'Code review for PR #234',     team: 'Dev Team',    priority: 'Low',    dueDate: '2024-11-18', status: 'Completed',   description: 'Review new feature implementation', assignee: 'Mike Johnson' },
+  ];
 
   return (
     <div className="space-y-6">
@@ -64,7 +69,7 @@ const Dashboard = () => {
 
       {/* My Recent Tasks + Teams Overview */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* My Recent Tasks (unchanged) */}
+        {/* My Recent Tasks */}
         <Card className="lg:col-span-2">
           <div className="flex items-center justify-between mb-6">
             <h2 className="text-xl font-bold text-gray-900 dark:text-white">My Recent Tasks</h2>
@@ -73,14 +78,10 @@ const Dashboard = () => {
             </a>
           </div>
           <div className="space-y-3">
-            {[
-              { id: 1, title: 'Update landing page design', team: 'Design Team', priority: 'High',    dueDate: '2024-11-15', status: 'In Progress' },
-              { id: 2, title: 'Fix authentication bug',      team: 'Dev Team',    priority: 'Critical',dueDate: '2024-11-12', status: 'In Progress' },
-              { id: 3, title: 'Prepare Q4 presentation',     team: 'Marketing',   priority: 'Medium', dueDate: '2024-11-20', status: 'Pending' },
-              { id: 4, title: 'Code review for PR #234',     team: 'Dev Team',    priority: 'Low',    dueDate: '2024-11-18', status: 'Completed' },
-            ].map((task) => (
+            {recent.map((task) => (
               <div
                 key={task.id}
+                onClick={() => navigate(`/tasks/${task.id}`, { state: { task, viewerRole: 'member' } })}  
                 className="flex items-center justify-between p-4 rounded-lg bg-gray-50 dark:bg-gray-700/50 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors cursor-pointer"
               >
                 <div className="flex-1 min-w-0">
@@ -104,7 +105,7 @@ const Dashboard = () => {
           </div>
         </Card>
 
-        {/* All Teams Overview (replaces Quick Stats) */}
+        {/* All Teams Overview */}
         <Card>
           <div className="flex items-center justify-between mb-6">
             <h2 className="text-xl font-bold text-gray-900 dark:text-white">All Teams Overview</h2>
