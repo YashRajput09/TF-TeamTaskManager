@@ -1,9 +1,18 @@
-// Telegram.jsx
-import React, { useState } from 'react';
-import Card from '../components/Card';
-import { MessageCircle, CheckCircle, XCircle, Send, Bot, Bell, RefreshCw, Users } from 'lucide-react';
 
-const API_BASE = 'http://localhost:5000'; // Add this line
+import React, { useState } from 'react';
+import axios from 'axios';
+import Card from '../components/Card';
+import { MessageCircle, CheckCircle, Send, Bot, Bell, RefreshCw, Users } from 'lucide-react';
+
+const API_BASE = 'http://localhost:3000';
+
+const api = axios.create({
+  baseURL: API_BASE,
+  withCredentials: true, 
+  headers: {
+    'Content-Type': 'application/json',
+  },
+});
 
 const TelegramPage = () => {
   const [chatId, setChatId] = useState('');
@@ -15,21 +24,11 @@ const TelegramPage = () => {
     e.preventDefault();
     setLoading(true);
     try {
-      const response = await fetch(`${API_BASE}/telegram/register-user`, { // Added API_BASE
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
-        },
-        body: JSON.stringify({ telegramChatId: chatId })
+      const response = await api.post('/api/telegram/register-user', { 
+        telegramChatId: chatId 
       });
 
-      // Check if response is OK before parsing JSON
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      const data = await response.json();
+      const data = response.data;
       if (data.success) {
         setRegistered(true);
         alert('Telegram chat ID registered successfully!');
@@ -38,7 +37,7 @@ const TelegramPage = () => {
       }
     } catch (error) {
       console.error('Registration failed:', error);
-      alert(`Registration failed: ${error.message}`);
+      alert(`Registration failed: ${error.response?.data?.message || error.message}`);
     } finally {
       setLoading(false);
     }
@@ -47,18 +46,9 @@ const TelegramPage = () => {
   const testTelegram = async () => {
     setTesting(true);
     try {
-      const response = await fetch(`${API_BASE}/telegram/test`, { // Added API_BASE
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
-        }
-      });
-
-      // Check if response is OK before parsing JSON
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      const data = await response.json();
+      const response = await api.get('/api/telegram/test');
+      
+      const data = response.data;
       if (data.success) {
         alert('Test message sent! Check your Telegram.');
       } else {
@@ -66,7 +56,7 @@ const TelegramPage = () => {
       }
     } catch (error) {
       console.error('Test failed:', error);
-      alert(`Test failed: ${error.message}`);
+      alert(`Test failed: ${error.response?.data?.message || error.message}`);
     } finally {
       setTesting(false);
     }
@@ -131,6 +121,15 @@ const TelegramPage = () => {
                 <p>Enter your chat ID in the form and click register</p>
               </div>
             </div>
+
+            <div className="mt-6 p-4 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg">
+              <p className="font-medium text-yellow-800 dark:text-yellow-200 mb-2">
+                Get your Chat ID from @userinfobot on Telegram
+              </p>
+              <p className="text-xs text-yellow-700 dark:text-yellow-300">
+                Simply search for @userinfobot on Telegram, start a conversation, and it will provide your numeric Chat ID
+              </p>
+            </div>
           </div>
         </Card>
 
@@ -152,7 +151,7 @@ const TelegramPage = () => {
                 value={chatId}
                 onChange={(e) => setChatId(e.target.value)}
                 placeholder="e.g., 123456789"
-                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-700 dark:text-white"
+                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
                 required
               />
               <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
@@ -160,10 +159,15 @@ const TelegramPage = () => {
               </p>
             </div>
 
+            {/* Register Button - Always visible */}
             <button
               type="submit"
               disabled={loading || !chatId}
-              className="btn-primary w-full flex items-center justify-center space-x-2"
+              className={`w-full flex items-center justify-center space-x-2 py-3 px-4 rounded-lg font-medium transition-colors ${
+                loading || !chatId 
+                  ? 'bg-gray-300 text-gray-500 cursor-not-allowed dark:bg-gray-600 dark:text-gray-400' 
+                  : 'bg-blue-600 text-white hover:bg-blue-700'
+              }`}
             >
               {loading ? (
                 <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
@@ -175,13 +179,20 @@ const TelegramPage = () => {
           </form>
 
           <div className="mt-6 pt-6 border-t border-gray-200 dark:border-gray-600">
+            {/* Test Button - Always visible but with different states */}
             <button
               onClick={testTelegram}
-              disabled={testing || !registered}
-              className="btn-secondary w-full flex items-center justify-center space-x-2"
+              disabled={testing}
+              className={`w-full flex items-center justify-center space-x-2 py-3 px-4 rounded-lg font-medium transition-colors mb-2 ${
+                testing 
+                  ? 'bg-gray-300 text-gray-500 cursor-not-allowed dark:bg-gray-600 dark:text-gray-400' 
+                  : registered
+                  ? 'bg-green-600 text-white hover:bg-green-700'
+                  : 'bg-gray-500 text-white hover:bg-gray-600'
+              }`}
             >
               {testing ? (
-                <div className="w-4 h-4 border-2 border-gray-600 dark:border-gray-400 border-t-transparent rounded-full animate-spin" />
+                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
               ) : (
                 <Send className="w-4 h-4" />
               )}
@@ -189,8 +200,13 @@ const TelegramPage = () => {
             </button>
 
             {!registered && (
-              <p className="mt-2 text-sm text-gray-500 dark:text-gray-400 text-center">
+              <p className="text-sm text-gray-500 dark:text-gray-400 text-center">
                 Register your chat ID first to test notifications
+              </p>
+            )}
+            {registered && (
+              <p className="text-sm text-green-600 dark:text-green-400 text-center">
+                ✓ Chat ID registered! You can now test notifications
               </p>
             )}
           </div>
@@ -214,7 +230,7 @@ const TelegramPage = () => {
             const Icon = item.icon;
             return (
               <div key={index} className="text-center p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
-                <Icon className="w-8 h-8 text-primary-500 mx-auto mb-2" />
+                <Icon className="w-8 h-8 text-blue-500 mx-auto mb-2" />
                 <h3 className="font-semibold text-gray-900 dark:text-white mb-1">{item.title}</h3>
                 <p className="text-sm text-gray-600 dark:text-gray-400">{item.desc}</p>
               </div>
