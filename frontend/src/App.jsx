@@ -7,7 +7,6 @@
 
 // // inside your <Routes>
 
-
 // import Dashboard from './pages/Dashboard';
 // import MyTasks from './pages/MyTasks';
 // import CreateTask from './pages/CreateTask';
@@ -37,32 +36,27 @@
 
 // export default App;
 
+import React from "react";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 
-import React from 'react';
-import {
-  BrowserRouter,
-  Routes,
-  Route,
-  Navigate
-} from 'react-router-dom';
+import Layout from "./components/Layout";
 
-import Layout from './components/Layout';
-
-import Login from './pages/Login';
-import Signup from './pages/Signup';
-
-import Dashboard from './pages/Dashboard';
-import MyTasks from './pages/MyTasks';
-import CreateTask from './pages/CreateTask';
-import CreateTeam from './pages/CreateTeam';
-import Teams from './pages/Teams';
-import Notifications from './pages/Notification';
-import Settings from './pages/Settings';
+import Login from "./pages/Login";
+import Signup from "./pages/Signup";
+import Automation from "./pages/Automation";
+import Calendar from "./pages/Calendar";
+import Telegram from "./pages/Telegram";
+import Dashboard from "./pages/Dashboard";
+import MyTasks from "./pages/MyTasks";
+import CreateTask from "./pages/CreateTask";
+import Teams from "./pages/Teams";
+import Notifications from "./pages/Notification";
+import Settings from "./pages/Settings";
 
 // --- tiny helpers ---
 const isAuthed = () => {
   try {
-    return !!localStorage.getItem('auth_user');
+    return !!localStorage.getItem("auth_user");
   } catch {
     return false;
   }
@@ -115,16 +109,16 @@ export default function App() {
           <Route path="teams" element={<Teams />} />
           <Route path="notifications" element={<Notifications />} />
           <Route path="settings" element={<Settings />} />
+          <Route path="automation" element={<Automation />} />
+          <Route path="calendar" element={<Calendar />} />
+          <Route path="telegram" element={<Telegram />} />
         </Route>
 
         {/* Fallback */}
         <Route
           path="*"
           element={
-            <Navigate
-              to={isAuthed() ? '/dashboard' : '/login'}
-              replace
-            />
+            <Navigate to={isAuthed() ? "/dashboard" : "/login"} replace />
           }
         />
       </Routes>
