@@ -13,7 +13,6 @@ import CreateTask from "./pages/CreateTask";
 import CreateTeam from "./pages/CreateTeam";
 import Teams from "./pages/Teams";
 import Notifications from "./pages/Notification";
-import Settings from "./pages/Settings";
 import TaskDetail from "./pages/TaskDetail";
 import AssignedTasks from "./pages/AssignedTasks";
 import Automation from "./pages/Automation";
@@ -101,7 +100,6 @@ export default function App() {
           <Route path="create-team" element={<CreateTeam />} />
           <Route path="teams/:teamId" element={<Teams />} />
           <Route path="notifications" element={<Notifications />} />
-          <Route path="settings" element={<Settings />} />
 
           {/* Task Detail + Assigned Tasks */}
           <Route path="tasks/:taskId" element={<TaskDetail />} />

@@ -121,7 +121,6 @@ const Sidebar = ({ isOpen, onClose }) => {
             })}
           </nav>
 
-<<<<<<< HEAD
           {/* Footer with profile + logout */}
           <div className="p-4 border-t border-gray-200/50 dark:border-gray-700/50 space-y-2">
             <div className="flex items-center space-x-3 p-3 rounded-lg bg-gray-50/70 dark:bg-gray-800/70">
@@ -139,35 +138,6 @@ const Sidebar = ({ isOpen, onClose }) => {
                 </p>
               </div>
             </div>
-=======
-          {/* ✅ Footer section with Logout button */}
-         <div className="p-4 border-t border-gray-200 dark:border-gray-700 space-y-2">
-  <div className="flex items-center space-x-3 p-3 rounded-lg bg-gray-50 dark:bg-gray-700/50">
-    {/* ✅ Profile Image */}
-    <div className="w-10 h-10 rounded-full overflow-hidden border border-gray-300 dark:border-gray-600 flex-shrink-0">
-      {profileData?.profileImage?.url ? (
-        <img
-          src={profileData.profileImage.url}
-          alt={profileData?.name || "User"}
-          className="w-full h-full object-cover"
-        />
-      ) : (
-        <div className="w-full h-full flex items-center justify-center bg-gray-300 dark:bg-gray-600 text-white font-semibold">
-          {profileData?.name?.[0]?.toUpperCase() || "U"}
-        </div>
-      )}
-    </div>
-
-    <div className="flex-1 min-w-0">
-      <p className="text-sm font-medium text-gray-900 dark:text-white truncate">
-        {profileData?.name || "Loading..."}
-      </p>
-      <p className="text-xs text-gray-500 dark:text-gray-400 truncate">
-        {profileData?.email || ""}
-      </p>
-    </div>
-  </div>
->>>>>>> 69f8cb356e84336c4584e5a261d2e12eacc5a8d8
 
             <button
               onClick={handleLogout}
