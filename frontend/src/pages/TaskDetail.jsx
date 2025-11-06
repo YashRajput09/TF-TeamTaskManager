@@ -13,6 +13,44 @@ import {
 import axiosInstance from "../utility/axiosInstance";
 import { useAuth } from "../context/AuthProvider";
 
+// 🧠 Utility: Format and colorize due date
+const formatDueDate = (dateString) => {
+  if (!dateString) return { text: "No due date", color: "text-gray-400" };
+
+  const date = new Date(dateString);
+  const now = new Date();
+
+  const formattedDate = date.toLocaleDateString("en-GB", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+  });
+
+  const diffDays = Math.ceil((date - now) / (1000 * 60 * 60 * 24));
+
+  if (diffDays > 3) {
+    return {
+      text: `Due in ${diffDays} days (${formattedDate})`,
+      color: "text-green-600 dark:text-green-400",
+    };
+  } else if (diffDays > 0) {
+    return {
+      text: `Due soon (${formattedDate})`,
+      color: "text-orange-500 dark:text-orange-400",
+    };
+  } else if (diffDays === 0) {
+    return {
+      text: `Due today (${formattedDate})`,
+      color: "text-yellow-500 dark:text-yellow-400",
+    };
+  } else {
+    return {
+      text: `Overdue ${Math.abs(diffDays)} days (${formattedDate})`,
+      color: "text-red-500 dark:text-red-400",
+    };
+  }
+};
+
 /**
  * TaskDetail expects to be navigated with `state.task` from Dashboard/MyTasks/Teams/AssignedTasks.
  * viewerRole in state controls who can upload:
@@ -103,22 +141,23 @@ export default function TaskDetail() {
         console.log(error);
       }
     };
-   const getComments = async () => {
-  try {
-    const { data } = await axiosInstance.get(`/comment/getAll-comment/${taskId}`);
-    const sorted = data?.allComments?.sort(
-      (a, b) => new Date(b.date) - new Date(a.date) // newest first
-    );
-    setComments(sorted || []);
-  } catch (error) {
-    console.log(error);
-  }
-};
-
+    const getComments = async () => {
+      try {
+        const { data } = await axiosInstance.get(
+          `/comment/getAll-comment/${taskId}`
+        );
+        const sorted = data?.allComments?.sort(
+          (a, b) => new Date(b.date) - new Date(a.date) // newest first
+        );
+        setComments(sorted || []);
+      } catch (error) {
+        console.log(error);
+      }
+    };
 
     getTask();
     getComments();
-  }, [taskId,newComment]);
+  }, [taskId, newComment]);
 
   console.log(adminFiles);
   console.log(memberFiles);
@@ -149,23 +188,25 @@ export default function TaskDetail() {
     e.target.value = "";
   };
 
-  const addComment = async(e) => {
+  const addComment = async (e) => {
     try {
       e.preventDefault();
       if (!newComment.trim()) return;
-      
-      const {data}=await axiosInstance.post(`/comment/add-comment/${taskId}`,{message:newComment})
-      console.log(data)
-      alert("Comment added")
-  
+
+      const { data } = await axiosInstance.post(
+        `/comment/add-comment/${taskId}`,
+        { message: newComment }
+      );
+      console.log(data);
+      alert("Comment added");
+
       setComments((prev) => [
         { id: `c-${Date.now()}`, author: "You", text: newComment.trim() },
         ...prev,
       ]);
       setNewComment("");
-      
     } catch (error) {
-      console.log(error)
+      console.log(error);
     }
   };
 
@@ -233,6 +274,16 @@ export default function TaskDetail() {
                   <Calendar className="w-4 h-4" /> Due {task?.deadline}
                 </span>
               )}
+              {/* {(() => {
+                const due = formatDueDate(task.dueDate);
+                return (
+                  <span
+                    className={`inline-flex items-center gap-1 ${due.color}`}
+                  >
+                    <Calendar className="w-4 h-4" /> {due.text}
+                  </span>
+                );
+              })()} */}
             </div>
           </div>
         </div>

@@ -1,6 +1,7 @@
 import React from "react";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { useAuth } from "./context/AuthProvider";
+import { Toaster } from "react-hot-toast";
 
 // Layout and Pages
 import Layout from "./components/Layout";
@@ -62,6 +63,7 @@ export default function App() {
 
   return (
     <BrowserRouter>
+     <Toaster position="top-right" reverseOrder={false} />
       <Routes>
         {/* Public Routes */}
         <Route

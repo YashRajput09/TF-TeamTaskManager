@@ -4,10 +4,9 @@ import { registerTelegram, testTelegram } from '../controller/telegramController
 
 const router = express.Router();
 
-// Register Telegram chat ID
+
 router.post('/register-user', isAuthenticated, registerTelegram);
 
-// Test Telegram connection
 router.get('/test', isAuthenticated, testTelegram);
 
 export default router;
