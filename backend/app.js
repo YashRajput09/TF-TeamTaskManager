@@ -18,10 +18,10 @@ import calendarRoute from './routes/calendar.route.js';
 const app = express();
 
 // Debug environment variables
-console.log('🔧 Environment Variables Check:');
-console.log('PORT:', process.env.PORT);
-console.log('JWT_SECRET:', process.env.JWT_SECRET ? 'Present' : 'Missing');
-console.log('MONGODB_URI:', process.env.MONGODB_URI ? 'Present' : 'Missing');
+// console.log('🔧 Environment Variables Check:');
+// console.log('PORT:', process.env.PORT);
+// console.log('JWT_SECRET:', process.env.JWT_SECRET ? 'Present' : 'Missing');
+// console.log('MONGODB_URI:', process.env.MONGODB_ATLUS_URL ? 'Present' : 'Missing');
 
 // Define session options
 const sessionOptions = {
@@ -58,7 +58,29 @@ app.use(cors({
     },
     credentials: true,
     methods: ["GET", "POST", "PUT", "DELETE"],
-}));
+  })
+);
+
+
+// const allowedOrigins = [
+//     'http://localhost:5173',
+//     'http://localhost:3000',
+//     // 'https://breezblogs.vercel.app',
+//   ];
+
+// app.use(cors({
+//     // origin:'http://localhost:5173',
+//     // origin: "https://breezblogs.vercel.app",
+//     origin: (origin, callback) => {
+//         if (!origin || allowedOrigins.includes(origin)) {
+//           callback(null, true);
+//         } else {
+//           callback(new Error('Not allowed by CORS'));
+//         }
+//       }, 
+//     credentials: true,
+//     methods: ["GET", "POST", "PUT", "DELETE"],
+// }));
 
 // Express-fileupload middleware
 const fileUploadMiddleware = fileUpload({
@@ -67,7 +89,7 @@ const fileUploadMiddleware = fileUpload({
 });
 
 const port = process.env.PORT || 3000;
-const dbUrl = process.env.MONGODB_URI;
+const dbUrl = process.env.MONGODB_ATLUS_URL;
 
 // Test route
 app.get("/api/test", (req, res) => {
@@ -98,8 +120,8 @@ app.use("/calendar", calendarRoute);
 
 // Add to your app.js
 app.get("/api/debug-cookie", (req, res) => {
-  console.log('🍪 Received cookies:', req.cookies);
-  console.log('🍪 jwttoken present:', !!req.cookies.jwttoken);
+  // console.log('🍪 Received cookies:', req.cookies);
+  // console.log('🍪 jwttoken present:', !!req.cookies.jwttoken);
   
   res.json({
     cookiesReceived: req.cookies,

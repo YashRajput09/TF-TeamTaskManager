@@ -6,9 +6,9 @@ export const isAuthenticated = async (req, res, next) => {
   try {
     const jwtToken = req.cookies.jwttoken;
     
-    console.log('🔐 Auth Check - Headers:', req.headers);
-    console.log('🔐 Auth Check - Cookies:', req.cookies);
-    console.log('🔐 Extracted Token:', jwtToken ? 'Present' : 'Missing');
+    // console.log('🔐 Auth Check - Headers:', req.headers);
+    // console.log('🔐 Auth Check - Cookies:', req.cookies);
+    // console.log('🔐 Extracted Token:', jwtToken ? 'Present' : 'Missing');
     
     if (!jwtToken) {
       return res.status(401).json({ message: "Unauthorized access, You need to login first." });

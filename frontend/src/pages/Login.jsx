@@ -109,6 +109,8 @@ import { useNavigate, Link } from 'react-router-dom';
 import Card from '../components/Card';
 import { LogIn, User, Lock, Mail } from 'lucide-react';
 import { useAuth } from '../context/AuthProvider';
+import axiosInstance from '../utility/axiosInstance';
+
 
 export default function Login() {
   const { login } = useAuth(); // Use the login function from context
