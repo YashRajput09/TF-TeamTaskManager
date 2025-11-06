@@ -1,6 +1,6 @@
 import { google } from 'googleapis';
 import userModel from '../models/user_model.js';
-import { Task } from '../models/task.model.js';
+import { Task } from '../models/task.modal.js';
 
 // Google Calendar configuration
 const oauth2Client = new google.auth.OAuth2(

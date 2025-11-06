@@ -1,6 +1,6 @@
 import express from 'express';
-import { isAuthenticated } from '../middlewares/auth.js';
-import { calendarStatus, connectCalendar, syncTaskToCalendar } from '../controllers/calendarController.js';
+import { isAuthenticated } from '../middleware/authenticateUser.js';
+import { calendarStatus, connectCalendar, syncTaskToCalendar } from '../controller/calendarController.js';
 
 const router = express.Router();
 

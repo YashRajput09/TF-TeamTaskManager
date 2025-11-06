@@ -1,6 +1,6 @@
 import express from 'express';
-import { isAuthenticated, isAdmin } from '../middlewares/auth.js';
-import { analyzeWorkload, autoRedistributeTasks } from '../controllers/automationController.js';
+import { isAuthenticated, isAdmin } from '../middleware/authenticateUser.js';
+import { analyzeWorkload, autoRedistributeTasks } from '../controller/automationController.js'
 
 const router = express.Router();
 
