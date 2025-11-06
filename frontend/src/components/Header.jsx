@@ -1,8 +1,15 @@
 import React from 'react';
-import { Search, Bell, Moon, Sun, Menu } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Search, Bell, Moon, Sun, Menu, LogOut } from 'lucide-react';
+import { Link, useNavigate } from 'react-router-dom';
 
 const Header = ({ toggleDarkMode, darkMode, toggleSidebar }) => {
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    localStorage.removeItem("auth_user"); // ✅ Clear auth
+    navigate("/login"); // ✅ Redirect to login
+  };
+
   return (
     <header className="sticky top-0 z-20 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-b border-gray-200 dark:border-gray-700">
       <div className="flex items-center justify-between px-4 py-3 md:px-6">
@@ -27,9 +34,9 @@ const Header = ({ toggleDarkMode, darkMode, toggleSidebar }) => {
           </div>
         </div>
 
-        {/* Right: Actions */}
+        {/* Right Actions */}
         <div className="flex items-center space-x-2">
-          {/* Mobile search icon */}
+          {/* Mobile search */}
           <button className="md:hidden p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
             <Search className="w-5 h-5 text-gray-700 dark:text-gray-300" />
           </button>
@@ -43,7 +50,7 @@ const Header = ({ toggleDarkMode, darkMode, toggleSidebar }) => {
             <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span>
           </Link>
 
-          {/* Dark mode toggle */}
+          {/* Dark Mode Toggle */}
           <button
             onClick={toggleDarkMode}
             className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
@@ -53,6 +60,15 @@ const Header = ({ toggleDarkMode, darkMode, toggleSidebar }) => {
             ) : (
               <Moon className="w-5 h-5 text-gray-700" />
             )}
+          </button>
+
+          {/* ✅ Logout Button */}
+          <button
+            onClick={handleLogout}
+            className="p-2 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/30 transition-colors"
+            title="Logout"
+          >
+            <LogOut className="w-5 h-5 text-red-500" />
           </button>
         </div>
       </div>
