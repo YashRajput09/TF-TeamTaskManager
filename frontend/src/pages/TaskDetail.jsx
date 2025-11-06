@@ -3,6 +3,46 @@ import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import Card from '../components/Card';
 import { ArrowLeft, Calendar, Flag, MessageSquare, UploadCloud, Paperclip, User } from 'lucide-react';
 
+
+// 🧠 Utility: Format and colorize due date
+const formatDueDate = (dateString) => {
+  if (!dateString) return { text: "No due date", color: "text-gray-400" };
+
+  const date = new Date(dateString);
+  const now = new Date();
+
+  const formattedDate = date.toLocaleDateString("en-GB", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+  });
+
+  const diffDays = Math.ceil((date - now) / (1000 * 60 * 60 * 24));
+
+  if (diffDays > 3) {
+    return {
+      text: `Due in ${diffDays} days (${formattedDate})`,
+      color: "text-green-600 dark:text-green-400",
+    };
+  } else if (diffDays > 0) {
+    return {
+      text: `Due soon (${formattedDate})`,
+      color: "text-orange-500 dark:text-orange-400",
+    };
+  } else if (diffDays === 0) {
+    return {
+      text: `Due today (${formattedDate})`,
+      color: "text-yellow-500 dark:text-yellow-400",
+    };
+  } else {
+    return {
+      text: `Overdue ${Math.abs(diffDays)} days (${formattedDate})`,
+      color: "text-red-500 dark:text-red-400",
+    };
+  }
+};
+
+
 /**
  * TaskDetail expects to be navigated with `state.task` from Dashboard/MyTasks/Teams/AssignedTasks.
  * viewerRole in state controls who can upload:
@@ -114,11 +154,15 @@ export default function TaskDetail() {
                   <Flag className="w-4 h-4" /> {task.team}
                 </span>
               )}
-              {!!task.dueDate && (
-                <span className="inline-flex items-center gap-1">
-                  <Calendar className="w-4 h-4" /> Due {task.dueDate}
-                </span>
-              )}
+              {(() => {
+  const due = formatDueDate(task.dueDate);
+  return (
+    <span className={`inline-flex items-center gap-1 ${due.color}`}>
+      <Calendar className="w-4 h-4" /> {due.text}
+    </span>
+  );
+})()}
+
             </div>
           </div>
         </div>
