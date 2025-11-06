@@ -222,7 +222,7 @@ export default function App() {
           <Route path="my-tasks" element={<MyTasks />} />
           <Route path="create-task" element={<CreateTask />} />
           <Route path="create-team" element={<CreateTeam />} />
-          <Route path="teams" element={<Teams />} />
+          <Route path="teams/:teamId" element={<Teams />} />
           <Route path="notifications" element={<Notifications />} />
           <Route path="settings" element={<Settings />} />
 

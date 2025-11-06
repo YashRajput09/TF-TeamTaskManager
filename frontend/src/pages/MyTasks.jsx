@@ -203,39 +203,40 @@ const MyTasks = () => {
         ) : (
           filteredTasks.map((task) => (
             <Card key={task.id} hover className="cursor-pointer">
-              {/* Make entire row clickable to open Task Detail */}
-              <div
-                onClick={() => navigate(`/tasks/${task.id}`, { state: { task, viewerRole: 'member' } })} 
-                className="space-y-4"
-              >
-                {/* Top Row */}
-                <div className="flex flex-col md:flex-row md:items-center md:justify-between space-y-4 md:space-y-0">
-                  {/* Task Info */}
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-start space-x-3">
-                      <input
-                        type="checkbox"
-                        checked={task.status === 'Completed'}
-                        onClick={(e) => e.stopPropagation()}
-                        onChange={(e) => toggleComplete(e, task)}
-                        className="mt-1 w-4 h-4 text-primary-600 bg-gray-100 border-gray-300 rounded focus:ring-primary-500 dark:focus:ring-primary-600 dark:bg-gray-700 dark:border-gray-600"
-                      />
-                      <div className="flex-1 min-w-0">
-                        <h3 className="text-lg font-semibold text-gray-900 dark:text-white">{task.title}</h3>
-                        <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">{task.description}</p>
-                        <div className="mt-3 flex flex-wrap items-center gap-3 text-sm text-gray-600 dark:text-gray-400">
-                          <div className="flex items-center space-x-1">
-                            <User className="w-4 h-4" />
-                            <span>{task.assignee}</span>
-                          </div>
-                          <div className="flex items-center space-x-1">
-                            <Calendar className="w-4 h-4" />
-                            <span>Due {task.dueDate}</span>
-                          </div>
-                          <div className="flex items-center space-x-1">
-                            <Flag className="w-4 h-4" />
-                            <span>{task.team}</span>
-                          </div>
+              console.log(task)
+              <div className="flex flex-col md:flex-row md:items-center md:justify-between space-y-4 md:space-y-0">
+                {/* Task Info */}
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-start space-x-3">
+                    <input
+                      type="checkbox"
+                      checked={task.status === 'Completed'}
+                      onChange={() => {
+                        // Handle task completion toggle - integrate with API
+                        const newTasks = tasks.map(t => 
+                          t.id === task.id 
+                            ? { ...t, status: t.status === 'Completed' ? 'Pending' : 'Completed' }
+                            : t
+                        );
+                        setTasks(newTasks);
+                      }}
+                      className="mt-1 w-4 h-4 text-primary-600 bg-gray-100 border-gray-300 rounded focus:ring-primary-500 dark:focus:ring-primary-600 dark:bg-gray-700 dark:border-gray-600"
+                    />
+                    <div className="flex-1 min-w-0">
+                      <h3 className="text-lg font-semibold text-gray-900 dark:text-white">{task.title}</h3>
+                      <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">{task.description}</p>
+                      <div className="mt-3 flex flex-wrap items-center gap-3 text-sm text-gray-600 dark:text-gray-400">
+                        <div className="flex items-center space-x-1">
+                          <User className="w-4 h-4" />
+                          <span>{task.assignee}</span>
+                        </div>
+                        <div className="flex items-center space-x-1">
+                          <Calendar className="w-4 h-4" />
+                          <span>Due {task.dueDate}</span>
+                        </div>
+                        <div className="flex items-center space-x-1">
+                          <Flag className="w-4 h-4" />
+                          <span>{task.team}</span>
                         </div>
                       </div>
                     </div>

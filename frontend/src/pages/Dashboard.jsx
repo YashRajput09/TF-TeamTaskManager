@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import Card from '../components/Card';
 import { TrendingUp, CheckCircle, Clock, Users, ArrowUpRight, Calendar } from 'lucide-react';
 import axiosInstance from '../utility/axiosInstance';
@@ -35,9 +35,24 @@ const Dashboard = () => {
       }
     };
 
-    allUserTask();
-    getUserGroups();
-  }, []);
+ useEffect(() => {
+   const allUserTask=async ()=>{
+         try {
+          const {data}=await axiosInstance.get(`/task/get-user-task`);
+          console.log(data?.assignedTasks)
+          console.log(data?.createdTasks)
+        setUserAssignedTask(data?.assignedTasks)
+        setUserCreatedTask(data?.createdTasks)
+         } catch (error) {
+          console.log(error)
+         }
+   }
+   const getUserGroups=async ()=>{
+    const {data}=await axiosInstance.get(`/user/myprofile`);
+    console.log(data?.groups)
+    setUserGroups(data?.groups);
+
+   }
 
   // Stats (keep UI; wire to backend later if you expose an endpoint)
   const stats = [
@@ -165,24 +180,20 @@ const Dashboard = () => {
           </div>
 
           <div className="space-y-3">
-            {teams.length === 0 ? (
-              <p className="text-sm text-gray-600 dark:text-gray-400 px-3 pb-3">You are not part of any team yet.</p>
-            ) : (
-              teams.map((t) => (
-                <button
-                  key={t.id}
-                  onClick={() => navigate(`/teams?team=${t.id}`)}
-                  className="w-full text-left p-3 rounded-lg bg-gray-50 dark:bg-gray-700/50 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+            {userGroups?.map((t) => (
+              <Link
+                key={t?._id}
+                // onClick={() => navigate(`/teams?team=${t._id}`)}
+                to={`/teams/${t._id}`}
+                className="w-full text-left p-3 rounded-lg bg-gray-50 dark:bg-gray-700/50 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
                 >
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-3">
-                      <div className={`w-8 h-8 ${t.color} rounded-lg`} />
-                      <div>
-                        <p className="text-sm font-semibold text-gray-900 dark:text-white">{t.name}</p>
-                        <p className="text-xs text-gray-600 dark:text-gray-400">
-                          {t.membersCount} members • {t.activeTasks} active
-                        </p>
-                      </div>
+                {console.log(t._id)}
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center space-x-3">
+                    <div className={`w-8 h-8 ${t.color} rounded-lg`} />
+                    <div>
+                      <p className="text-sm font-semibold text-gray-900 dark:text-white">{t.name}</p>
+                      <p className="text-xs text-gray-600 dark:text-gray-400">{t?.length} members • {t.activeTasks} active</p>
                     </div>
                     <div className="flex items-center space-x-2">
                       <div className="w-24 bg-gray-200 dark:bg-gray-700 rounded-full h-2 overflow-hidden">
@@ -191,9 +202,9 @@ const Dashboard = () => {
                       <span className="text-xs font-medium text-gray-700 dark:text-gray-300">{t.progress}%</span>
                     </div>
                   </div>
-                </button>
-              ))
-            )}
+                </div>
+              </Link>
+            ))}
           </div>
         </Card>
       </div>
