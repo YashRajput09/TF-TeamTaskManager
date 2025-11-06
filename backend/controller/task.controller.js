@@ -28,8 +28,12 @@ export const createTask = async (req, res) => {
       
     const { groupId } = req.params;
     const adminId = req?.user?._id;
-    const attachment = req.files?.attachment;
+    const attachment = req.files?.profileImage;
 
+    if(attachment){
+      console.log(attachment)
+      console.log("file aa gyi")
+    }
     // if (!req.files || Object.keys(req.files).length === 0) {
     //   return res
     //     .status(400)

@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import Card from "../components/Card";
-import { Save, X, Calendar, Flag, Users } from "lucide-react";
+import { Save, X, Calendar, Flag, Users, FileImage } from "lucide-react";
 import { useLocation, useNavigate } from "react-router-dom";
 import axiosInstance from "../utility/axiosInstance";
 
@@ -19,16 +19,27 @@ const CreateTask = () => {
     status: "Assigned",
     deadline: "",
     assignedTo: "",
+    profileImage:null
   });
 
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
+  // const handleChange = (e) => {
+  //   const { name, value,files } = e.target;
+  //   setFormData((prev) => ({
+  //     ...prev,
+  //     [name]: value,
+  //   }));
+  // };
+
+  const handleChange= (e) => {
+    const { name, value, files } = e.target;
+    if (name === "profileImage") {
+      setFormData((prev) => ({ ...prev, profileImage: files[0] }));
+    } else {
+      setFormData((prev) => ({ ...prev, [name]: value }));
+    }
   };
 
+  console.log(formData)
   const handleSubmit =async (e) => {
     e.preventDefault();
     // TODO: Integrate with API to create task
@@ -231,6 +242,22 @@ const CreateTask = () => {
                 </option>
               ))}
             </select>
+          </div>
+
+           <div>
+            <label className="block text-sm mb-1 text-gray-700 dark:text-gray-300">
+              Attachment
+            </label>
+            <div className="relative">
+              <FileImage className="w-4 h-4 absolute left-3 top-3 text-gray-400" />
+              <input
+                name="profileImage"
+                type="file"
+                accept="image/png, image/jpeg, application/pdf"
+                onChange={handleChange}
+                className="w-full pl-9 pr-3 py-2 rounded-md bg-gray-50 dark:bg-gray-700/50 outline-none"
+              />
+            </div>
           </div>
 
           {/* Form Actions */}
