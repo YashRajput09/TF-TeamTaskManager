@@ -17,8 +17,8 @@ import CreateTask from './pages/CreateTask';
 import Teams from './pages/Teams';
 import Notifications from './pages/Notification';
 import Settings from './pages/Settings';
-import TaskDetail from './pages/TaskDetail';       // ✅ NEW/ensure
-import AssignedTasks from './pages/AssignedTasks'; // (if you created this page)
+import TaskDetail from './pages/TaskDetail';
+import AssignedTasks from './pages/AssignedTasks';
 
 // --- tiny helpers ---
 const isAuthed = () => {
@@ -75,9 +75,8 @@ export default function App() {
           <Route path="teams" element={<Teams />} />
           <Route path="notifications" element={<Notifications />} />
           <Route path="settings" element={<Settings />} />
-          <Route path="tasks/:taskId" element={<TaskDetail />} /> 
-          {/* Optional */}
-          {AssignedTasks && <Route path="assigned-tasks" element={<AssignedTasks />} />}
+          <Route path="tasks/:taskId" element={<TaskDetail />} />
+          <Route path="assigned-tasks" element={<AssignedTasks />} />
         </Route>
 
         {/* Fallback */}

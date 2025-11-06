@@ -17,6 +17,13 @@ export const createGroup = async (req, res) => {
     });
     await newGroup.save();
 
+    if(membersId){
+      const find_member=await User.findById(membersId);
+       if(!find_member) return res.status(404).json({message:"Invalid member id"})
+
+      find_member?.groups?.push(newGroup.id);
+    }
+
     return res.status(200).json({ message: "Done", newGroup });
   } catch (error) {
     console.log(error);
