@@ -279,6 +279,7 @@ export const submitTask = async (req, res) => {
         "image/png",
         "image/pdf",
         "image/txt",
+        "image/csv",
       ];
       if (!allowedFormates.includes(attachment.mimetype)) {
         return res.status(400).json({

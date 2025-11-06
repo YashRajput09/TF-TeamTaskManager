@@ -24,6 +24,13 @@ export const createGroup = async (req, res) => {
       find_member?.groups?.push(newGroup.id);
     }
 
+    const find_admin=await User.findById(admin);
+    if(!find_admin) return res.status(500).json({message:"not found"})
+
+      find_admin?.groups?.push(newGroup?.id)
+
+     await find_admin.save();
+
     return res.status(200).json({ message: "Done", newGroup });
   } catch (error) {
     console.log(error);
@@ -36,6 +43,7 @@ export const addMember = async (req, res) => {
     const { groupId } = req.params;
     const { membersId } = req.body;
 
+    console.log(membersId)
     if (!membersId || membersId.length <= 0) {
       return res.status(400).json({ message: "Select atleast one" });
     }

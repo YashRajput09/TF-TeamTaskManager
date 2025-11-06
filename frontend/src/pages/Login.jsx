@@ -20,7 +20,7 @@ export default function Login() {
     console.log(form);
     setError('');
     if (!form.email.trim() || !form.password.trim()) {
-      setError('Username and password are required.');
+      setError('email and password are required.');
       return;
     }
     // Demo-only auth (replace with API later)
@@ -31,7 +31,7 @@ export default function Login() {
       // pretend API call
       console.log(data);
       await new Promise((r) => setTimeout(r, 600));
-      localStorage.setItem('auth_user', JSON.stringify({ username: form.username }));
+      localStorage.setItem('auth_user', JSON.stringify({ email: form.email }));
       navigate('/dashboard');
     } catch (err) {
       setError('Invalid credentials. Please try again.');
@@ -52,7 +52,7 @@ export default function Login() {
 
         <form onSubmit={onSubmit} className="space-y-4">
           <div>
-            <label className="block text-sm mb-1 text-gray-700 dark:text-gray-300">Username</label>
+            <label className="block text-sm mb-1 text-gray-700 dark:text-gray-300">email</label>
             <div className="relative">
               <User className="w-4 h-4 absolute left-3 top-3 text-gray-400" />
               <input
@@ -61,7 +61,7 @@ export default function Login() {
                 onChange={onChange}
                 placeholder="yourname"
                 className="w-full pl-9 pr-3 py-2 rounded-md bg-gray-50 dark:bg-gray-700/50 outline-none"
-                autoComplete="username"
+                autoComplete="email"
               />
             </div>
           </div>

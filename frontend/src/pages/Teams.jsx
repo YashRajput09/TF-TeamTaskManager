@@ -640,10 +640,10 @@ const Teams = () => {
 
       {showRemove && teamData && (
         <InlineModal
-          title={`Add Member to ${teamData.name}`}
-          onClose={() => setShowAdd(false)}
+          title={`Remove Member from ${teamData.name}`}
+          onClose={() => setShowRemove(false)}
         >
-          <AddMemberForm
+          <RemoveMemberForm
             onAdd={{ alluser: alluser, groupId: teamId }}
             onCancel={() => setShowAdd(false)}
           />
@@ -757,6 +757,8 @@ const AddMemberForm = ({ onAdd, onCancel }) => {
     );
   };
 
+  console.log(selectedMembers);
+
   console.log(onAdd?.groupId);
   // ✅ Handle form submit
   const handleSubmit = async (e) => {
@@ -767,9 +769,10 @@ const AddMemberForm = ({ onAdd, onCancel }) => {
     }
     const { data } = await axiosInstance.post(
       `/group/add-member/${onAdd?.groupId}`,
-      { memberId: selectedMembers }
+      { membersId: selectedMembers }
     );
     console.log(data);
+    alert("User Added successsfully");
   };
 
   return (
@@ -806,7 +809,7 @@ const AddMemberForm = ({ onAdd, onCancel }) => {
   );
 };
 
-const removeMemberForm = ({ onAdd, onCancel }) => {
+const RemoveMemberForm = ({ onAdd, onCancel }) => {
   const [selectedMembers, setSelectedMembers] = useState("");
   const [role, setRole] = useState("Member");
 
@@ -851,7 +854,7 @@ const removeMemberForm = ({ onAdd, onCancel }) => {
               >
                 <input
                   type="checkbox"
-                  checked={selectedMember === user._id}
+                  checked={selectedMembers === user._id}
                   onChange={() => setSelectedMember(user._id)}
                   className="accent-blue-600"
                 />
