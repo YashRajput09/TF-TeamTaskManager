@@ -49,6 +49,7 @@ import Telegram from "./pages/Telegram";
 import Dashboard from "./pages/Dashboard";
 import MyTasks from "./pages/MyTasks";
 import CreateTask from "./pages/CreateTask";
+import CreateTeam from "./pages/CreateTeam";
 import Teams from "./pages/Teams";
 import Notifications from "./pages/Notification";
 import Settings from "./pages/Settings";
