@@ -8,41 +8,44 @@ import {
   Bell,
   Settings,
   X,
-  TrendingUp,
-  Calendar,
+  ClipboardList, // Assigned Tasks
+  TrendingUp,    // AI Automation
+  Calendar as CalendarIcon, // Calendar page (alias to avoid name clash)
 } from "lucide-react";
 
 const Sidebar = ({ isOpen, onClose }) => {
   const location = useLocation();
 
   const menuItems = [
-    { path: "/dashboard", icon: LayoutDashboard, label: "Dashboard" },
-    { path: "/my-tasks", icon: CheckSquare, label: "My Tasks" },
-    { path: "/create-task", icon: PlusSquare, label: "Create Task" },
-    { path: "/teams", icon: Users, label: "Teams" },
-    { path: "/automation", icon: TrendingUp, label: "AI Automation" }, // NEW
-    { path: "/calendar", icon: Calendar, label: "Calendar" }, // NEW
-    { path: "/telegram", icon: Bell, label: "Telegram Setup" }, // NEW
-    { path: "/notifications", icon: Bell, label: "Notifications" },
-    { path: "/settings", icon: Settings, label: "Settings" },
+    { path: "/dashboard",       icon: LayoutDashboard, label: "Dashboard" },
+    { path: "/my-tasks",        icon: CheckSquare,     label: "My Tasks" },
+    { path: "/assigned-tasks",  icon: ClipboardList,   label: "Assigned Tasks" }, // kept
+    { path: "/create-task",     icon: PlusSquare,      label: "Create Task" },
+    { path: "/teams",           icon: Users,           label: "Teams" },
+
+    // from other branch (kept)
+    { path: "/automation",      icon: TrendingUp,      label: "AI Automation" },
+    { path: "/calendar",        icon: CalendarIcon,    label: "Calendar" },
+    { path: "/telegram",        icon: Bell,            label: "Telegram Setup" },
+
+    { path: "/notifications",   icon: Bell,            label: "Notifications" },
+    { path: "/settings",        icon: Settings,        label: "Settings" },
   ];
 
   const isActive = (path) => location.pathname === path;
 
   return (
     <>
-      {/* Sidebar */}
       <aside
         className={`
-        fixed top-0 left-0 z-40 h-screen w-64 
-        bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700
-        transition-transform duration-300 ease-in-out
-        ${isOpen ? "translate-x-0" : "-translate-x-full"}
-        lg:translate-x-0
-      `}
+          fixed top-0 left-0 z-40 h-screen w-64 
+          bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700
+          transition-transform duration-300 ease-in-out
+          ${isOpen ? "translate-x-0" : "-translate-x-full"}
+          lg:translate-x-0
+        `}
       >
         <div className="flex flex-col h-full">
-          {/* Logo Section */}
           <div className="flex items-center justify-between p-6 border-b border-gray-200 dark:border-gray-700">
             <div className="flex items-center space-x-2">
               <div className="w-8 h-8 rounded-lg gradient-primary flex items-center justify-center">
@@ -53,14 +56,13 @@ const Sidebar = ({ isOpen, onClose }) => {
               </span>
             </div>
             <button
-              onClick={onClose}
+              onClick={() => onClose && onClose()}
               className="lg:hidden p-1 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700"
             >
               <X className="w-5 h-5" />
             </button>
           </div>
 
-          {/* Navigation */}
           <nav className="flex-1 overflow-y-auto p-4 space-y-1">
             {menuItems.map((item) => {
               const Icon = item.icon;
@@ -70,7 +72,7 @@ const Sidebar = ({ isOpen, onClose }) => {
                 <Link
                   key={item.path}
                   to={item.path}
-                  onClick={() => onClose()}
+                  onClick={() => onClose && onClose()}
                   className={`
                     flex items-center space-x-3 px-4 py-3 rounded-lg
                     transition-all duration-200
@@ -88,7 +90,6 @@ const Sidebar = ({ isOpen, onClose }) => {
             })}
           </nav>
 
-          {/* User Profile Section */}
           <div className="p-4 border-t border-gray-200 dark:border-gray-700">
             <div className="flex items-center space-x-3 p-3 rounded-lg bg-gray-50 dark:bg-gray-700/50">
               <div className="w-10 h-10 rounded-full gradient-primary flex items-center justify-center">

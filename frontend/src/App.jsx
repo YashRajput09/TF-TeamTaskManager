@@ -1,63 +1,34 @@
-// import React from 'react';
-// import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-// import Layout from './components/Layout';
-// // imports at the top
-// import Login from './pages/Login';
-// import Signup from './pages/Signup';
+import React from 'react';
+import {
+  BrowserRouter,
+  Routes,
+  Route,
+  Navigate
+} from 'react-router-dom';
 
-// // inside your <Routes>
+import Layout from './components/Layout';
 
-// import Dashboard from './pages/Dashboard';
-// import MyTasks from './pages/MyTasks';
-// import CreateTask from './pages/CreateTask';
-// import Teams from './pages/Teams';
-// import Notifications from './pages/Notification';
-// import Settings from './pages/Settings';
+import Login from './pages/Login';
+import Signup from './pages/Signup';
 
-// function App() {
-//   return (
-//     <Router>
-//       <Routes>
-//         <Route path="/" element={<Layout />}>
-//           <Route path="/login" element={<Login />} />
-//           <Route path="/signup" element={<Signup />} />
-//           <Route index element={<Navigate to="/dashboard" replace />} />
-//           <Route path="dashboard" element={<Dashboard />} />
-//           <Route path="my-tasks" element={<MyTasks />} />
-//           <Route path="create-task" element={<CreateTask />} />
-//           <Route path="teams" element={<Teams />} />
-//           <Route path="notifications" element={<Notifications />} />
-//           <Route path="settings" element={<Settings />} />
-//         </Route>
-//       </Routes>
-//     </Router>
-//   );
-// }
+import Dashboard from './pages/Dashboard';
+import MyTasks from './pages/MyTasks';
+import CreateTask from './pages/CreateTask';
+import CreateTeam from './pages/CreateTeam';
+import Teams from './pages/Teams';
+import Notifications from './pages/Notification';
+import Settings from './pages/Settings';
+import TaskDetail from './pages/TaskDetail';
+import AssignedTasks from './pages/AssignedTasks';
 
-// export default App;
-
-import React from "react";
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
-
-import Layout from "./components/Layout";
-
-import Login from "./pages/Login";
-import Signup from "./pages/Signup";
-import Automation from "./pages/Automation";
-import Calendar from "./pages/Calendar";
-import Telegram from "./pages/Telegram";
-import Dashboard from "./pages/Dashboard";
-import MyTasks from "./pages/MyTasks";
-import CreateTask from "./pages/CreateTask";
-import CreateTeam from "./pages/CreateTeam";
-import Teams from "./pages/Teams";
-import Notifications from "./pages/Notification";
-import Settings from "./pages/Settings";
+import Automation from './pages/Automation';
+import Calendar from './pages/Calendar';
+import Telegram from './pages/Telegram';
 
 // --- tiny helpers ---
 const isAuthed = () => {
   try {
-    return !!localStorage.getItem("auth_user");
+    return !!localStorage.getItem('auth_user');
   } catch {
     return false;
   }
@@ -103,6 +74,8 @@ export default function App() {
           }
         >
           <Route index element={<Navigate to="/dashboard" replace />} />
+
+          {/* Core */}
           <Route path="dashboard" element={<Dashboard />} />
           <Route path="my-tasks" element={<MyTasks />} />
           <Route path="create-task" element={<CreateTask />} />
@@ -110,6 +83,12 @@ export default function App() {
           <Route path="teams" element={<Teams />} />
           <Route path="notifications" element={<Notifications />} />
           <Route path="settings" element={<Settings />} />
+
+          {/* Tasks deep link + assigned-by-me */}
+          <Route path="tasks/:taskId" element={<TaskDetail />} />
+          <Route path="assigned-tasks" element={<AssignedTasks />} />
+
+          {/* Extra pages from other branch */}
           <Route path="automation" element={<Automation />} />
           <Route path="calendar" element={<Calendar />} />
           <Route path="telegram" element={<Telegram />} />
@@ -118,9 +97,7 @@ export default function App() {
         {/* Fallback */}
         <Route
           path="*"
-          element={
-            <Navigate to={isAuthed() ? "/dashboard" : "/login"} replace />
-          }
+          element={<Navigate to={isAuthed() ? '/dashboard' : '/login'} replace />}
         />
       </Routes>
     </BrowserRouter>
