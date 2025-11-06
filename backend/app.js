@@ -115,7 +115,7 @@ app.use("/group", groupRoute);
 app.use("/task", fileUploadMiddleware, taskRoute);
 app.use("/comment", commentRoute);
 app.use("/automation", automationRoute);
-app.use("/telegram", telegramRoute);
+app.use("/api/telegram", telegramRoute); 
 app.use("/calendar", calendarRoute);
 
 // Add to your app.js
