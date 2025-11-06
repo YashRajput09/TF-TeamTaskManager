@@ -1,50 +1,70 @@
-import React, { useState } from 'react';
-import Card from '../components/Card';
-import { Save, X, Calendar, Flag, Users } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState } from "react";
+import Card from "../components/Card";
+import { Save, X, Calendar, Flag, Users } from "lucide-react";
+import { useLocation, useNavigate } from "react-router-dom";
+import axiosInstance from "../utility/axiosInstance";
 
 const CreateTask = () => {
   const navigate = useNavigate();
-  
+
+  const location = useLocation();
+  const teamData = location.state.teamData;
+
+  console.log(teamData);
   // Form state
   const [formData, setFormData] = useState({
-    title: '',
-    description: '',
-    priority: 'Medium',
-    status: 'Pending',
-    dueDate: '',
-    team: '',
-    assignee: '',
+    title: "",
+    description: "",
+    priority: "Medium",
+    status: "Assigned",
+    deadline: "",
+    assignedTo: "",
   });
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      [name]: value
+      [name]: value,
     }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit =async (e) => {
     e.preventDefault();
     // TODO: Integrate with API to create task
-    console.log('Creating task:', formData);
-    
-    // Simulate success and navigate back
-    alert('Task created successfully!');
-    navigate('/my-tasks');
+    try {
+      console.log("Creating task:", formData);
+  
+      const {data}=await axiosInstance.post(`/task/create-task/${teamData._id}`,formData)
+  
+      console.log(data);
+      // Simulate success and navigate back
+      alert("Task created successfully!");
+      navigate(`/teams/${teamData._id}`);
+      
+    } catch (error) {
+      console.log(error);
+      if(error?.response?.data?.message){
+        alert(error?.response?.data?.message)
+
+      }
+    }
   };
 
   const handleCancel = () => {
-    navigate('/my-tasks');
+    navigate("/my-tasks");
   };
 
   return (
     <div className="max-w-4xl mx-auto space-y-6">
       {/* Page Header */}
       <div>
-        <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Create New Task</h1>
-        <p className="mt-1 text-gray-600 dark:text-gray-400">Fill in the details to create a new task</p>
+        <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
+          Create New Task
+        </h1>
+        <p className="mt-1 text-gray-600 dark:text-gray-400">
+          Fill in the details to create a new task
+        </p>
       </div>
 
       {/* Create Task Form */}
@@ -52,7 +72,10 @@ const CreateTask = () => {
         <form onSubmit={handleSubmit} className="space-y-6">
           {/* Task Title */}
           <div>
-            <label htmlFor="title" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+            <label
+              htmlFor="title"
+              className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
+            >
               Task Title *
             </label>
             <input
@@ -69,7 +92,10 @@ const CreateTask = () => {
 
           {/* Task Description */}
           <div>
-            <label htmlFor="description" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+            <label
+              htmlFor="description"
+              className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
+            >
               Description *
             </label>
             <textarea
@@ -88,7 +114,10 @@ const CreateTask = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {/* Priority */}
             <div>
-              <label htmlFor="priority" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              <label
+                htmlFor="priority"
+                className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
+              >
                 <div className="flex items-center space-x-2">
                   <Flag className="w-4 h-4" />
                   <span>Priority *</span>
@@ -105,13 +134,12 @@ const CreateTask = () => {
                 <option value="Low">Low</option>
                 <option value="Medium">Medium</option>
                 <option value="High">High</option>
-                <option value="Critical">Critical</option>
               </select>
             </div>
 
             {/* Status */}
             <div>
-              <label htmlFor="status" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              {/* <label htmlFor="status" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                 Status *
               </label>
               <select
@@ -125,7 +153,7 @@ const CreateTask = () => {
                 <option value="Pending">Pending</option>
                 <option value="In Progress">In Progress</option>
                 <option value="Completed">Completed</option>
-              </select>
+              </select> */}
             </div>
           </div>
 
@@ -133,7 +161,10 @@ const CreateTask = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {/* Due Date */}
             <div>
-              <label htmlFor="dueDate" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              <label
+                htmlFor="deadline"
+                className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
+              >
                 <div className="flex items-center space-x-2">
                   <Calendar className="w-4 h-4" />
                   <span>Due Date *</span>
@@ -141,9 +172,9 @@ const CreateTask = () => {
               </label>
               <input
                 type="date"
-                id="dueDate"
-                name="dueDate"
-                value={formData.dueDate}
+                id="deadline"
+                name="deadline"
+                value={formData.deadline}
                 onChange={handleChange}
                 required
                 className="input-field"
@@ -151,7 +182,7 @@ const CreateTask = () => {
             </div>
 
             {/* Team */}
-            <div>
+            {/* <div>
               <label htmlFor="team" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                 <div className="flex items-center space-x-2">
                   <Users className="w-4 h-4" />
@@ -173,28 +204,32 @@ const CreateTask = () => {
                 <option value="Sales">Sales</option>
                 <option value="Product">Product</option>
               </select>
-            </div>
+            </div> */}
           </div>
 
-          {/* Assignee */}
+          {/* assignedTo */}
           <div>
-            <label htmlFor="assignee" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+            <label
+              htmlFor="assignedTo"
+              className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
+            >
               Assign To *
             </label>
             <select
-              id="assignee"
-              name="assignee"
-              value={formData.assignee}
+              id="assignedTo"
+              name="assignedTo"
+              value={formData.assignedTo}
               onChange={handleChange}
               required
               className="input-field"
             >
               <option value="">Select team member</option>
-              <option value="John Doe">John Doe</option>
-              <option value="Jane Smith">Jane Smith</option>
-              <option value="Mike Johnson">Mike Johnson</option>
-              <option value="Sarah Williams">Sarah Williams</option>
-              <option value="Tom Brown">Tom Brown</option>
+
+              {teamData?.members?.map((member) => (
+                <option key={member._id} value={member._id}>
+                  {member.name}
+                </option>
+              ))}
             </select>
           </div>
 
@@ -221,7 +256,9 @@ const CreateTask = () => {
 
       {/* Tips Card */}
       <Card className="bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800">
-        <h3 className="text-sm font-semibold text-blue-900 dark:text-blue-300 mb-2">💡 Tips for Creating Tasks</h3>
+        <h3 className="text-sm font-semibold text-blue-900 dark:text-blue-300 mb-2">
+          💡 Tips for Creating Tasks
+        </h3>
         <ul className="text-sm text-blue-800 dark:text-blue-400 space-y-1 list-disc list-inside">
           <li>Use clear and descriptive titles</li>
           <li>Break down large tasks into smaller subtasks</li>

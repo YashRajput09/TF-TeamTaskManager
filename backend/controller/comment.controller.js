@@ -9,7 +9,7 @@ export const addComment = async (req, res) => {
     if (!message)
       return res.status(404).json({ message: "fill comment field" });
 
-    const find_task = await Task.findById(taskId);
+    const find_task = await Task.findById(taskId).populate('comment.commentedBy');
     if (!find_task) return res.status(404).json({ message: "Task not found" });
 
     // if (!find_task.comment) find_task.comment = [];
@@ -31,7 +31,7 @@ export const getAllComments= async (req,res) =>{
     try {
         const {taskId}=req.params;
         
-        const find_task=await Task.findById(taskId)
+        const find_task=await Task.findById(taskId).populate("comment.commentedBy");
         if(!find_task) return res.status(404).json({message:"Task Not Found"})
 
         return res.status(200).json({allComments:find_task.comment});

@@ -357,25 +357,25 @@ const Teams = () => {
           </div>
         </div>
 
-        <div className="mt-4 md:mt-0 flex items-center gap-2">
+        <div className="mt-4 md:mt-0 flex items-center gap-4">
           <button
-            className="btn-primary flex items-center space-x-2"
-            onClick={() => setShowCreate(true)}
+            className="btn-primary hover:opacity-60 flex items-center space-x-2"
+            onClick={() => navigate(`/create-task`,{state: {teamData}})}
           >
             <Plus className="w-4 h-4" />
-            <span>Create Group</span>
+            <span>Create Task</span>
           </button>
           {!selectedTeam && (
             <>
               <button
-                className="btn-secondary flex items-center space-x-2"
+                className="btn-secondary hover:opacity-60 flex items-center space-x-2"
                 onClick={() => setShowAdd(true)}
               >
                 <UserPlus className="w-4 h-4" />
                 <span>Add Member</span>
               </button>
               <button
-                className="btn-secondary flex items-center space-x-2"
+                className="btn-secondary hover:opacity-60 flex items-center space-x-2"
                 onClick={() => setShowRemove(true)}
               >
                 <UserMinus className="w-4 h-4" />
@@ -562,14 +562,15 @@ const Teams = () => {
                 <tbody>
                   {visibleTasks?.map((task) => (
                     <tr
-                      key={task.id}
+                      onClick={() => navigate(`/tasks/${task._id}`)}
+                      key={task?._id}
                       className="border-b border-gray-100 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors"
                     >
                       <td className="py-3 px-4 text-sm text-gray-900 dark:text-white">
                         {task.title}
                       </td>
                       <td className="py-3 px-4 text-sm text-gray-700 dark:text-gray-300">
-                        {task.assignee}
+                        {task?.assignedTo}
                       </td>
                       <td className="py-3 px-4">
                         <span
@@ -865,7 +866,10 @@ const RemoveMemberForm = ({ onAdd, onCancel }) => {
             <p className="text-sm text-gray-500">No users available</p>
           )}
         </div>
-        <button className=" px-4 py-2 w-full justify-center hover:bg-red-900 items-center bg-red-700 mt-4 rounded-md " type="submit">
+        <button
+          className=" px-4 py-2 w-full justify-center hover:bg-red-900 items-center bg-red-700 mt-4 rounded-md "
+          type="submit"
+        >
           Remove{" "}
         </button>
       </div>

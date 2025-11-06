@@ -233,8 +233,8 @@ const Dashboard = () => {
           <div className="space-y-3">
             {userGroups?.map((t) => (
               <Link
-                key={t.id}
-                to={`/teams/${t.id}`}
+                key={t._id}
+                to={`/teams/${t._id}`}
                 className="w-full text-left p-3 rounded-lg bg-gray-50 dark:bg-gray-700/50 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
               >
                 <div className="flex items-center justify-between">
