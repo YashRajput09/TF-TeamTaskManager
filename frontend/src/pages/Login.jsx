@@ -125,7 +125,7 @@ export default function Login() {
     setError('');
     
     if (!form.email.trim() || !form.password.trim()) {
-      setError('Email and password are required.');
+      setError('email and password are required.');
       return;
     }
 
@@ -136,6 +136,12 @@ export default function Login() {
       await login(form.email, form.password);
       
       // Navigate to dashboard on success
+
+      const {data}=await axiosInstance.post("/user/login",form);
+      // pretend API call
+      console.log(data);
+      await new Promise((r) => setTimeout(r, 600));
+      localStorage.setItem('auth_user', JSON.stringify({ email: form.email }));
       navigate('/dashboard');
       
     } catch (err) {
