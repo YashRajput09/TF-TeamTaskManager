@@ -20,7 +20,7 @@ const Sidebar = ({ isOpen, onClose }) => {
     { path: "/dashboard",       icon: LayoutDashboard, label: "Dashboard" },
     { path: "/my-tasks",        icon: CheckSquare,     label: "My Tasks" },
     { path: "/assigned-tasks",  icon: ClipboardList,   label: "Assigned Tasks" }, // kept
-    { path: "/create-task",     icon: PlusSquare,      label: "Create Team" },
+    { path: "/create-Team",     icon: PlusSquare,      label: "Create Team" },
     { path: "/teams",           icon: Users,           label: "Teams" },
 
     // from other branch (kept)
