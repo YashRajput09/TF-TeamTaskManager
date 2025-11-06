@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import {
   LayoutDashboard,
   CheckSquare,
@@ -11,11 +11,16 @@ import {
   ClipboardList, // Assigned Tasks
   TrendingUp,    // AI Automation
   Calendar as CalendarIcon, // Calendar page (alias)
+  LogOut,        // ✅ added icon
 } from "lucide-react";
 import axiosInstance from "../utility/axiosInstance";
+import toast from "react-hot-toast"; // ✅ toast import
+import { useAuth } from "../context/AuthProvider";
 
 const Sidebar = ({ isOpen, onClose }) => {
+  const { setIsAuthenticated, setProfile } = useAuth();
   const location = useLocation();
+  const navigate = useNavigate(); // ✅ for redirect after logout
   const [profileData, setProfileData] = useState(null);
 
   const menuItems = [
@@ -44,9 +49,24 @@ const Sidebar = ({ isOpen, onClose }) => {
         console.error("❌ Error fetching profile:", error);
       }
     };
-
     fetchProfile();
   }, []);
+
+  // ✅ Logout function
+  const handleLogout = async () => {
+    try {
+      await axiosInstance.post("http://localhost:3000/user/logout", {}, { withCredentials: true });
+      localStorage.removeItem("auth_user"); // optional cleanup
+      setIsAuthenticated(false);
+    setProfile(null);
+       toast.success("Logged out successfully!");
+      navigate("/login");
+
+    } catch (error) {
+      console.error("Logout failed:", error);
+      toast.error("Logout failed. Try again!");
+    }
+  };
 
   return (
     <>
@@ -99,8 +119,8 @@ const Sidebar = ({ isOpen, onClose }) => {
             })}
           </nav>
 
-          {/* ✅ Fixed footer section */}
-          <div className="p-4 border-t border-gray-200 dark:border-gray-700">
+          {/* ✅ Footer section with Logout button */}
+          <div className="p-4 border-t border-gray-200 dark:border-gray-700 space-y-2">
             <div className="flex items-center space-x-3 p-3 rounded-lg bg-gray-50 dark:bg-gray-700/50">
               <div className="w-10 h-10 rounded-full gradient-primary flex items-center justify-center">
                 <span className="text-white font-semibold">
@@ -116,6 +136,16 @@ const Sidebar = ({ isOpen, onClose }) => {
                 </p>
               </div>
             </div>
+
+            {/* 👇 Logout Button */}
+            <button
+              onClick={handleLogout}
+              className="w-full flex items-center justify-center space-x-2 mt-2 py-2 rounded-lg text-sm font-medium
+              text-red-600 hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-900/20 transition-all duration-200"
+            >
+              <LogOut className="w-4 h-4" />
+              <span>Logout</span>
+            </button>
           </div>
         </div>
       </aside>
