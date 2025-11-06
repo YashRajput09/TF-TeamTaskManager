@@ -2,11 +2,10 @@ import axios from "axios";
 import React, { createContext, useContext, useEffect, useState } from "react";
 // import Cookies from "js-cookie";
 // dotenv.config();
-// import BreezBlogsLoader from "../componentes/InfiniteLoader";
-// import SkeletonLoader from "../loaders/SkeletonLoader";
-// import InfinityLogo from "../home/InfinityLogo";
+
 
 export const AuthContext = createContext(); //creates a context to that manage authenticated data (blog Info) golbally.
+console.log("auth provider file");
 
 // context provider component
 export const AuthProvider = ({ children }) => {
@@ -18,9 +17,12 @@ export const AuthProvider = ({ children }) => {
 
   useEffect(() => {
     const fetchProfile = async () => {
+      // console.log("🔥 fetchProfile called");
+
       try {
         const { data } = await axios.get(
-          `${import.meta.env.VITE_APP_BACKEND_URL}/user/myprofile`,
+          // `${import.meta.env.VITE_APP_BACKEND_URL}/user/myprofile`,
+          `http://localhost:3000/user/myprofile`,
           {
             withCredentials: true, // This ensures cookies are sent
             headers: {
@@ -42,19 +44,7 @@ export const AuthProvider = ({ children }) => {
     //   }
     };
 
-    // const fetchBlogs = async () => {
-    //   try {
-    //     const { data } = await axios.get(
-    //       //fetch Blogs using axios
-    //       `${import.meta.env.VITE_APP_BACKEND_URL}/blog/all-blogs`
-    //     );
-    //     setBlogs(data); // store the data in the state, using setBlogs().
-    //     // console.log(data);
-    //   } catch (error) {
-    //     console.log(error);
-    //   }
-    // };
-    // fetchBlogs();
+    
     fetchProfile();
   }, []); // '[]' indicates useEffect will run only once after component mounts.
   return (

@@ -54,6 +54,20 @@ const userSchema = new mongoose.Schema(
     default: Date.now,
   },
 
+      // 🔥 NEW FIELDS FOR AUTOMATION
+    telegramChatId: { type: String },
+    googleCalendar: {
+      accessToken: String,
+      refreshToken: String,
+      isConnected: { type: Boolean, default: false },
+      lastSync: Date
+    },
+
+    createdAt: {
+      type: Date,
+      default: Date.now,
+    },
+
     // optional: store references for quick user-task queries
     createdTasks: [
       {

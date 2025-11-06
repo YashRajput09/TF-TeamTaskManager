@@ -12,6 +12,9 @@ import groupRoute from '../backend/routes/group.route.js';
 import taskRoute from '../backend/routes/task.route.js';
 import commentRoute from '../backend/routes/comment.route.js';
 // import categoryRoute from '../backend/routes/category.routes.js';
+import automationRoute from './routes/ai.route.jsautomation.route.js';
+import telegramRoute from './routes/telegram.route.js';
+import calendarRoute from './routes/calendar.route.js';
 const app = express();
 
 // define session options
@@ -82,3 +85,6 @@ app.use("/group",groupRoute);
 app.use("/task",fileUploadMiddleware,taskRoute);
 app.use("/comment",commentRoute);
 // app.use("/category",categoryRoute);
+app.use("/automation", automationRoute);
+app.use("/telegram", telegramRoute);
+app.use("/calendar", calendarRoute);

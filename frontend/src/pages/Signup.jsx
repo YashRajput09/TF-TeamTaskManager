@@ -5,7 +5,7 @@ import { UserPlus, User, Lock } from 'lucide-react';
 
 export default function Signup() {
   const navigate = useNavigate();
-  const [form, setForm] = useState({ username: '', password: '' });
+  const [form, setForm] = useState({ email: '', password: '' });
   const [error, setError] = useState('');
   const [submitting, setSubmitting] = useState(false);
 
@@ -14,8 +14,8 @@ export default function Signup() {
   const onSubmit = async (e) => {
     e.preventDefault();
     setError('');
-    if (!form.username.trim() || !form.password.trim()) {
-      setError('Username and password are required.');
+    if (!form.email.trim() || !form.password.trim()) {
+      setError('email and password are required.');
       return;
     }
     // Demo-only signup (replace with API later)
@@ -23,7 +23,7 @@ export default function Signup() {
       setSubmitting(true);
       await new Promise((r) => setTimeout(r, 600));
       // store basic user locally (demo)
-      localStorage.setItem('auth_user', JSON.stringify({ username: form.username }));
+      localStorage.setItem('auth_user', JSON.stringify({ email: form.email }));
       navigate('/dashboard');
     } catch (err) {
       setError('Could not create account. Try again.');
@@ -44,16 +44,16 @@ export default function Signup() {
 
         <form onSubmit={onSubmit} className="space-y-4">
           <div>
-            <label className="block text-sm mb-1 text-gray-700 dark:text-gray-300">Username</label>
+            <label className="block text-sm mb-1 text-gray-700 dark:text-gray-300">email</label>
             <div className="relative">
               <User className="w-4 h-4 absolute left-3 top-3 text-gray-400" />
               <input
-                name="username"
-                value={form.username}
+                name="email"
+                value={form.email}
                 onChange={onChange}
                 placeholder="yourname"
                 className="w-full pl-9 pr-3 py-2 rounded-md bg-gray-50 dark:bg-gray-700/50 outline-none"
-                autoComplete="username"
+                autoComplete="email"
               />
             </div>
           </div>
