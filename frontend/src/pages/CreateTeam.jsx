@@ -6,7 +6,6 @@ import axiosInstance from '../utility/axiosInstance';
 
 const CreateTask = () => {
   const navigate = useNavigate();
-  
   // Form state
   const [formData, setFormData] = useState({
     name: '',
