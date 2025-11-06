@@ -1,9 +1,37 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Card from '../components/Card';
 import { TrendingUp, CheckCircle, Clock, Users, ArrowUpRight, Calendar } from 'lucide-react';
+import axiosInstance from '../utility/axiosInstance';
 
 const Dashboard = () => {
+
+  const [userAssignedTask,setUserAssignedTask]=useState();
+  const [userCreatedTask,setUserCreatedTask]=useState();
+  const [userGroups,setUserGroups]=useState();
+
+ useEffect(() => {
+   const allUserTask=async ()=>{
+         try {
+          const {data}=await axiosInstance.get(`/task/get-user-task`);
+          console.log(data?.assignedTasks)
+          console.log(data?.createdTasks)
+        setUserAssignedTask(data?.assignedTasks)
+        setUserCreatedTask(data?.createdTasks)
+         } catch (error) {
+          console.log(error)
+         }
+   }
+   const getUserGroups=async ()=>{
+    const {data}=await axiosInstance.get(`/user/myprofile`);
+    console.log(data?.groups)
+    setUserGroups(data?.groups);
+   }
+
+   allUserTask();
+   getUserGroups();
+ },[])
+ 
   // Sample data - replace with API calls
   const stats = [
     { label: 'Total Tasks', value: '48', change: '+12%', icon: CheckCircle, color: 'text-green-500' },
@@ -13,12 +41,7 @@ const Dashboard = () => {
   ];
 
   // Teams overview shown on Dashboard instead of "Quick Stats"
-  const teams = [
-    { id: 1, name: 'Design Team', members: 5, activeTasks: 12, progress: 78, color: 'bg-purple-500' },
-    { id: 2, name: 'Dev Team', members: 8, activeTasks: 23, progress: 65, color: 'bg-blue-500' },
-    { id: 3, name: 'Marketing', members: 4, activeTasks: 8,  progress: 82, color: 'bg-green-500' },
-    { id: 4, name: 'Product',   members: 6, activeTasks: 15, progress: 71, color: 'bg-orange-500' },
-  ];
+  const teams =userGroups;
 
   const navigate = useNavigate();
 
@@ -73,12 +96,14 @@ const Dashboard = () => {
             </a>
           </div>
           <div className="space-y-3">
-            {[
-              { id: 1, title: 'Update landing page design', team: 'Design Team', priority: 'High',    dueDate: '2024-11-15', status: 'In Progress' },
-              { id: 2, title: 'Fix authentication bug',      team: 'Dev Team',    priority: 'Critical',dueDate: '2024-11-12', status: 'In Progress' },
-              { id: 3, title: 'Prepare Q4 presentation',     team: 'Marketing',   priority: 'Medium', dueDate: '2024-11-20', status: 'Pending' },
-              { id: 4, title: 'Code review for PR #234',     team: 'Dev Team',    priority: 'Low',    dueDate: '2024-11-18', status: 'Completed' },
-            ].map((task) => (
+            {
+            // [
+            //   { id: 1, title: 'Update landing page design', team: 'Design Team', priority: 'High',    dueDate: '2024-11-15', status: 'In Progress' },
+            //   { id: 2, title: 'Fix authentication bug',      team: 'Dev Team',    priority: 'Critical',dueDate: '2024-11-12', status: 'In Progress' },
+            //   { id: 3, title: 'Prepare Q4 presentation',     team: 'Marketing',   priority: 'Medium', dueDate: '2024-11-20', status: 'Pending' },
+            //   { id: 4, title: 'Code review for PR #234',     team: 'Dev Team',    priority: 'Low',    dueDate: '2024-11-18', status: 'Completed' },
+            // ]
+            userAssignedTask?.map((task) => (
               <div
                 key={task.id}
                 className="flex items-center justify-between p-4 rounded-lg bg-gray-50 dark:bg-gray-700/50 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors cursor-pointer"
@@ -88,7 +113,8 @@ const Dashboard = () => {
                   <div className="mt-1 flex items-center space-x-3 text-xs text-gray-600 dark:text-gray-400">
                     <span>{task.team}</span>
                     <span>•</span>
-                    <span>Due {task.dueDate}</span>
+                   
+                    <span>Due {task?.deadline}</span>
                   </div>
                 </div>
                 <div className="flex items-center space-x-2 ml-4">
@@ -117,7 +143,7 @@ const Dashboard = () => {
           </div>
 
           <div className="space-y-3">
-            {teams.map((t) => (
+            {teams?.map((t) => (
               <button
                 key={t.id}
                 onClick={() => navigate(`/teams?team=${t.id}`)}
@@ -128,7 +154,7 @@ const Dashboard = () => {
                     <div className={`w-8 h-8 ${t.color} rounded-lg`} />
                     <div>
                       <p className="text-sm font-semibold text-gray-900 dark:text-white">{t.name}</p>
-                      <p className="text-xs text-gray-600 dark:text-gray-400">{t.members} members • {t.activeTasks} active</p>
+                      <p className="text-xs text-gray-600 dark:text-gray-400">{teams?.length} members • {t.activeTasks} active</p>
                     </div>
                   </div>
                   <div className="flex items-center space-x-2">

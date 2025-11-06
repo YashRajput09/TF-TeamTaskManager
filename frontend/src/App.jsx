@@ -54,6 +54,7 @@ import Signup from './pages/Signup';
 import Dashboard from './pages/Dashboard';
 import MyTasks from './pages/MyTasks';
 import CreateTask from './pages/CreateTask';
+import CreateTeam from './pages/CreateTeam';
 import Teams from './pages/Teams';
 import Notifications from './pages/Notification';
 import Settings from './pages/Settings';
@@ -110,6 +111,7 @@ export default function App() {
           <Route path="dashboard" element={<Dashboard />} />
           <Route path="my-tasks" element={<MyTasks />} />
           <Route path="create-task" element={<CreateTask />} />
+          <Route path="create-team" element={<CreateTeam />} />
           <Route path="teams" element={<Teams />} />
           <Route path="notifications" element={<Notifications />} />
           <Route path="settings" element={<Settings />} />

@@ -2,10 +2,14 @@ import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import Card from '../components/Card';
 import { LogIn, User, Lock } from 'lucide-react';
+import axiosInstance from '../utility/axiosInstance';
+import { useAuth } from '../context/AuthProvider';
 
 export default function Login() {
+
+  // const { profile,setProfile }=useAuth();
   const navigate = useNavigate();
-  const [form, setForm] = useState({ username: '', password: '' });
+  const [form, setForm] = useState({ email: '', password: '' });
   const [error, setError] = useState('');
   const [submitting, setSubmitting] = useState(false);
 
@@ -13,15 +17,19 @@ export default function Login() {
 
   const onSubmit = async (e) => {
     e.preventDefault();
+    console.log(form);
     setError('');
-    if (!form.username.trim() || !form.password.trim()) {
+    if (!form.email.trim() || !form.password.trim()) {
       setError('Username and password are required.');
       return;
     }
     // Demo-only auth (replace with API later)
     try {
       setSubmitting(true);
+
+      const {data}=await axiosInstance.post("/user/login",form);
       // pretend API call
+      console.log(data);
       await new Promise((r) => setTimeout(r, 600));
       localStorage.setItem('auth_user', JSON.stringify({ username: form.username }));
       navigate('/dashboard');
@@ -48,8 +56,8 @@ export default function Login() {
             <div className="relative">
               <User className="w-4 h-4 absolute left-3 top-3 text-gray-400" />
               <input
-                name="username"
-                value={form.username}
+                name="email"
+                value={form.email}
                 onChange={onChange}
                 placeholder="yourname"
                 className="w-full pl-9 pr-3 py-2 rounded-md bg-gray-50 dark:bg-gray-700/50 outline-none"
