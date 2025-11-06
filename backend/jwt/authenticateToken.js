@@ -2,21 +2,20 @@ import jwt from 'jsonwebtoken';
 import userModel from '../models/user_model.js';
 
 const createTokenAndSaveCookies = async (userId, res, rememberMe = false) => {
-    // console.log(process.env.JWT_SECRET);
-    
-    const token = jwt.sign({ userId }, process.env.JWT_SECRET,{
-        // expiresIn: rememberMe ? "7d" : "1h",
-        expiresIn:  "7d" ,
+    const token = jwt.sign({ userId }, process.env.JWT_SECRET, {
+        expiresIn: rememberMe ? "7d" : "1h",
     });
-    res.cookie("jwttoken", token , {
-        // httpOnly: false, //protect from xss attck 
-        // sameSite: "none", //protect from csrf attack
-        // secure: true,  // For development (set to true in production with HTTPS)    
-        httpOnly: true, //protect from xss attck 
-        sameSite: "none", //protect from csrf attack
-        secure: true,  // For development (set to true in production with HTTPS)    
-    })
-    await userModel.findByIdAndUpdate(userId, {token});
+    
+    // FIXED: For localhost development, use this configuration:
+    res.cookie("jwttoken", token, {
+        httpOnly: true, // Protect from XSS attacks
+        sameSite: 'lax', // Changed from 'none' to 'lax' for localhost
+        secure: false,   // false for localhost (HTTP)
+        maxAge: rememberMe ? 7 * 24 * 60 * 60 * 1000 : 60 * 60 * 1000, // 7 days or 1 hour
+        path: '/',
+    });
+    
+    await userModel.findByIdAndUpdate(userId, { token });
     return token;
 }
 

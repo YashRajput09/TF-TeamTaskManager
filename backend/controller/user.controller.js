@@ -90,7 +90,7 @@ export const signUpUser = async(req, res) =>{
 
 // Login User
 export const logInUser = async (req, res) => {
-  const { email, password, rememberMe } = req.body;
+  const { email, password } = req.body;
   try {
     if (!email || !password) {
       return res.status(400).json({ message: "Please fill required fields" });
@@ -103,9 +103,9 @@ export const logInUser = async (req, res) => {
     if (!user || !isValidPassword) {
       return res.status(400).json({ message: "Invalid email or password" });
     }
-    const token = await createTokenAndSaveCookie(user._id, res, rememberMe);
+    const token = await createTokenAndSaveCookie(user._id, res);
     // console.log(token);
-
+req.user = user;
     res.status(200).json({
       message: "User loggedIn successfully",
       user: {
