@@ -855,7 +855,7 @@ const RemoveMemberForm = ({ onAdd, onCancel }) => {
                 <input
                   type="checkbox"
                   checked={selectedMembers === user._id}
-                  onChange={() => setSelectedMember(user._id)}
+                  onChange={() => setSelectedMembers(user._id)}
                   className="accent-blue-600"
                 />
                 <span>{user.name || user.email}</span>
