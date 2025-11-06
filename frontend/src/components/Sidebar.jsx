@@ -34,6 +34,7 @@ const Sidebar = ({ isOpen, onClose }) => {
     { path: "/calendar", icon: CalendarIcon, label: "Calendar" },
     { path: "/telegram", icon: Bell, label: "Telegram Setup" },
     { path: "/notifications", icon: Bell, label: "Notifications" },
+    { path: "/settings", icon: Settings, label: "Settings" },
   ];
 
   const isActive = (path) => location.pathname === path;

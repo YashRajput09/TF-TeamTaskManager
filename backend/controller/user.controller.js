@@ -156,3 +156,54 @@ export const getAllUsers=async (req,res)=>{
 console.log(error)
   }
 }
+
+// ✅ Update User Profile
+export const updateUserProfile = async (req, res) => {
+  try {
+    const userId = req.user?._id; // Logged-in user
+    if (!userId) {
+      return res.status(401).json({ message: "Unauthorized" });
+    }
+
+    const { name, email, bio } = req.body;
+    let updatedFields = { name, email, bio };
+
+    // ✅ Handle optional profile image update
+    if (req.files && req.files.profileImage) {
+      const { profileImage } = req.files;
+
+      const allowedFormats = ["image/jpeg", "image/png"];
+      if (!allowedFormats.includes(profileImage.mimetype)) {
+        return res.status(400).json({ message: "Only JPG or PNG allowed" });
+      }
+
+      const cloudinaryResponse = await cloudinary.uploader.upload(
+        profileImage.tempFilePath,
+        { folder: "TF-TeamTaskManager" }
+      );
+
+      updatedFields.profileImage = {
+        public_id: cloudinaryResponse.public_id,
+        url: cloudinaryResponse.secure_url,
+      };
+    }
+
+    const updatedUser = await User.findByIdAndUpdate(
+      userId,
+      updatedFields,
+      { new: true, runValidators: true }
+    );
+
+    if (!updatedUser) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    res.status(200).json({
+      message: "Profile updated successfully",
+      user: updatedUser,
+    });
+  } catch (error) {
+    console.error("Error updating profile:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
