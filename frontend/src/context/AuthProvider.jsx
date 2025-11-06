@@ -59,7 +59,7 @@ export const AuthProvider = ({ children }) => {
   }, []); // '[]' indicates useEffect will run only once after component mounts.
   return (
     <AuthContext.Provider
-      value={{ profile, isAuthenticated, setIsAuthenticated }}
+      value={{ profile,setProfile, isAuthenticated, setIsAuthenticated }}
     //   value={{ blogs, profile, isAuthenticated, setIsAuthenticated }}
     >
       {children}
