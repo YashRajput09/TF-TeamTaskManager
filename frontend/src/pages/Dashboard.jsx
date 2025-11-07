@@ -19,30 +19,28 @@ const Dashboard = () => {
   const [userCreatedTask, setUserCreatedTask] = useState([]);
   const [userGroups, setUserGroups] = useState([]);
 
- useEffect(() => {
-   const allUserTask=async ()=>{
-         try {
-          const {data}=await axiosInstance.get(`/task/get-user-task`);
-          console.log(data?.assignedTasks)
-          console.log(data?.createdTasks)
-        setUserAssignedTask(data?.assignedTasks)
-        setUserCreatedTask(data?.createdTasks)
-         } catch (error) {
-          console.log(error)
-         }
-   }
-   const getUserGroups=async ()=>{
-    const {data}=await axiosInstance.get(`/user/myprofile`);
-    console.log(data?.groups)
-    setUserGroups(data?.groups);
-
-   }
-
+  useEffect(() => {
+    const allUserTask = async () => {
+      try {
+        const { data } = await axiosInstance.get(`/task/get-user-task`);
+        console.log(data?.assignedTasks);
+        console.log(data?.createdTasks);
+        setUserAssignedTask(data?.assignedTasks);
+        setUserCreatedTask(data?.createdTasks);
+      } catch (error) {
+        console.log(error);
+      }
+    };
+    const getUserGroups = async () => {
+      const { data } = await axiosInstance.get(`/user/myprofile`);
+      console.log(data?.groups);
+      setUserGroups(data?.groups);
+    };
 
     // Call both in parallel
     allUserTask();
     getUserGroups();
-  }, []);
+  }, [userAssignedTask]);
 
   // Stats
   const stats = [
@@ -105,46 +103,58 @@ const Dashboard = () => {
     raw: t,
   }));
 
-// date formate
-// 🧠 Utility: Format date and calculate relative due status
-const formatDueDate = (dateString) => {
-  if (!dateString) return { text: "No due date", color: "text-gray-400" };
+  // date formate
+  // 🧠 Utility: Format date and calculate relative due status
+  const formatDueDate = (dateString) => {
+    if (!dateString) return { text: "No due date", color: "text-gray-400" };
 
-  const date = new Date(dateString);
-  const now = new Date();
+    const date = new Date(dateString);
+    const now = new Date();
 
-  // Format: 25 Nov 2025
-  const formattedDate = date.toLocaleDateString("en-GB", {
-    day: "2-digit",
-    month: "short",
-    year: "numeric",
-  });
+    // Format: 25 Nov 2025
+    const formattedDate = date.toLocaleDateString("en-GB", {
+      day: "2-digit",
+      month: "short",
+      year: "numeric",
+    });
 
-  const diffDays = Math.ceil((date - now) / (1000 * 60 * 60 * 24));
+    const diffDays = Math.ceil((date - now) / (1000 * 60 * 60 * 24));
 
-  if (diffDays > 3) {
-    return {
-      text: `Due in ${diffDays} days (${formattedDate})`,
-      color: "text-green-600 dark:text-green-400",
-    };
-  } else if (diffDays > 0) {
-    return {
-      text: `Due soon (${formattedDate})`,
-      color: "text-orange-500 dark:text-orange-400",
-    };
-  } else if (diffDays === 0) {
-    return {
-      text: `Due today (${formattedDate})`,
-      color: "text-yellow-500 dark:text-yellow-400",
-    };
-  } else {
-    return {
-      text: `Overdue ${Math.abs(diffDays)} days (${formattedDate})`,
-      color: "text-red-500 dark:text-red-400",
-    };
-  }
-};
+    if (diffDays > 3) {
+      return {
+        text: `Due in ${diffDays} days (${formattedDate})`,
+        color: "text-green-600 dark:text-green-400",
+      };
+    } else if (diffDays > 0) {
+      return {
+        text: `Due soon (${formattedDate})`,
+        color: "text-orange-500 dark:text-orange-400",
+      };
+    } else if (diffDays === 0) {
+      return {
+        text: `Due today (${formattedDate})`,
+        color: "text-yellow-500 dark:text-yellow-400",
+      };
+    } else {
+      return {
+        text: `Overdue ${Math.abs(diffDays)} days (${formattedDate})`,
+        color: "text-red-500 dark:text-red-400",
+      };
+    }
+  };
 
+  const handleAccept = async (task_id) => {
+    try {
+      console.log(task_id)
+      const { data } = await axiosInstance.put(
+        `/task/update-status/${task_id}` ,{status:"In-progress"}
+      );
+      console.log(data);
+      alert("task accepted ");
+    } catch (error) {
+      console.log(error);
+    }
+  };
 
   return (
     <div className="space-y-6">
@@ -219,38 +229,53 @@ const formatDueDate = (dateString) => {
                 No tasks assigned to you yet.
               </p>
             ) : (
-              recent.map((task) => (
+              recent?.map((task) => (
                 <div
                   key={task.id}
-                  onClick={() =>
-                    navigate(`/tasks/${task.id}`, {
-                      state: { task, viewerRole: "member" },
-                    })
-                  }
                   className="flex items-center justify-between p-4 rounded-lg bg-gray-50 dark:bg-gray-700/50 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors cursor-pointer"
                 >
                   <div className="flex-1 min-w-0">
-                    <h3 className="text-sm font-semibold text-gray-900 dark:text-white truncate">
+                    <h3
+                      onClick={() =>
+                        navigate(`/tasks/${task.id}`, {
+                          state: { task, viewerRole: "member" },
+                        })
+                      }
+                      className="text-sm font-semibold text-gray-900 dark:text-white truncate"
+                    >
                       {task.title}
                     </h3>
                     <div className="mt-1 flex items-center space-x-3 text-xs text-gray-600 dark:text-gray-400">
                       <span>{task.team}</span>
                       <span>•</span>
                       <span>
-                         {/* {task.dueDate ? `Due ${task.dueDate}` : "No due date"} */}
-                         {(() => {
-  const due = formatDueDate(task.dueDate);
-  return (
-    <span className={`flex items-center gap-1 text-xs ${due.color}`}>
-      <Calendar className="w-3 h-3" />
-      {due.text}
-    </span>
-  );
-})()}
+                        {/* {task.dueDate ? `Due ${task.dueDate}` : "No due date"} */}
+                        {(() => {
+                          const due = formatDueDate(task.dueDate);
+                          return (
+                            <span
+                              className={`flex items-center gap-1 text-xs ${due.color}`}
+                            >
+                              <Calendar className="w-3 h-3" />
+                              {due.text}
+                            </span>
+                          );
+                        })()}
                       </span>
                     </div>
                   </div>
                   <div className="flex items-center space-x-2 ml-4">
+                    { console.log(task?.id)}
+                    {task.status === "Assigned" && (
+                      <button
+                        onClick={() => {
+                          handleAccept(task?.id);
+                        }}
+                        className="px-2 py-1 rounded-md text-xs hover:opacity-60 font-medium  text-green-700  dark:text-green-400"
+                      >
+                        {"Accept"}
+                      </button>
+                    )}
                     <span className="px-2 py-1 rounded-md text-xs font-medium bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400">
                       {task.priority}
                     </span>

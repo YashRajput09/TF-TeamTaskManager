@@ -26,9 +26,10 @@ export const createTask = async (req, res) => {
       req.body;
       // console.log(req.body);
       
+      console.log(req?.files)
     const { groupId } = req.params;
     const adminId = req?.user?._id;
-    const attachment = req.files?.profileImage;
+    const attachment = req.files?.attachments;
 
     if(attachment){
       console.log(attachment)
@@ -92,7 +93,7 @@ export const createTask = async (req, res) => {
       category,
       attachments: attachment
         ? {
-            uploadedBy:loggedUserId,
+            uploadedBy:adminId,
             url: cloudinaryResponse?.secure_url || "None",
           }
         : null,
@@ -237,10 +238,10 @@ export const updateTaskStatus = async (req, res) => {
     const task = await Task.findById(taskId).populate("createdBy assignedTo");
     if (!task) return res.status(404).json({ message: "Task not found" });
 
-    console.log(task.createdBy.id,task.assignedTo.id,loggedUserId)
+    // console.log(task.createdBy.id,task.assignedTo.id,loggedUserId)
     // 3. Permission Check
-    const isGroupAdmin = task.createdBy.id === loggedUserId.toString();
-    const isAssignedUser =task.assignedTo.id === loggedUserId.toString();
+    const isGroupAdmin = task.createdBy?.id === loggedUserId.toString();
+    const isAssignedUser =task.assignedTo?.id === loggedUserId.toString();
 
 
     if (!isGroupAdmin && !isAssignedUser) {

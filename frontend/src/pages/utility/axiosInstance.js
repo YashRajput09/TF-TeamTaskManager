@@ -7,7 +7,7 @@ const axiosInstance=axios.create({
     withCredentials:true,
 
     headers:{
-        ContentType:"multipart/form-data",
+        "ContentType":"multipart/form-data",
     }
 })
 

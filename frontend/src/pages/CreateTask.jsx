@@ -3,7 +3,7 @@ import Card from "../components/Card";
 import { Save, X, Calendar, Flag, Users, FileImage } from "lucide-react";
 import { useLocation, useNavigate } from "react-router-dom";
 import axiosInstance from "./utility/axiosInstance";
-import toast from 'react-hot-toast';
+import toast from "react-hot-toast";
 
 const CreateTask = () => {
   const navigate = useNavigate();
@@ -20,7 +20,7 @@ const CreateTask = () => {
     status: "Assigned",
     deadline: "",
     assignedTo: "",
-    profileImage:null
+    attachments: null,
   });
 
   // const handleChange = (e) => {
@@ -31,34 +31,40 @@ const CreateTask = () => {
   //   }));
   // };
 
-  const handleChange= (e) => {
+  const handleChange = (e) => {
     const { name, value, files } = e.target;
-    if (name === "profileImage") {
-      setFormData((prev) => ({ ...prev, profileImage: files[0] }));
+    if (name === "attachments") {
+      setFormData((prev) => ({ ...prev, attachments: files[0] }));
     } else {
       setFormData((prev) => ({ ...prev, [name]: value }));
     }
   };
 
-  console.log(formData)
-  const handleSubmit =async (e) => {
+  console.log(formData);
+  const handleSubmit = async (e) => {
     e.preventDefault();
     // TODO: Integrate with API to create task
     try {
       console.log("Creating task:", formData);
-  
-      const {data}=await axiosInstance.post(`/task/create-task/${teamData._id}`,formData)
-  
+
+      const { data } = await axiosInstance.post(
+        `/task/create-task/${teamData._id}`,
+        formData,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      );
+
       console.log(data);
       // Simulate success and navigate back
       alert("Task created successfully!");
       navigate(`/teams/${teamData._id}`);
-      
     } catch (error) {
       console.log(error);
-      if(error?.response?.data?.message){
-        alert(error?.response?.data?.message)
-
+      if (error?.response?.data?.message) {
+        alert(error?.response?.data?.message);
       }
     }
   };
@@ -245,14 +251,14 @@ const CreateTask = () => {
             </select>
           </div>
 
-           <div>
+          <div>
             <label className="block text-sm mb-1 text-gray-700 dark:text-gray-300">
               Attachment
             </label>
             <div className="relative">
               <FileImage className="w-4 h-4 absolute left-3 top-3 text-gray-400" />
               <input
-                name="profileImage"
+                name="attachments"
                 type="file"
                 accept="image/png, image/jpeg, application/pdf"
                 onChange={handleChange}
