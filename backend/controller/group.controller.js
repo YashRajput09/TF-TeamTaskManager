@@ -132,3 +132,86 @@ try {
       
 
 }
+
+
+export const getAllUserGroups = async (req, res) => {
+  try {
+    const userId = req.user.userId; // From authentication middleware
+    
+    // Find all groups where the user is a member
+    const groups = await groupModel.find({ 
+      members: userId 
+    })
+    .populate('members', 'name email')
+    .populate('createdBy', 'name email')
+    .select('name description createdBy members createdAt updatedAt')
+    .sort({ createdAt: -1 });
+
+    res.json({
+      success: true,
+      count: groups.length,
+      groups: groups.map(group => ({
+        id: group._id,
+        name: group.name,
+        description: group.description,
+        createdBy: group.createdBy?.name || 'Unknown',
+        memberCount: group.members.length,
+        members: group.members.map(member => ({
+          id: member._id,
+          name: member.name,
+          email: member.email
+        })),
+        createdAt: group.createdAt,
+        updatedAt: group.updatedAt
+      }))
+    });
+  } catch (error) {
+    res.status(500).json({ 
+      success: false, 
+      message: 'Server error', 
+      error: error.message 
+    });
+  }
+};
+
+// In group.controller.js - make sure this function exists and is exported
+export const getAllGroups = async (req, res) => {
+  try {
+    console.log('🔍 Getting ALL groups from database...');
+    
+    // Find ALL groups in the database
+    const groups = await groupModel.find({})
+      .populate('members', 'name email')
+      .populate('createdBy', 'name email')
+      .select('name description createdBy members createdAt updatedAt')
+      .sort({ createdAt: -1 });
+
+    console.log(`📋 Found ${groups.length} groups`);
+    
+    res.json({
+      success: true,
+      count: groups.length,
+      groups: groups.map(group => ({
+        id: group._id,
+        name: group.name,
+        description: group.description,
+        createdBy: group.createdBy?.name || 'Unknown',
+        memberCount: group.members.length,
+        members: group.members.map(member => ({
+          id: member._id,
+          name: member.name,
+          email: member.email
+        })),
+        createdAt: group.createdAt,
+        updatedAt: group.updatedAt
+      }))
+    });
+  } catch (error) {
+    console.error('❌ Error getting all groups:', error);
+    res.status(500).json({ 
+      success: false, 
+      message: 'Server error', 
+      error: error.message 
+    });
+  }
+};

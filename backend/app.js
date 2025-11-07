@@ -45,6 +45,7 @@ app.use(cookieParser());
 
 const allowedOrigins = [
     'http://localhost:5173',
+    'http://localhost:5174',
     'http://localhost:3000',
 ];
 
@@ -94,7 +95,7 @@ app.use("/task", fileUploadMiddleware, taskRoute);
 app.use("/comment", commentRoute);
 app.use("/automation", automationRoute);
 app.use("/api/telegram", telegramRoute); 
-app.use("/calendar", calendarRoute);
+app.use("/api/calendar", calendarRoute);  
 
 // Add to your app.js
 app.get("/api/debug-cookie", (req, res) => {

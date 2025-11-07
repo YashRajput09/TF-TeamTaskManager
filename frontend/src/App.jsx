@@ -6,7 +6,7 @@ import { useAuth } from "./context/AuthProvider";
 import Layout from "./components/Layout";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
-import Automation from "./pages/Automation";
+
 import Calendar from "./pages/Calendar";
 import Telegram from "./pages/Telegram";
 import Dashboard from "./pages/Dashboard";
@@ -16,6 +16,7 @@ import CreateTeam from "./pages/CreateTeam";
 import Teams from "./pages/Teams";
 import Notifications from "./pages/Notification";
 import Settings from "./pages/Settings";
+import AIAutomationDashboard from "./pages/AIAutomationDashboard";
 
 // Auth wrapper components
 function RequireAuth({ children }) {
@@ -95,9 +96,9 @@ export default function App() {
           <Route path="teams" element={<Teams />} />
           <Route path="notifications" element={<Notifications />} />
           <Route path="settings" element={<Settings />} />
-          <Route path="automation" element={<Automation />} />
           <Route path="calendar" element={<Calendar />} />
           <Route path="telegram" element={<Telegram />} />
+           <Route path="automation" element={<AIAutomationDashboard />} />
         </Route>
 
         {/* Fallback */}

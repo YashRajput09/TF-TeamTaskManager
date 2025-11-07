@@ -88,7 +88,7 @@ const TelegramPage = () => {
               </div>
               <div>
                 <p className="font-medium text-gray-900 dark:text-white">Find our Telegram Bot</p>
-                <p>Search for <code className="bg-gray-100 dark:bg-gray-700 px-1 rounded">@YourTaskFlowBot</code> on Telegram</p>
+                <p>Search for <code className="bg-gray-100 dark:bg-gray-700 px-1 rounded">@PlannerAgent_bot</code> on Telegram</p>
               </div>
             </div>
 
