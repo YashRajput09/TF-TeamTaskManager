@@ -99,6 +99,7 @@ export default function App() {
           <Route path="create-task" element={<CreateTask />} />
           <Route path="create-team" element={<CreateTeam />} />
           <Route path="teams/:teamId" element={<Teams />} />
+          <Route path="teams/" element={<Teams />} />
           <Route path="notifications" element={<Notifications />} />
 
           {/* Task Detail + Assigned Tasks */}
