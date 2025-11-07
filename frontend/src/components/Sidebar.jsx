@@ -14,7 +14,7 @@ import {
   LogOut,
   CheckSquare as BrandIcon
 } from "lucide-react";
-import axiosInstance from "../utility/axiosInstance";
+import axiosInstance from "../pages/utility/axiosInstance";
 import toast from "react-hot-toast";
 import { useAuth } from "../context/AuthProvider";
 
@@ -127,7 +127,15 @@ const Sidebar = ({ isOpen, onClose }) => {
             <div className="flex items-center space-x-3 p-3 rounded-lg bg-gray-50/70 dark:bg-gray-800/70">
               <div className="w-10 h-10 rounded-lg gradient-primary flex items-center justify-center shadow">
                 <span className="text-white font-semibold">
-                  {profileData?.name?.[0] || "U"}
+                  {profileData?.profileImage?.url ? (
+      <img
+        src={profileData.profileImage.url}
+        alt={profileData?.name || "User"}
+        className="w-full h-full object-cover  rounded-full"
+      />
+    ) : (
+      <span>{(profileData?.name?.[0] || "U").toUpperCase()}</span>
+    )}
                 </span>
               </div>
               <div className="flex-1 min-w-0">
