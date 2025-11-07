@@ -56,6 +56,10 @@ const taskSchema = new mongoose.Schema(
         },
       },
     ],
+    group:[{
+      type:mongoose.Schema.ObjectId,
+      ref:"User"
+    }],
 
     history: [{ message: String, date: Date }],
     createdBy: {

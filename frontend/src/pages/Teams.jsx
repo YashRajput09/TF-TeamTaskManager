@@ -570,7 +570,7 @@ const Teams = () => {
                         {task.title}
                       </td>
                       <td className="py-3 px-4 text-sm text-gray-700 dark:text-gray-300">
-                        {task?.assignedTo}
+                        {task?.assignedTo?.name}
                       </td>
                       <td className="py-3 px-4">
                         <span

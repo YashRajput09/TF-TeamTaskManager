@@ -40,7 +40,7 @@ const Dashboard = () => {
     // Call both in parallel
     allUserTask();
     getUserGroups();
-  }, [userAssignedTask]);
+  }, []);
 
   // Stats
   const stats = [
@@ -246,7 +246,7 @@ const Dashboard = () => {
                       {task.title}
                     </h3>
                     <div className="mt-1 flex items-center space-x-3 text-xs text-gray-600 dark:text-gray-400">
-                      <span>{task.team}</span>
+                      <span>{task?.group?.name}</span>
                       <span>•</span>
                       <span>
                         {/* {task.dueDate ? `Due ${task.dueDate}` : "No due date"} */}
@@ -265,7 +265,7 @@ const Dashboard = () => {
                     </div>
                   </div>
                   <div className="flex items-center space-x-2 ml-4">
-                    { console.log(task?.id)}
+                    {/* { console.log(task?.id)} */}
                     {task.status === "Assigned" && (
                       <button
                         onClick={() => {

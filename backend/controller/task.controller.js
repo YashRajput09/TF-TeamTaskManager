@@ -91,6 +91,7 @@ export const createTask = async (req, res) => {
       assignedTo: assignedTo ? assignedTo : null,
       deadline,
       category,
+      group:groupId,
       attachments: attachment
         ? {
             uploadedBy:adminId,
@@ -104,6 +105,8 @@ export const createTask = async (req, res) => {
     });
 
     await newTask.save();
+
+    
 
     if (find_assignedUser !== null) {
       newTask.history.push({
@@ -123,7 +126,8 @@ export const createTask = async (req, res) => {
     await find_group.save();
     await findAdmin.save();
 
-    return res.status(200).json({ message: "Task Created", newTask });
+    const populatedTask = await newTask.populate("group");
+    return res.status(200).json({ message: "Task Created", newTask:populatedTask });
   } catch (error) {
     console.log(error);
     return res.status(500).json({ mwssage: "Internal Server Error", error });
@@ -172,7 +176,13 @@ export const getAllTask = async (req, res) => {
   try {
     const { groupId } = req.params;
 
-    const find_group = await groupModel.findById(groupId).populate("allTasks");
+    const find_group = await groupModel.findById(groupId).populate("allTasks").populate({
+    path: "allTasks",
+    populate: [
+      { path: "assignedTo", model: "User" },
+    ],
+  });
+;
     if (!find_group) return res.status(404).json({ message: "No Group Found" });
 
     const groupName = find_group?.name;
@@ -189,9 +199,16 @@ export const getUserAllTask = async (req, res) => {
     const loggedUserId = req?.user?._id;
 
     console.log(loggedUserId);
-    const find_user = await User.findById(loggedUserId)
-      .populate("createdTasks")
-      .populate("assignedTasks");
+   const find_user = await User.findById(loggedUserId)
+  .populate("createdTasks")
+  .populate({
+    path: "assignedTasks",
+    populate: [
+      { path: "assignedTo", model: "User" },
+      { path: "group", model: "Group" },
+    ],
+  });
+
     if (!find_user) return res.status(404).json({ message: "User Not Found" });
 
     const userTasks = {
@@ -269,72 +286,105 @@ export const updateTaskStatus = async (req, res) => {
 export const submitTask = async (req, res) => {
   try {
     const { taskId } = req.params;
-    const url = req.body.url ? req.body?.url : null;
-    const message = req.body.message ? req.body?.message : null;
+    const { url, message } = req.body;
     const loggedUserId = req?.user?._id;
-    
-    const attachment  = req.files ? req.files.attachment : null;
 
-    const find_task = await Task.findById(taskId).populate('attachments.uploadedBy');
-    if (!find_task) return res.status(404).json({ message: "Task not found" });
+    console.log("Incoming files:", req.files);
 
-    console.log(find_task.assignedTo,loggedUserId);
+    // Safely extract single or multiple attachments
+    let attachments = req.files?.attachment || null;
 
-    if (find_task.assignedTo.toString() !== loggedUserId.toString())
+    const find_task = await Task.findById(taskId).populate("attachments.uploadedBy");
+    if (!find_task)
+      return res.status(404).json({ message: "Task not found" });
+
+    // ✅ Ensure attachments array exists
+    if (!Array.isArray(find_task.attachments)) {
+      find_task.attachments = [];
+    }
+
+    // 🔒 Only assigned user can submit
+    if (find_task.assignedTo.toString() !== loggedUserId.toString()) {
       return res
-        .status(404)
-        .json({ message: "Only asssigned user can submit" });
+        .status(403)
+        .json({ message: "Only the assigned user can submit this task." });
+    }
 
-    let cloudinaryResponse = null;
-    if (attachment) {
-      const allowedFormates = [
+    // ✅ Handle file uploads if present
+    if (attachments) {
+      attachments = Array.isArray(attachments) ? attachments : [attachments];
+
+      console.log("Attachments to upload:", attachments);
+
+      const allowedFormats = [
         "image/jpeg",
         "image/png",
-        "image/pdf",
-        "image/txt",
-        "image/csv",
+        "application/pdf",
+        "text/plain",
+        "text/csv",
       ];
-      if (!allowedFormates.includes(attachment.mimetype)) {
-        return res.status(400).json({
-          message: "Invalid image formate, only jpg, png, pdf are allowed",
+
+      for (const file of attachments) {
+        if (!allowedFormats.includes(file.mimetype)) {
+          return res.status(400).json({
+            message: `Invalid file format (${file.mimetype}). Allowed: jpg, png, pdf, txt, csv.`,
+          });
+        }
+
+        const cloudinaryResponse = await cloudinary.uploader.upload(
+          file.tempFilePath,
+          {
+            folder: "TF-TeamTaskManager/attachments",
+            resource_type: "auto",
+          }
+        );
+
+        console.log("✅ Uploaded file:", cloudinaryResponse.secure_url);
+
+        // ✅ Now safe to push
+        find_task.attachments.push({
+          uploadedBy: loggedUserId,
+          url: cloudinaryResponse?.secure_url,
         });
       }
-
-      cloudinaryResponse = await cloudinary.uploader.upload(
-        attachment.tempFilePath,
-        {
-          folder: "TF-TeamTaskManager/attachments",
-          resource_type: "auto",
-        }
-      );
-      console.log(cloudinaryResponse);
-
-      find_task.attachments.push({
-        uploadedBy:loggedUserId,
-        url: cloudinaryResponse?.secure_url,
-      });
     }
 
+    // ✅ Optional URL-based attachment
     if (url) {
       find_task.attachments.push({
-       uploadedBy:loggedUserId,
-        url: url,
+        uploadedBy: loggedUserId,
+        url,
       });
     }
+
+    // ✅ Optional message
     if (message) {
       find_task.submitMessage = message;
     }
 
+    // 🟡 Change status and add history
     find_task.status = "Pending";
-    find_task.history.push({ message: "Send For Review", date: Date.now() });
+    find_task.history.push({
+      message: `Task submitted for review by ${loggedUserId}`,
+      date: Date.now(),
+    });
+
     await find_task.save();
 
-    return res.status(200).json({ message: "Task Submitted and In review" ,find_task});
+    return res.status(200).json({
+      message: "✅ Task submitted successfully and sent for review.",
+      task: find_task,
+    });
   } catch (error) {
-    console.log(error);
-    return res.status(500).json({ message: "Internal Server Error", error });
+    console.error("❌ Error in submitTask:", error);
+    return res.status(500).json({
+      message: "Internal Server Error",
+      error: error.message,
+    });
   }
 };
+
+
 
 //Task Approval Only by Admin
 export const approveTask = async (req, res) => {
