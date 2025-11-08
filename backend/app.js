@@ -132,7 +132,7 @@ app.get("/api/debug-cookie", (req, res) => {
 // FIXED: 404 handler - use a proper path
 app.use((req, res) => {
     res.status(404).json({ 
-        message: "Route not found",
+        message: "Route not Found",
         path: req.originalUrl,
         method: req.method
     });
