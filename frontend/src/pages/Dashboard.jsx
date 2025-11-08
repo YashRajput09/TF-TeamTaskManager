@@ -326,12 +326,12 @@ const Dashboard = () => {
                       </p>
                     </div>
                     <div className="flex items-center space-x-2">
-                      <div className="w-24 bg-gray-200 dark:bg-gray-700 rounded-full h-2 overflow-hidden">
+                      {/* <div className="w-24 bg-gray-200 dark:bg-gray-700 rounded-full h-2 overflow-hidden">
                         <div
                           className={`h-full ${t.color}`}
                           style={{ width: `${t.progress}%` }}
                         />
-                      </div>
+                      </div> */}
                       <span className="text-xs font-medium text-gray-700 dark:text-gray-300">
                         {t.progress}%
                       </span>
