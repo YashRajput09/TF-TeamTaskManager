@@ -110,7 +110,7 @@ app.get("/health", (req, res) => {
 });
 
 // Routes
-app.use(["/", "/user"], fileUploadMiddleware, userRoute);
+app.use("/user", fileUploadMiddleware, userRoute);
 app.use("/group", groupRoute);
 app.use("/task", fileUploadMiddleware, taskRoute);
 app.use("/comment", commentRoute);
