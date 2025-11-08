@@ -110,7 +110,7 @@ app.get("/health", (req, res) => {
 });
 
 // Routes
-app.use(["/", "/user"], fileUploadMiddleware, userRoute);
+app.use( "/user", fileUploadMiddleware, userRoute);
 app.use("/group", groupRoute);
 app.use("/task", fileUploadMiddleware, taskRoute);
 app.use("/comment", commentRoute);
@@ -146,6 +146,10 @@ app.use((error, req, res, next) => {
         error: process.env.NODE_ENV === 'development' ? error.message : undefined
     });
 });
+
+app.get("/",()=>{
+    res.json({message:"TaskManager is Live"})
+})
 
 async function dbConnection() {
     try {
