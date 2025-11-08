@@ -46,7 +46,6 @@ app.use(cookieParser());
 const allowedOrigins = [
     'http://localhost:5173',
     'http://localhost:3000',
-    'https://tf-team-task-manager.vercel.app'
 ];
 
 app.use(cors({
@@ -111,7 +110,7 @@ app.get("/health", (req, res) => {
 });
 
 // Routes
-app.use( "/user", fileUploadMiddleware, userRoute);
+app.use(["/", "/user"], fileUploadMiddleware, userRoute);
 app.use("/group", groupRoute);
 app.use("/task", fileUploadMiddleware, taskRoute);
 app.use("/comment", commentRoute);
@@ -130,14 +129,10 @@ app.get("/api/debug-cookie", (req, res) => {
     message: "Check your backend console for cookie details"
   });
 });
-
-app.get("/",()=>{
-    res.json({message:"TaskManager is Live"})
-})
 // FIXED: 404 handler - use a proper path
 app.use((req, res) => {
     res.status(404).json({ 
-        message: "Route not Found",
+        message: "Route not found",
         path: req.originalUrl,
         method: req.method
     });
@@ -151,7 +146,6 @@ app.use((error, req, res, next) => {
         error: process.env.NODE_ENV === 'development' ? error.message : undefined
     });
 });
-
 
 async function dbConnection() {
     try {
