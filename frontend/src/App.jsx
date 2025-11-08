@@ -18,6 +18,7 @@ import AssignedTasks from "./pages/AssignedTasks";
 import Automation from "./pages/Automation";
 import Calendar from "./pages/Calendar";
 import Telegram from "./pages/Telegram";
+import Settings from "./pages/Settings";
 
 // --- Protected Route Wrappers ---
 function RequireAuth({ children }) {
@@ -101,6 +102,7 @@ export default function App() {
           <Route path="teams/:teamId" element={<Teams />} />
           <Route path="teams/" element={<Teams />} />
           <Route path="notifications" element={<Notifications />} />
+          <Route path="settings" element={<Settings />} />
 
           {/* Task Detail + Assigned Tasks */}
           <Route path="tasks/:taskId" element={<TaskDetail />} />
