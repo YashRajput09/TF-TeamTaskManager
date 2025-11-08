@@ -349,7 +349,7 @@ export default function TaskDetail() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       {/* Header */}
       <div className="flex items-start justify-between">
         <div className="flex items-center space-x-3">
@@ -373,16 +373,17 @@ export default function TaskDetail() {
               {console.log(task?.group[0]?.name)}
               {task?.group && (
                 <span className="inline-flex items-center gap-1">
-                  <Flag className="w-4 h-4" /> {task?.groupId || task?.group[0]?.name}
+                  <Flag className="w-4 h-4" />{" "}
+                  {task?.groupId || task?.group[0]?.name}
                 </span>
               )}
-              {!!task.deadline && (
+              {/* {!!task.deadline && (
                 <span className="inline-flex items-center gap-1">
                   <Calendar className="w-4 h-4" /> Due {task?.deadline}
                 </span>
-              )}
-              {/* {(() => {
-                const due = formatDueDate(task.dueDate);
+              )} */}
+              {(() => {
+                const due = formatDueDate(task?.deadline);
                 return (
                   <span
                     className={`inline-flex items-center gap-1 ${due.color}`}
@@ -390,14 +391,59 @@ export default function TaskDetail() {
                     <Calendar className="w-4 h-4" /> {due.text}
                   </span>
                 );
-              })()} */}
+              })()}
+              <div className="flex gap-2">
+                <span
+                  className={`px-2 py-1 rounded-md text-xs font-medium ${
+                    task.priority === "Critical"
+                      ? "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400"
+                      : task.priority === "High"
+                      ? "bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400"
+                      : task.priority === "Medium"
+                      ? "bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400"
+                      : "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400"
+                  }`}
+                >
+                  {task?.priority}
+                </span>
+                <span
+                  className={`px-2 py-1 rounded-md text-xs font-medium ${
+                    task.status === "Completed"
+                      ? "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400"
+                      : task.status === "In-progress"
+                      ? "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400"
+                      : "bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300"
+                  }`}
+                >
+                  {task?.status}
+                </span>
+
+              </div>
+            </div>
+             <div className="mt-2">
+              {task.status === "Declined" ? (
+                <div className="rounded-md bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-700 px-4 py-2 text-sm text-red-700 dark:text-red-300">
+                  ❌ Task declined by <strong>{task?.createdBy?.name}</strong>
+                  <div className="mt-2 text-xs italic text-red-500 dark:text-red-400">
+                    Reason: “Incomplete deliverables and missing documentation.”
+                  </div>
+                </div>
+              ) : task.status === "Completed" ? (
+                <div className="rounded-md bg-green-50 dark:bg-green-900/30 border border-green-200 dark:border-green-700 px-4 py-2 text-sm text-green-700 dark:text-green-300">
+                  ✅ Task approved by <strong>{task?.createdBy?.name}</strong>
+                </div>
+              ) : task.status === "Pending" ? (
+                <div className="rounded-md bg-yellow-50 dark:bg-yellow-900/30 border border-yellow-200 dark:border-yellow-700 px-4 py-2 text-sm text-yellow-700 dark:text-yellow-300">
+                  ⏳ Task submission pending review by {task?.createdBy?.name}
+                </div>
+              ):("")}
             </div>
           </div>
         </div>
       </div>
 
       {/* Description */}
-      <Card className="p-6">
+      <Card className="">
         <h2 className="text-lg font-bold text-gray-900 dark:text-white">
           Description
         </h2>
@@ -538,9 +584,11 @@ export default function TaskDetail() {
                     {/* <span className="text-sm text-gray-900 dark:text-gray-100">
                       {f.name}
                     </span> */}
-                { f.size > 0 &&   <span className="text-xs text-gray-500 dark:text-gray-400">
-                      {Math.ceil(f.size / 1024)} KB
-                    </span>}
+                    {f.size > 0 && (
+                      <span className="text-xs text-gray-500 dark:text-gray-400">
+                        {Math.ceil(f.size / 1024)} KB
+                      </span>
+                    )}
                   </li>
                 ))}
               </ul>
@@ -644,7 +692,7 @@ export default function TaskDetail() {
             ) : (
               <ul className="divide-y divide-gray-200 dark:divide-gray-700">
                 {/* console.log(memberFiles) */}
-                 {memberFiles?.map((f) => (
+                {memberFiles?.map((f) => (
                   <li
                     key={f.id}
                     className="py-2 flex items-center justify-between"
@@ -672,9 +720,11 @@ export default function TaskDetail() {
                     {/* <span className="text-sm text-gray-900 dark:text-gray-100">
                       {f.name}
                     </span> */}
-                { f.size > 0 &&   <span className="text-xs text-gray-500 dark:text-gray-400">
-                      {Math.ceil(f.size / 1024)} KB
-                    </span>}
+                    {f.size > 0 && (
+                      <span className="text-xs text-gray-500 dark:text-gray-400">
+                        {Math.ceil(f.size / 1024)} KB
+                      </span>
+                    )}
                   </li>
                 ))}
               </ul>
