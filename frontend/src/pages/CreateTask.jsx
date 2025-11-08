@@ -59,7 +59,8 @@ const CreateTask = () => {
 
       console.log(data);
       // Simulate success and navigate back
-      alert("Task created successfully!");
+      // alert("Task created successfully!");
+      toast.success("Task Created Successfully")
       navigate(`/teams/${teamData._id}`);
     } catch (error) {
       console.log(error);

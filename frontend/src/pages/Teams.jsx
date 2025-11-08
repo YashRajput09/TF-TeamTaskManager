@@ -15,6 +15,7 @@ import {
   ArrowLeft,
 } from "lucide-react";
 import axiosInstance from "./utility/axiosInstance";
+import toast from "react-hot-toast";
 
 // Helper to read ?team= from URL
 const useQuery = () => new URLSearchParams(useLocation().search);
@@ -432,6 +433,7 @@ const Teams = () => {
                       {team.completedTasks}
                     </p>
                     <p className="text-xs text-gray-600 dark:text-gray-400">
+                      console.log
                       Completed
                     </p>
                   </div>
@@ -577,7 +579,7 @@ const Teams = () => {
                           className={`px-2 py-1 rounded-md text-xs font-medium ${
                             task.status === "Completed"
                               ? "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400"
-                              : task.status === "In Progress"
+                              : task.status === "In-progress"
                               ? "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400"
                               : "bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300"
                           }`}
@@ -773,7 +775,8 @@ const AddMemberForm = ({ onAdd, onCancel }) => {
       { membersId: selectedMembers }
     );
     console.log(data);
-    alert("User Added successsfully");
+    // alert("User Added successsfully");
+    toast.success("User Added");
   };
 
   return (

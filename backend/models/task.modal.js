@@ -18,7 +18,7 @@ const taskSchema = new mongoose.Schema(
     }, // User ID
     status: {
       type: String,
-      enum: ["Assigned", "In-progress", "Pending", "Done"],
+      enum: ["Assigned", "In-progress", "Pending", "Completed"],
       default: "Assigned",
     },
     deadline: Date,
@@ -58,7 +58,7 @@ const taskSchema = new mongoose.Schema(
     ],
     group:[{
       type:mongoose.Schema.ObjectId,
-      ref:"User"
+      ref:"Group"
     }],
 
     history: [{ message: String, date: Date }],

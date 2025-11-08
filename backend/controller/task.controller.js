@@ -2,38 +2,44 @@ import express from "express";
 import cloudinary from "../config/cloudConfig.js";
 import { groupModel } from "../models/group.model.js";
 import { Task } from "../models/task.modal.js";
-import {generateSearchQuery} from "../utils/search.js";
+import { generateSearchQuery } from "../utils/search.js";
 import User from "../models/user_model.js";
 
-export const searchBlogs = async(req, res) =>{
-  const searchQuery = req.query.search || "" ; // Default to an empty string if search is not provided
+export const searchBlogs = async (req, res) => {
+  const searchQuery = req.query.search || ""; // Default to an empty string if search is not provided
   // console.log(req.query.search);
-  if(searchQuery){
+  if (searchQuery) {
     const searchTasks = generateSearchQuery(searchQuery);
     // console.log("searchBlogs", searchBlogs)
     const allSearchTasks = await Task.find(searchTasks);
     return res.status(200).json(allSearchTasks); // Return search results as JSON
-  }  else {
+  } else {
     return res.status(400).json({ message: "Search query is required" }); // Handle missing query
   }
 };
 
-
 export const createTask = async (req, res) => {
   try {
-    console.log(req.body)
-    const { title, description, priority, assignedTo, status, deadline, category } =
-      req.body;
-      // console.log(req.body);
-      
-      console.log(req?.files)
+    console.log(req.body);
+    const {
+      title,
+      description,
+      priority,
+      assignedTo,
+      status,
+      deadline,
+      category,
+    } = req.body;
+    // console.log(req.body);
+
+    console.log(req?.files);
     const { groupId } = req.params;
     const adminId = req?.user?._id;
     const attachment = req.files?.attachments;
 
-    if(attachment){
-      console.log(attachment)
-      console.log("file aa gyi")
+    if (attachment) {
+      console.log(attachment);
+      console.log("file aa gyi");
     }
     // if (!req.files || Object.keys(req.files).length === 0) {
     //   return res
@@ -91,10 +97,10 @@ export const createTask = async (req, res) => {
       assignedTo: assignedTo ? assignedTo : null,
       deadline,
       category,
-      group:groupId,
+      group: groupId,
       attachments: attachment
         ? {
-            uploadedBy:adminId,
+            uploadedBy: adminId,
             url: cloudinaryResponse?.secure_url || "None",
           }
         : null,
@@ -106,13 +112,10 @@ export const createTask = async (req, res) => {
 
     await newTask.save();
 
-    
-
     if (find_assignedUser !== null) {
       newTask.history.push({
         message: `Assigned to ${find_assignedUser?.name} `,
       });
-      
     }
 
     find_group?.allTasks?.push(newTask?._id);
@@ -127,7 +130,9 @@ export const createTask = async (req, res) => {
     await findAdmin.save();
 
     const populatedTask = await newTask.populate("group");
-    return res.status(200).json({ message: "Task Created", newTask:populatedTask });
+    return res
+      .status(200)
+      .json({ message: "Task Created", newTask: populatedTask });
   } catch (error) {
     console.log(error);
     return res.status(500).json({ mwssage: "Internal Server Error", error });
@@ -176,13 +181,13 @@ export const getAllTask = async (req, res) => {
   try {
     const { groupId } = req.params;
 
-    const find_group = await groupModel.findById(groupId).populate("allTasks").populate({
-    path: "allTasks",
-    populate: [
-      { path: "assignedTo", model: "User" },
-    ],
-  });
-;
+    const find_group = await groupModel
+      .findById(groupId)
+      .populate("allTasks")
+      .populate({
+        path: "allTasks",
+        populate: [{ path: "assignedTo", model: "User" }],
+      });
     if (!find_group) return res.status(404).json({ message: "No Group Found" });
 
     const groupName = find_group?.name;
@@ -199,15 +204,15 @@ export const getUserAllTask = async (req, res) => {
     const loggedUserId = req?.user?._id;
 
     console.log(loggedUserId);
-   const find_user = await User.findById(loggedUserId)
-  .populate("createdTasks")
-  .populate({
-    path: "assignedTasks",
-    populate: [
-      { path: "assignedTo", model: "User" },
-      { path: "group", model: "Group" },
-    ],
-  });
+    const find_user = await User.findById(loggedUserId)
+      .populate("createdTasks")
+      .populate({
+        path: "assignedTasks",
+        populate: [
+          { path: "assignedTo", model: "User" },
+          { path: "group", model: "Group" },
+        ],
+      });
 
     if (!find_user) return res.status(404).json({ message: "User Not Found" });
 
@@ -227,30 +232,28 @@ export const getUserAllTask = async (req, res) => {
 export const getSingleAllTask = async (req, res) => {
   try {
     const { taskId } = req.params;
-  
+
     const find_task = await Task.findById(taskId)
       .populate("createdBy")
-      .populate('attachments.uploadedBy')
-      .populate("assignedTo");
+      .populate("attachments.uploadedBy")
+      .populate("assignedTo").populate("group");
     if (!find_task) return res.status(404).json({ message: "Task Not Found" });
-  
+
     return res.status(200).json(find_task);
-    
   } catch (error) {
-    return res.status(200).json({message:"Internal Error",error});
+    return res.status(200).json({ message: "Internal Error", error });
   }
 };
-
 
 //used when member accept task and start to work on
 export const updateTaskStatus = async (req, res) => {
   try {
     const { taskId } = req.params;
-    const {status} = req.body;
+    const { status } = req.body;
     const loggedUserId = req?.user?._id;
 
-  console.log(loggedUserId)
-    console.log("hello")
+    console.log(loggedUserId);
+    console.log("hello");
     // 1. Find Task
     const task = await Task.findById(taskId).populate("createdBy assignedTo");
     if (!task) return res.status(404).json({ message: "Task not found" });
@@ -258,8 +261,7 @@ export const updateTaskStatus = async (req, res) => {
     // console.log(task.createdBy.id,task.assignedTo.id,loggedUserId)
     // 3. Permission Check
     const isGroupAdmin = task.createdBy?.id === loggedUserId.toString();
-    const isAssignedUser =task.assignedTo?.id === loggedUserId.toString();
-
+    const isAssignedUser = task.assignedTo?.id === loggedUserId.toString();
 
     if (!isGroupAdmin && !isAssignedUser) {
       return res.status(403).json({
@@ -294,9 +296,10 @@ export const submitTask = async (req, res) => {
     // Safely extract single or multiple attachments
     let attachments = req.files?.attachment || null;
 
-    const find_task = await Task.findById(taskId).populate("attachments.uploadedBy");
-    if (!find_task)
-      return res.status(404).json({ message: "Task not found" });
+    const find_task = await Task.findById(taskId).populate(
+      "attachments.uploadedBy"
+    );
+    if (!find_task) return res.status(404).json({ message: "Task not found" });
 
     // ✅ Ensure attachments array exists
     if (!Array.isArray(find_task.attachments)) {
@@ -384,30 +387,28 @@ export const submitTask = async (req, res) => {
   }
 };
 
-
-
 //Task Approval Only by Admin
 export const approveTask = async (req, res) => {
   try {
     const { taskId } = req.params;
-    const { isAccept, declineMessage } = req.body;
+    // const { isAccept, declineMessage  ,payload} = req.body;
+    const { action,message} = req.body;
     const loggedUserId = req?.user?._id; //Admin and creator of project of Group
 
+console.log(req.body)
+    console.log(action,message);
     const find_task = await Task.findById(taskId);
     if (!find_task) return res.status(400).json({ message: "Task not found" });
 
-    console.log(find_task.createdBy,loggedUserId)
+    console.log(find_task.createdBy, loggedUserId);
     //Check if logged user is creator of group or not
     const find_loggedUser = await User.findById(loggedUserId);
     if (find_task?.createdBy.toString() !== loggedUserId.toString())
       return res.status(400).json({ message: "Only Admin can approve" });
 
-    if (isAccept !== "yes" || isAccept !== "no") {
-    }
-
-    if (isAccept !== "yes") {
-      if (declineMessage) {
-        find_task.declineMessage = declineMessage;
+    if (action=="decline") {
+      if (message) {
+        find_task.declineMessage = message;
       }
 
       find_task.history.push({
@@ -417,16 +418,17 @@ export const approveTask = async (req, res) => {
 
       return res
         .status(400)
-        .json({ message: "Submission Declined", declineMessage });
+        .json({ message: "Submission Declined",message });
     }
     find_task.history.push({ message: "Task completed", date: Date.now() });
+   find_task.status="Completed"
 
     await find_task.save();
 
     return res.status(200).json({ message: "Task Completed", find_task });
   } catch (error) {
     console.log(error);
-    
+
     return res.status(500).json({ message: "Internal Server Error", error });
   }
 };

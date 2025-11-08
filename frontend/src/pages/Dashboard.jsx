@@ -150,7 +150,8 @@ const Dashboard = () => {
         `/task/update-status/${task_id}` ,{status:"In-progress"}
       );
       console.log(data);
-      alert("task accepted ");
+      // alert("task accepted ");
+      toast.success("Accepted")
     } catch (error) {
       console.log(error);
     }
@@ -249,6 +250,7 @@ const Dashboard = () => {
                       <span>{task?.group?.name}</span>
                       <span>•</span>
                       <span>
+                        {console.log(task)}
                         {/* {task.dueDate ? `Due ${task.dueDate}` : "No due date"} */}
                         {(() => {
                           const due = formatDueDate(task.dueDate);
@@ -304,10 +306,12 @@ const Dashboard = () => {
           </div>
 
           <div className="space-y-3">
-            {userGroups?.map((t) => (
-              <Link
-                key={t._id}
-                to={`/teams/${t._id}`}
+            {teams?.map((t) => (
+              <div
+              // <Link
+                key={t.id}
+                onClick={()=>navigate(`/teams/${t.id}`)}
+                // to={`/teams/${t._id}`}
                 className="w-full text-left p-3 rounded-lg bg-gray-50 dark:bg-gray-700/50 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
               >
                 <div className="flex items-center justify-between">
@@ -334,7 +338,7 @@ const Dashboard = () => {
                     </div>
                   </div>
                 </div>
-              </Link>
+              </div>
             ))}
           </div>
         </Card>

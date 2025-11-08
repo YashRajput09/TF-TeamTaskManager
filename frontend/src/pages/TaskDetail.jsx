@@ -152,6 +152,8 @@ export default function TaskDetail() {
       console.log(error);
     }
   };
+  console.log(adminFiles);
+  console.log(memberFiles);
 
   const fetchComments = async () => {
     try {
@@ -248,7 +250,7 @@ export default function TaskDetail() {
       // If backend expects a single file field name, adjust the key here to e.g. 'profileImage' or 'attachments'
       submissionFiles.forEach((file, idx) => {
         attachment.append("attachment", file);
-        attachment.append("url","") // <<-- change 'files' if backend expects another key
+        attachment.append("url", ""); // <<-- change 'files' if backend expects another key
       });
 
       const { data } = await axiosInstance.put(
@@ -260,7 +262,7 @@ export default function TaskDetail() {
           },
         }
       );
-      console.log(data)
+      console.log(data);
       // assume backend returns updated task; if not, we re-fetch
       if (data?.task) {
         setTask(data.task);
@@ -295,7 +297,7 @@ export default function TaskDetail() {
           ? { action: "approve" }
           : { action: "decline", message: declineMessage };
 
-      const { data } = await axiosInstance.post(
+      const { data } = await axiosInstance.put(
         `/task/${taskId}/approve`,
         payload
       );
@@ -368,9 +370,10 @@ export default function TaskDetail() {
                   <User className="w-4 h-4" /> {task?.assignedTo?.name}
                 </span>
               )}
-              {task.team && (
+              {console.log(task?.group[0]?.name)}
+              {task?.group && (
                 <span className="inline-flex items-center gap-1">
-                  <Flag className="w-4 h-4" /> {task.team}
+                  <Flag className="w-4 h-4" /> {task?.groupId || task?.group[0]?.name}
                 </span>
               )}
               {!!task.deadline && (
@@ -512,12 +515,32 @@ export default function TaskDetail() {
                     key={f.id}
                     className="py-2 flex items-center justify-between"
                   >
-                    <span className="text-sm text-gray-900 dark:text-gray-100">
+                    {f.url && f.url.match(/\.(jpg|jpeg|png|gif|webp)$/i) ? (
+                      <a href={f.url} target="_blank" rel="noopener noreferrer">
+                        <img
+                          src={f.url}
+                          alt={f.name || "admin file"}
+                          className="w-full h-12 object-cover rounded-md"
+                        />
+                      </a>
+                    ) : (
+                      <div className="flex items-center justify-center h-32 text-xs text-gray-500">
+                        <a
+                          href={f.url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="underline"
+                        >
+                          View file
+                        </a>
+                      </div>
+                    )}
+                    {/* <span className="text-sm text-gray-900 dark:text-gray-100">
                       {f.name}
-                    </span>
-                    <span className="text-xs text-gray-500 dark:text-gray-400">
+                    </span> */}
+                { f.size > 0 &&   <span className="text-xs text-gray-500 dark:text-gray-400">
                       {Math.ceil(f.size / 1024)} KB
-                    </span>
+                    </span>}
                   </li>
                 ))}
               </ul>
@@ -620,22 +643,38 @@ export default function TaskDetail() {
               </p>
             ) : (
               <ul className="divide-y divide-gray-200 dark:divide-gray-700">
-                {memberFiles.map((f) => (
+                {/* console.log(memberFiles) */}
+                 {memberFiles?.map((f) => (
                   <li
                     key={f.id}
                     className="py-2 flex items-center justify-between"
                   >
-                    <div className="flex items-center gap-2">
-                      <span className="text-sm text-gray-900 dark:text-gray-100">
-                        {f.name}
-                      </span>
-                      <span className="text-xs text-gray-500 dark:text-gray-400">
-                        • by {f.from}
-                      </span>
-                    </div>
-                    <span className="text-xs text-gray-500 dark:text-gray-400">
+                    {f.url && f.url.match(/\.(jpg|jpeg|png|gif|webp)$/i) ? (
+                      <a href={f.url} target="_blank" rel="noopener noreferrer">
+                        <img
+                          src={f.url}
+                          alt={f.name || "admin file"}
+                          className="w-full h-12 object-cover rounded-md"
+                        />
+                      </a>
+                    ) : (
+                      <div className="flex items-center justify-center h-32 text-xs text-gray-500">
+                        <a
+                          href={f.url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="underline"
+                        >
+                          View file
+                        </a>
+                      </div>
+                    )}
+                    {/* <span className="text-sm text-gray-900 dark:text-gray-100">
+                      {f.name}
+                    </span> */}
+                { f.size > 0 &&   <span className="text-xs text-gray-500 dark:text-gray-400">
                       {Math.ceil(f.size / 1024)} KB
-                    </span>
+                    </span>}
                   </li>
                 ))}
               </ul>
