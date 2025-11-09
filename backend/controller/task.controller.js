@@ -205,7 +205,14 @@ export const getUserAllTask = async (req, res) => {
 
     console.log(loggedUserId);
     const find_user = await User.findById(loggedUserId)
-      .populate("createdTasks")
+      // .populate("createdTasks")
+      .populate({
+        path: "createdTasks",
+        populate: [
+          { path: "assignedTo", model: "User" },
+          { path: "group", model: "Group" },
+        ],
+      })
       .populate({
         path: "assignedTasks",
         populate: [
