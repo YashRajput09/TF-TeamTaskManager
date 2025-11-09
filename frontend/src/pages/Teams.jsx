@@ -805,8 +805,11 @@ const AddMemberForm = ({ onAdd, onCancel }) => {
             <p className="text-sm text-gray-500">No users available</p>
           )}
         </div>
-        <button className=" btn" type="submit">
-          Add{" "}
+         <button
+          className=" px-4 py-2 w-full justify-center hover:bg-green-800 items-center bg-green-700 mt-4 rounded-md "
+          type="submit"
+        >
+          Remove{" "}
         </button>
       </div>
     </form>
