@@ -325,14 +325,15 @@ const Teams = () => {
     );
   }, [selectedTeam, searchMember]);
 
-  // const visibleTasks = useMemo(() => {
-  //   if (!selectedTeam) return [];
-  //   const base = onlyMine
-  //     ? selectedTeam.tasks.filter(task => task.assignee === currentUser)
-  //     : selectedTeam.tasks;
-  //   return base;
-  // }, [selectedTeam, onlyMine]);
-
+  //Assigned to me code
+  const visibleTask = useMemo(() => {
+    if (!teamData) return [];
+    const base = onlyMine
+      ? visibleTasks?.filter(task => task.assignedTo?._id=== profile?._id)
+      : visibleTasks;
+    return base;
+  }, [teamData, onlyMine]);
+ 
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -504,8 +505,9 @@ const Teams = () => {
                   <div className="flex items-center space-x-3">
                     {/* <div className={`w-8 h-8 rounded-lg ${selectedTeam.color}`} /> */}
                     <div>
+                      {console.log(teamData?.createdBy?._id,m?._id,teamData?.createdBy?._id===m?._id)}
                       <p className="text-sm font-semibold text-gray-900 dark:text-white">
-                        {m.name}
+                        {m.name } {teamData?.createdBy?._id===m?._id ? (<i>(Admin)</i>) : "" }  {m._id===profile._id ? (<i>(You)</i>) : ""}
                       </p>
                       <p className="text-xs text-gray-600 dark:text-gray-400">
                         {m.role}
@@ -569,7 +571,7 @@ const Teams = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  {visibleTasks?.map((task) => (
+                  {visibleTask?.map((task) => (
                     <tr
                       onClick={() => navigate(`/tasks/${task._id}`)}
                       key={task?._id}
@@ -578,6 +580,7 @@ const Teams = () => {
                       <td className="py-3 px-4 text-sm text-gray-900 dark:text-white">
                         {task.title}
                       </td>
+                       {console.log(task?.assignedTo) }
                       <td className="py-3 px-4 text-sm text-gray-700 dark:text-gray-300">
                         {task?.assignedTo?.name}
                       </td>

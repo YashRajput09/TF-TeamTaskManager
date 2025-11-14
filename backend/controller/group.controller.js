@@ -157,7 +157,7 @@ export const getSingleGroup = async (req, res) => {
   try {
     const { groupId } = req.params;
 
-    const find_group = await groupModel.findById(groupId).populate("members createdBy");
+    const find_group = await groupModel.findById(groupId).populate("members createdBy allTasks");
     if (!find_group)
       return res.status(404).json({ messaage: "Group not found" });
 
