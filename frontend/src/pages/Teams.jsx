@@ -13,9 +13,11 @@ import {
   ListChecks,
   Search,
   ArrowLeft,
+  User,
 } from "lucide-react";
 import axiosInstance from "./utility/axiosInstance";
 import toast from "react-hot-toast";
+import { useAuth } from "../context/AuthProvider";
 
 // Helper to read ?team= from URL
 const useQuery = () => new URLSearchParams(useLocation().search);
@@ -199,7 +201,9 @@ const Teams = () => {
   const [showAdd, setShowAdd] = useState(false);
   const [showRemove, setShowRemove] = useState(false);
   const [alluser, setAlluser] = useState();
+  const [loading, setLoading] = useState();
 
+  const { profile } = useAuth();
   // NEW: create task modal state
   const [showCreateTask, setShowCreateTask] = useState(false); // <-- added
 
@@ -247,7 +251,7 @@ const Teams = () => {
     getAllUsers();
     getSingleGroup();
     getGroupTask();
-  }, []);
+  }, [showAdd, showRemove]);
 
   console.log(alluser);
   // console.log(teamData?.groupTasks)
@@ -263,10 +267,7 @@ const Teams = () => {
   );
 
   // owner check — either ownerUsername matches or role 'Owner' in members list (for newly created groups)
-  const isOwner = (team) =>
-    !!team &&
-    (team?.createdBy === currentUser ||
-      team.members.some((m) => m.name === currentUser && m.role === "Owner")); // <-- added
+  const isOwner = (team) => team?.createdBy?._id === profile?._id; // <-- added
 
   const handleSelect = (id) => {
     setSelectedId(id);
@@ -337,7 +338,7 @@ const Teams = () => {
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center md:justify-between">
         <div className="flex items-center space-x-3">
-          {selectedTeam && (
+          {!selectedTeam && (
             <button
               onClick={() => navigate("/teams")}
               className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700"
@@ -348,24 +349,31 @@ const Teams = () => {
           )}
           <div>
             <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
-              {selectedTeam ? selectedTeam.name : "Teams"}
+              {teamData?.name}
             </h1>
-            <p className="mt-1 text-gray-600 dark:text-gray-400">
-              {selectedTeam
-                ? "Team overview, members, and tasks"
-                : "Manage your teams and track their progress"}
-            </p>
+            <div className="flex gap-2 items-center">
+              <span className=" flex items-center gap-1 text-gray-600 dark:text-gray-400">
+                <User className="w-4 h-4" />
+                <i> Admin: </i> {teamData?.createdBy?.name}
+              </span>
+              <p className="text-gray-600 dark:text-gray-400">
+                |{" "}
+                {selectedTeam
+                  ? "Team overview, members, and tasks"
+                  : "Manage your teams and track their progress"}
+              </p>
+            </div>
           </div>
         </div>
 
         <div className="mt-4 md:mt-0 flex items-center gap-4">
-          <button
+         {isOwner(teamData) && <button
             className="btn-primary hover:opacity-60 flex items-center space-x-2"
-            onClick={() => navigate(`/create-task`,{state: {teamData}})}
+            onClick={() => navigate(`/create-task`, { state: { teamData } })}
           >
             <Plus className="w-4 h-4" />
             <span>Create Task</span>
-          </button>
+          </button>}
           {!selectedTeam && (
             <>
               <button
@@ -433,8 +441,7 @@ const Teams = () => {
                       {team.completedTasks}
                     </p>
                     <p className="text-xs text-gray-600 dark:text-gray-400">
-                      console.log
-                      Completed
+                      console.log Completed
                     </p>
                   </div>
                   <div className="text-center p-3 rounded-lg bg-gray-50 dark:bg-gray-700/50">
@@ -532,14 +539,14 @@ const Teams = () => {
                 </label>
 
                 {/* Show Create Task only for owner */}
-                {isOwner(teamData) && (
+                {/* {isOwner(teamData) && (
                   <button
                     className="btn-primary"
                     onClick={() => setShowCreateTask(true)}
                   >
                     Create Task
                   </button>
-                )}
+                )} */}
               </div>
             </div>
 
@@ -631,7 +638,7 @@ const Teams = () => {
 
       {showAdd && teamData && (
         <InlineModal
-          title={`Add Member to ${teamData.name}`}
+          title={`Add Member to ${teamData?.name}`}
           onClose={() => setShowAdd(false)}
         >
           <AddMemberForm
@@ -648,7 +655,7 @@ const Teams = () => {
         >
           <RemoveMemberForm
             onAdd={{ groupUsers: teamData?.members, groupId: teamId }}
-            onCancel={() => setShowAdd(false)}
+            onCancel={() => setShowRemove(false)}
           />
         </InlineModal>
       )}
@@ -748,8 +755,10 @@ const CreateGroupForm = ({ onCreate, onCancel }) => {
 const AddMemberForm = ({ onAdd, onCancel }) => {
   const [selectedMembers, setSelectedMembers] = useState([]);
   const [role, setRole] = useState("Member");
+  const [loading, setLoading] = useState(false);
 
   console.log(onAdd);
+  console.log(onCancel);
   // ✅ Handle checkbox selection
   const handleCheckboxChange = (userId) => {
     setSelectedMembers(
@@ -765,18 +774,27 @@ const AddMemberForm = ({ onAdd, onCancel }) => {
   console.log(onAdd?.groupId);
   // ✅ Handle form submit
   const handleSubmit = async (e) => {
-    e.preventDefault();
-    if (selectedMembers.length === 0) {
-      setError("Please select at least one user");
-      return;
+    try {
+      e.preventDefault();
+      setLoading(true);
+      if (selectedMembers.length === 0) {
+        setError("Please select at least one user");
+        return;
+      }
+      const { data } = await axiosInstance.post(
+        `/group/add-member/${onAdd?.groupId}`,
+        { membersId: selectedMembers }
+      );
+      console.log(data);
+      // alert("User Added successsfully");
+      setLoading(false);
+      onCancel();
+      toast.success("User Added");
+    } catch (error) {
+      console.log(error);
+      setLoading(false);
+      onCancel();
     }
-    const { data } = await axiosInstance.post(
-      `/group/add-member/${onAdd?.groupId}`,
-      { membersId: selectedMembers }
-    );
-    console.log(data);
-    // alert("User Added successsfully");
-    toast.success("User Added");
   };
 
   return (
@@ -805,11 +823,12 @@ const AddMemberForm = ({ onAdd, onCancel }) => {
             <p className="text-sm text-gray-500">No users available</p>
           )}
         </div>
-         <button
+        <button
+          disabled={loading}
           className=" px-4 py-2 w-full justify-center hover:bg-green-800 items-center bg-green-700 mt-4 rounded-md "
           type="submit"
         >
-          Remove{" "}
+          {loading ? "Adding..." : "Add"}
         </button>
       </div>
     </form>
@@ -818,7 +837,7 @@ const AddMemberForm = ({ onAdd, onCancel }) => {
 
 const RemoveMemberForm = ({ onAdd, onCancel }) => {
   const [selectedMembers, setSelectedMembers] = useState("");
-  const [role, setRole] = useState("Member");
+  const [loading, setLoading] = useState(false);
 
   console.log(onAdd);
   // ✅ Handle checkbox selection
@@ -834,16 +853,28 @@ const RemoveMemberForm = ({ onAdd, onCancel }) => {
   console.log(onAdd?.groupId);
   // ✅ Handle form submit
   const handleSubmit = async (e) => {
-    e.preventDefault();
-    if (!selectedMembers) {
-      setError("Please select at least one user");
-      return;
+    try {
+      e.preventDefault();
+      setLoading(true);
+      if (!selectedMembers) {
+        setError("Please select at least one user");
+        return;
+      }
+      const { data } = await axiosInstance.post(
+        `/group/remove-member/${onAdd?.groupId}`,
+        { memberId: selectedMembers }
+      );
+      console.log(data);
+      setLoading(false);
+      toast.error("User Removed !!");
+      onCancel();
+    } catch (error) {
+      console.log(error);
+      if (error?.response?.data?.message)
+        toast.error(error?.response?.data?.message);
+      onCancel();
+      setLoading(false);
     }
-    const { data } = await axiosInstance.post(
-      `/group/remove-member/${onAdd?.groupId}`,
-      { memberId: selectedMembers }
-    );
-    console.log(data);
   };
 
   return (
@@ -873,10 +904,11 @@ const RemoveMemberForm = ({ onAdd, onCancel }) => {
           )}
         </div>
         <button
+          disabled={loading}
           className=" px-4 py-2 w-full justify-center hover:bg-red-900 items-center bg-red-700 mt-4 rounded-md "
           type="submit"
         >
-          Remove{" "}
+          {loading ? "Removing... " : "Remove"}
         </button>
       </div>
     </form>

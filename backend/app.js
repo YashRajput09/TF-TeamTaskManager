@@ -46,6 +46,7 @@ app.use(cookieParser());
 const allowedOrigins = [
     'http://localhost:5173',
     'http://localhost:3000',
+    'https://tf-team-task-manager.vercel.app'
 ];
 
 app.use(cors({
