@@ -279,7 +279,7 @@ export const updateTaskStatus = async (req, res) => {
 
     // 4. Update Status
     task.status = status;
-    task?.history.push({ message: `In progess By ${task?.assignedTo}` });
+    task?.history.push({ message: `In progess By ${task?.assignedTo?.name}` });
     await task.save();
 
     return res.status(200).json({

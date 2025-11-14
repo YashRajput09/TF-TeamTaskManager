@@ -12,6 +12,7 @@ import MyTasks from "./pages/MyTasks";
 import CreateTask from "./pages/CreateTask";
 import CreateTeam from "./pages/CreateTeam";
 import Teams from "./pages/Teams";
+import AllTeams from "./pages/AllTeams";
 import Notifications from "./pages/Notification";
 import TaskDetail from "./pages/TaskDetail";
 import AssignedTasks from "./pages/AssignedTasks";
@@ -100,7 +101,7 @@ export default function App() {
           <Route path="create-task" element={<CreateTask />} />
           <Route path="create-team" element={<CreateTeam />} />
           <Route path="teams/:teamId" element={<Teams />} />
-          <Route path="teams/" element={<Teams />} />
+          <Route path="teams" element={<AllTeams />} />
           <Route path="notifications" element={<Notifications />} />
           <Route path="settings" element={<Settings />} />
 

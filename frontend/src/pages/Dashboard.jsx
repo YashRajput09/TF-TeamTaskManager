@@ -33,7 +33,7 @@ const Dashboard = () => {
     };
     const getUserGroups = async () => {
       const { data } = await axiosInstance.get(`/user/myprofile`);
-      console.log(data?.groups);
+      console.log(data);
       setUserGroups(data?.groups);
     };
 
@@ -305,6 +305,7 @@ const Dashboard = () => {
             </button>
           </div>
 
+{console.log(teams)}
           <div className="space-y-3">
             {teams?.map((t) => (
               <div
@@ -315,6 +316,7 @@ const Dashboard = () => {
                 className="w-full text-left p-3 rounded-lg bg-gray-50 dark:bg-gray-700/50 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
               >
                 <div className="flex items-center justify-between">
+                  {console.log(t)}
                   <div className="flex items-center space-x-3">
                     <div className={`w-8 h-8 ${t.color} rounded-lg`} />
                     <div>

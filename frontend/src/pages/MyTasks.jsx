@@ -39,7 +39,7 @@ const MyTasks = () => {
     const allUserTask = async () => {
       try {
         const { data } = await axiosInstance.get(`/task/get-user-task`);
-        console.log(data)
+        console.log(data);
         console.log(data?.assignedTasks);
         console.log(data?.createdTasks);
         setTasks(data?.assignedTasks);
@@ -236,293 +236,339 @@ const MyTasks = () => {
       </Card>
 
       {/* Tasks List */}
-      <label>Assigned Tasks</label>
-      <div className="space-y-4">
-        {tasks?.length === 0 ? (
-          <Card className="text-center py-12">
-            <p className="text-gray-500 dark:text-gray-400">
-              No tasks found matching your criteria.
-            </p>
-          </Card>
-        ) : (
-          tasks?.map((task) => (
-            <Card key={task.id} hover className="cursor-pointer">
-              {console.log(task)}
-              <div className="flex flex-col md:flex-row md:items-center md:justify-between space-y-4 md:space-y-0">
-                {/* Task Info */}
-                <Link
-                to={`/tasks/${task._id}`}
-                 className="flex-1 min-w-0">
-                  <div className="flex items-start space-x-3">
-                    <input
-                      type="checkbox"
-                      checked={task.status === "Completed"}
-                      onChange={() => {
-                        // Handle task completion toggle - integrate with API
-                        const newTasks = tasks.map((t) =>
-                          t.id === task.id
-                            ? {
-                                ...t,
-                                status:
-                                  t.status === "Completed"
-                                    ? "Pending"
-                                    : "Completed",
-                              }
-                            : t
-                        );
-                        setTasks(newTasks);
-                      }}
-                      className="mt-1 w-4 h-4 text-primary-600 bg-gray-100 border-gray-300 rounded focus:ring-primary-500 dark:focus:ring-primary-600 dark:bg-gray-700 dark:border-gray-600"
-                    />
-                    <div className="flex-1 min-w-0">
-                      <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
-                        {task.title}
-                      </h3>
-                      <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">
-                        {task.description}
-                      </p>
-                      <div className="mt-3 flex flex-wrap items-center gap-3 text-sm text-gray-600 dark:text-gray-400">
-                        <div className="flex items-center space-x-1">
-                          <User className="w-4 h-4" />
-                          <span>To:{task?.assignedTo?.name}</span>
-                        </div>
-                        <div className="flex items-center space-x-1">
-                          <Calendar className="w-4 h-4" />
-                          {/* <span>Due {task.dueDate}</span> */}
-                          {(() => {
-                            const due = formatDueDate(task?.deadline);
-                            return (
-                              <span
-                                className={`inline-flex items-center gap-1 ${due.color}`}
-                              >
-                                <Calendar className="w-4 h-4" /> {due.text}
-                              </span>
+      <div className="flex justify-between gap-2 ">
+        <div className="flex flex-col gap-4 items-center">
+          <label className="">Assigned Tasks</label>
+          <div className="space-y-4">
+            {tasks?.length === 0 ? (
+              <Card className="text-center py-12">
+                <p className="text-gray-500 dark:text-gray-400">
+                  No tasks found matching your criteria.
+                </p>
+              </Card>
+            ) : (
+              tasks?.map((task) => (
+                <Card key={task.id} hover className="cursor-pointer">
+                  {console.log(task)}
+                  <div className="flex flex-col   space-y-2 ">
+                    {/* Task Info */}
+                    <Link to={`/tasks/${task._id}`} className="flex-1 min-w-0">
+                      <div className="flex items-start space-x-3">
+                        {/* <input
+                          type="checkbox"
+                          checked={task.status === "Completed"}
+                          onChange={() => {
+                            // Handle task completion toggle - integrate with API
+                            const newTasks = tasks.map((t) =>
+                              t.id === task.id
+                                ? {
+                                    ...t,
+                                    status:
+                                      t.status === "Completed"
+                                        ? "Pending"
+                                        : "Completed",
+                                  }
+                                : t
                             );
-                          })()}
-                        </div>
-                        <div className="flex items-center space-x-1">
-                          <Flag className="w-4 h-4" />
-                          <span>{task?.group[0]?.name}</span>
+                            setTasks(newTasks);
+                          }}
+                          className="mt-1 w-4 h-4 text-primary-600 bg-gray-100 border-gray-300 rounded focus:ring-primary-500 dark:focus:ring-primary-600 dark:bg-gray-700 dark:border-gray-600"
+                        /> */}
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center">
+                            <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+                              {task.title}
+                            </h3>
+                            <div className="flex items-center space-x-2 md:ml-4">
+                              <span
+                                className={`px-3 py-1 rounded-lg text-xs font-medium ${getPriorityColor(
+                                  task.priority
+                                )}`}
+                              >
+                                {task.priority}
+                              </span>
+                              <span
+                                className={`px-3 py-1 rounded-lg text-xs font-medium ${getStatusColor(
+                                  task.status
+                                )}`}
+                              >
+                                {task?.status}
+                              </span>
+                            </div>
+                          </div>
+
+                          <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">
+                            {task.description}
+                          </p>
+                          <div className="mt-3 flex flex-wrap items-center gap-3 text-sm text-gray-600 dark:text-gray-400">
+                            <div className="flex items-center space-x-1">
+                              <User className="w-4 h-4" />
+                              <span>To:{task?.assignedTo?.name}</span>
+                            </div>
+                            <div className="flex items-center space-x-1">
+                              {/* <Calendar className="w-4 h-4" /> */}
+                              {/* <span>Due {task.dueDate}</span> */}
+                              {(() => {
+                                const due = formatDueDate(task?.deadline);
+                                return (
+                                  <span
+                                    className={`inline-flex items-center gap-1 ${due.color}`}
+                                  >
+                                    <Calendar className="w-4 h-4" /> {due.text}
+                                  </span>
+                                );
+                              })()}
+                            </div>
+                            <div className="flex items-center space-x-1">
+                              <Flag className="w-4 h-4" />
+                              <span>{task?.group[0]?.name}</span>
+                            </div>
+                          </div>
                         </div>
                       </div>
-                    </div>
-                  </div>
 
-                  {/* Task Badges */}
-                  <div className="flex items-center space-x-2 md:ml-4">
-                    <span
-                      className={`px-3 py-1 rounded-lg text-xs font-medium ${getPriorityColor(
-                        task.priority
-                      )}`}
+                      {/* Task Badges */}
+                      {/* <div className="flex items-center space-x-2 md:ml-4">
+                        <span
+                          className={`px-3 py-1 rounded-lg text-xs font-medium ${getPriorityColor(
+                            task.priority
+                          )}`}
+                        >
+                          {task.priority}
+                        </span>
+                        <span
+                          className={`px-3 py-1 rounded-lg text-xs font-medium ${getStatusColor(
+                            task.status
+                          )}`}
+                        >
+                          {task.status}
+                        </span>
+                      </div> */}
+                    </Link>
+
+                    {/* Task History (toggle) */}
+                    <div
+                      onClick={(e) => e.stopPropagation()}
+                      className="border-t border-gray-200 dark:border-gray-700 pt-3"
                     >
-                      {task.priority}
-                    </span>
-                    <span
-                      className={`px-3 py-1 rounded-lg text-xs font-medium ${getStatusColor(
-                        task.status
-                      )}`}
-                    >
-                      {task.status}
-                    </span>
-                  </div>
-                </Link>
+                      <button
+                        onClick={(e) => toggleHistory(e, task.id)}
+                        className="w-full flex items-center justify-between text-left"
+                      >
+                        <div className="flex items-center gap-2">
+                          <HistoryIcon className="w-4 h-4 text-gray-500" />
+                          <span className="text-sm font-semibold text-gray-900 dark:text-white">
+                            Task History
+                          </span>
+                        </div>
+                        {openHistory[task.id] ? (
+                          <ChevronDown className="w-4 h-4 text-gray-500" />
+                        ) : (
+                          <ChevronRight className="w-4 h-4 text-gray-500" />
+                        )}
+                      </button>
 
-                {/* Task History (toggle) */}
-                <div
-                  onClick={(e) => e.stopPropagation()}
-                  className="border-t border-gray-200 dark:border-gray-700 pt-3"
-                >
-                  <button
-                    onClick={(e) => toggleHistory(e, task.id)}
-                    className="w-full flex items-center justify-between text-left"
-                  >
-                    <div className="flex items-center gap-2">
-                      <HistoryIcon className="w-4 h-4 text-gray-500" />
-                      <span className="text-sm font-semibold text-gray-900 dark:text-white">
-                        Task History
-                      </span>
-                    </div>
-                    {openHistory[task.id] ? (
-                      <ChevronDown className="w-4 h-4 text-gray-500" />
-                    ) : (
-                      <ChevronRight className="w-4 h-4 text-gray-500" />
-                    )}
-                  </button>
-
-                  {openHistory[task.id] && (
-                    <div className="mt-3 space-y-2">
-                      {(task.history || []).length === 0 ? (
-                        <p className="text-sm text-gray-500 dark:text-gray-400">
-                          No history yet.
-                        </p>
-                      ) : (
-                        <ul className="space-y-2">
-                          {task.history.map((ev, idx) => (
-                            <li
-                              key={`${task.id}-h-${idx}`}
-                              className="flex items-start gap-2 p-2 rounded-lg bg-gray-50 dark:bg-gray-700/50"
-                            >
-                              <span className="text-xs font-medium text-gray-700 dark:text-gray-300 w-28 shrink-0">
-                                {ev.label}
-                              </span>
-                              <span className="text-xs text-gray-600 dark:text-gray-400">
-                                {new Date(ev.at).toLocaleString()}
-                              </span>
-                            </li>
-                          ))}
-                        </ul>
+                      {openHistory[task.id] && (
+                        <div className="mt-3 space-y-2">
+                          {(task?.history || []).length === 0 ? (
+                            <p className="text-sm text-gray-500 dark:text-gray-400">
+                              No history yet. {console.log(task)}
+                            </p>
+                          ) : (
+                            <ul className="space-y-2">
+                              {[...(task?.history || [])] // make a shallow copy first
+                                .reverse()
+                                .map((ev, idx) => (
+                                  <li
+                                    key={`${task.id}-h-${idx}`}
+                                    className="flex items-start justify-between gap-2 px-8 py-2 rounded-lg bg-gray-50 dark:bg-gray-700/50"
+                                  >
+                                    <span className="text-xs font-medium text-gray-700 dark:text-gray-300 w-42 shrink-0">
+                                      {ev?.message}
+                                    </span>
+                                    <span className="text-xs text-gray-600 dark:text-gray-400">
+                                      {new Date(ev.date).toLocaleString()}
+                                    </span>
+                                  </li>
+                                ))}
+                            </ul>
+                          )}
+                        </div>
                       )}
                     </div>
-                  )}
-                </div>
-              </div>
-            </Card>
-          ))
-        )}
-      </div>
+                  </div>
+                </Card>
+              ))
+            )}
+          </div>
+        </div>
 
-      <label>Created Tasks</label>
-      <div className="space-y-4">
-        {createdTasks?.length === 0 ? (
-          <Card className="text-center py-12">
-            <p className="text-gray-500 dark:text-gray-400">
-              No tasks found matching your criteria.
-            </p>
-          </Card>
-        ) : (
-          createdTasks?.map((task) => (
-            <Card key={task.id} hover className="cursor-pointer">
-              {console.log(task)}
-              <div className="flex flex-col md:flex-row md:items-center md:justify-between space-y-4 md:space-y-0">
-                {/* Task Info */}
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-start space-x-3">
-                    <input
-                      type="checkbox"
-                      checked={task.status === "Completed"}
-                      onChange={() => {
-                        // Handle task completion toggle - integrate with API
-                        const newTasks = tasks.map((t) =>
-                          t.id === task.id
-                            ? {
-                                ...t,
-                                status:
-                                  t.status === "Completed"
-                                    ? "Pending"
-                                    : "Completed",
-                              }
-                            : t
-                        );
-                        setTasks(newTasks);
-                      }}
-                      className="mt-1 w-4 h-4 text-primary-600 bg-gray-100 border-gray-300 rounded focus:ring-primary-500 dark:focus:ring-primary-600 dark:bg-gray-700 dark:border-gray-600"
-                    />
+        <div className="flex flex-col gap-4 items-center">
+          <label>Created Tasks</label>
+          <div className="space-y-4">
+            {createdTasks?.length === 0 ? (
+              <Card className="text-center py-12">
+                <p className="text-gray-500 dark:text-gray-400">
+                  No tasks found matching your criteria.
+                </p>
+              </Card>
+            ) : (
+              createdTasks?.map((task) => (
+                <Card key={task.id} hover className="cursor-pointer">
+                  {console.log(task)}
+                  <div className="flex flex-col  space-y-4 ">
+                    {/* Task Info */}
                     <div className="flex-1 min-w-0">
-                      <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
-                        {task.title}
-                      </h3>
-                      <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">
-                        {task.description}
-                      </p>
-                      <div className="mt-3 flex flex-wrap items-center gap-3 text-sm text-gray-600 dark:text-gray-400">
-                        <div className="flex items-center space-x-1">
-                          <User className="w-4 h-4" />
-                          <span>To:{task?.assignedTo?.name}</span>
-                        </div>
-                        <div className="flex items-center space-x-1">
-                          <Calendar className="w-4 h-4" />
-                          {/* <span>Due {task?.dueDate}</span> */}
-                          {(() => {
-                            const due = formatDueDate(task?.deadline);
-                            return (
-                              <span
-                                className={`inline-flex items-center gap-1 ${due.color}`}
-                              >
-                                <Calendar className="w-4 h-4" /> {due.text}
-                              </span>
+                      <div className="flex items-start space-x-3">
+                        {/* <input
+                          type="checkbox"
+                          checked={task.status === "Completed"}
+                          onChange={() => {
+                            // Handle task completion toggle - integrate with API
+                            const newTasks = tasks.map((t) =>
+                              t.id === task.id
+                                ? {
+                                    ...t,
+                                    status:
+                                      t.status === "Completed"
+                                        ? "Pending"
+                                        : "Completed",
+                                  }
+                                : t
                             );
-                          })()}
-                        </div>
-                        <div className="flex items-center space-x-1">
-                          <Flag className="w-4 h-4" />
-                          {console.log(task.group[0].name)}
-                          <span>{task?.group[0]?.name}</span>
+                            setTasks(newTasks);
+                          }}
+                          className="mt-1 w-4 h-4 text-primary-600 bg-gray-100 border-gray-300 rounded focus:ring-primary-500 dark:focus:ring-primary-600 dark:bg-gray-700 dark:border-gray-600"
+                        /> */}
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center">
+                            <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+                              {task.title}
+                            </h3>
+                            <div className="flex items-center space-x-2 md:ml-4">
+                              <span
+                                className={`px-3 py-1 rounded-lg text-xs font-medium ${getPriorityColor(
+                                  task.priority
+                                )}`}
+                              >
+                                {task.priority}
+                              </span>
+                              <span
+                                className={`px-3 py-1 rounded-lg text-xs font-medium ${getStatusColor(
+                                  task.status
+                                )}`}
+                              >
+                                {task.status}
+                              </span>
+                            </div>
+                          </div>
+
+                          <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">
+                            {task.description}
+                          </p>
+                          <div className="mt-3 flex flex-wrap items-center gap-3 text-sm text-gray-600 dark:text-gray-400">
+                            <div className="flex items-center space-x-1">
+                              <User className="w-4 h-4" />
+                              <span>To:{task?.assignedTo?.name}</span>
+                            </div>
+                            <div className="flex items-center space-x-1">
+                              {/* <Calendar className="w-4 h-4" /> */}
+                              {/* <span>Due {task?.dueDate}</span> */}
+                              {(() => {
+                                const due = formatDueDate(task?.deadline);
+                                return (
+                                  <span
+                                    className={`inline-flex items-center gap-1 ${due.color}`}
+                                  >
+                                    <Calendar className="w-4 h-4" /> {due.text}
+                                  </span>
+                                );
+                              })()}
+                            </div>
+                            <div className="flex items-center space-x-1">
+                              <Flag className="w-4 h-4" />
+                              {console.log(task.group[0].name)}
+                              <span>{task?.group[0]?.name}</span>
+                            </div>
+                          </div>
                         </div>
                       </div>
+
+                      {/* Task Badges */}
+                      {/* <div className="flex items-center space-x-2 md:ml-4">
+                        <span
+                          className={`px-3 py-1 rounded-lg text-xs font-medium ${getPriorityColor(
+                            task.priority
+                          )}`}
+                        >
+                          {task.priority}
+                        </span>
+                        <span
+                          className={`px-3 py-1 rounded-lg text-xs font-medium ${getStatusColor(
+                            task.status
+                          )}`}
+                        >
+                          {task.status}
+                        </span>
+                      </div> */}
                     </div>
-                  </div>
 
-                  {/* Task Badges */}
-                  <div className="flex items-center space-x-2 md:ml-4">
-                    <span
-                      className={`px-3 py-1 rounded-lg text-xs font-medium ${getPriorityColor(
-                        task.priority
-                      )}`}
+                    {/* Task History (toggle) */}
+                    <div
+                      onClick={(e) => e.stopPropagation()}
+                      className="border-t border-gray-200 dark:border-gray-700 pt-3"
                     >
-                      {task.priority}
-                    </span>
-                    <span
-                      className={`px-3 py-1 rounded-lg text-xs font-medium ${getStatusColor(
-                        task.status
-                      )}`}
-                    >
-                      {task.status}
-                    </span>
-                  </div>
-                </div>
+                      <button
+                        onClick={(e) => toggleHistory(e, task.id)}
+                        className="w-full flex items-center justify-between text-left"
+                      >
+                        <div className="flex items-center gap-2">
+                          <HistoryIcon className="w-4 h-4 text-gray-500" />
+                          <span className="text-sm font-semibold text-gray-900 dark:text-white">
+                            Task History
+                          </span>
+                        </div>
+                        {openHistory[task.id] ? (
+                          <ChevronDown className="w-4 h-4 text-gray-500" />
+                        ) : (
+                          <ChevronRight className="w-4 h-4 text-gray-500" />
+                        )}
+                      </button>
 
-                {/* Task History (toggle) */}
-                <div
-                  onClick={(e) => e.stopPropagation()}
-                  className="border-t border-gray-200 dark:border-gray-700 pt-3"
-                >
-                  <button
-                    onClick={(e) => toggleHistory(e, task.id)}
-                    className="w-full flex items-center justify-between text-left"
-                  >
-                    <div className="flex items-center gap-2">
-                      <HistoryIcon className="w-4 h-4 text-gray-500" />
-                      <span className="text-sm font-semibold text-gray-900 dark:text-white">
-                        Task History
-                      </span>
-                    </div>
-                    {openHistory[task.id] ? (
-                      <ChevronDown className="w-4 h-4 text-gray-500" />
-                    ) : (
-                      <ChevronRight className="w-4 h-4 text-gray-500" />
-                    )}
-                  </button>
-
-                  {openHistory[task.id] && (
-                    <div className="mt-3 space-y-2">
-                      {(task.history || []).length === 0 ? (
-                        <p className="text-sm text-gray-500 dark:text-gray-400">
-                          No history yet.
-                        </p>
-                      ) : (
-                        <ul className="space-y-2">
-                          {task.history.map((ev, idx) => (
-                            <li
-                              key={`${task.id}-h-${idx}`}
-                              className="flex items-start gap-2 p-2 rounded-lg bg-gray-50 dark:bg-gray-700/50"
-                            >
-                              <span className="text-xs font-medium text-gray-700 dark:text-gray-300 w-28 shrink-0">
-                                {ev.label}
-                              </span>
-                              <span className="text-xs text-gray-600 dark:text-gray-400">
-                                {new Date(ev.at).toLocaleString()}
-                              </span>
-                            </li>
-                          ))}
-                        </ul>
+                      {openHistory[task.id] && (
+                        <div className="mt-3 space-y-2">
+                          {(task.history || []).length === 0 ? (
+                            <p className="text-sm text-gray-500 dark:text-gray-400">
+                              No history yet.
+                            </p>
+                          ) : (
+                            <ul className="space-y-2">
+                              {[...(task?.history || [])] // make a shallow copy first
+                                .reverse()
+                                .map((ev, idx) => (
+                                  <li
+                                    key={`${task.id}-h-${idx}`}
+                                    className="flex items-start justify-between gap-2 px-2 md:px-4 lg:px-8 py-2 rounded-lg bg-gray-50 dark:bg-gray-700/50"
+                                  >
+                                    <span className="text-xs font-medium text-gray-700 dark:text-gray-300 w-28 shrink-0">
+                                      {ev.message}
+                                    </span>
+                                    <span className="text-xs text-gray-600 dark:text-gray-400">
+                                      {new Date(ev.date).toLocaleString()}
+                                    </span>
+                                  </li>
+                                ))}
+                            </ul>
+                          )}
+                        </div>
                       )}
                     </div>
-                  )}
-                </div>
-              </div>
-            </Card>
-          ))
-        )}
+                  </div>
+                </Card>
+              ))
+            )}
+          </div>
+        </div>
       </div>
 
       {/* Task Count */}
