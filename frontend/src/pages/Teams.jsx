@@ -332,7 +332,7 @@ const Teams = () => {
       ? visibleTasks?.filter(task => task.assignedTo?._id=== profile?._id)
       : visibleTasks;
     return base;
-  }, [teamData, onlyMine]);
+  }, [teamData,visibleTasks,profile, onlyMine]);
  
   return (
     <div className="space-y-6">
