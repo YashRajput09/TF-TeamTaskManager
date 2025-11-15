@@ -9,7 +9,7 @@ const createTokenAndSaveCookies = async (userId, res, rememberMe = false) => {
     // FIXED: For localhost development, use this configuration:
     res.cookie("jwttoken", token, {
         httpOnly: true, // Protect from XSS attacks
-        sameSite: 'lax', // Changed from 'none' to 'lax' for localhost
+        sameSite: 'none', // Changed from 'none' to 'lax' for localhost
         secure: true,   // false for localhost (HTTP)
         maxAge: rememberMe ? 7 * 24 * 60 * 60 * 1000 : 60 * 60 * 1000, // 7 days or 1 hour
         path: '/',
