@@ -111,13 +111,17 @@ app.get("/health", (req, res) => {
 });
 
 // Routes
-app.use(["/", "/user"], fileUploadMiddleware, userRoute);
+app.use("/user", fileUploadMiddleware, userRoute);
 app.use("/group", groupRoute);
 app.use("/task", fileUploadMiddleware, taskRoute);
 app.use("/comment", commentRoute);
 app.use("/automation", automationRoute);
 app.use("/api/telegram", telegramRoute); 
 app.use("/calendar", calendarRoute);
+
+app.get("/",(req,res)=>{
+    res.send("Task Manager and Tracker backend Running")
+})
 
 // Add to your app.js
 app.get("/api/debug-cookie", (req, res) => {
