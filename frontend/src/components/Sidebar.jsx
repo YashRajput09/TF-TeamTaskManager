@@ -42,7 +42,7 @@ const Sidebar = ({ isOpen, onClose }) => {
   useEffect(() => {
     const fetchProfile = async () => {
       try {
-        const res = await axiosInstance.get("http://localhost:3000/user/myprofile", {
+        const res = await axiosInstance.get("/user/myprofile", {
           withCredentials: true,
         });
         setProfileData(res.data);
@@ -55,7 +55,7 @@ const Sidebar = ({ isOpen, onClose }) => {
 
   const handleLogout = async () => {
     try {
-      await axiosInstance.post("http://localhost:3000/user/logout", {}, { withCredentials: true });
+      await axiosInstance.post("/user/logout", {}, { withCredentials: true });
       localStorage.removeItem("auth_user");
       setIsAuthenticated(false);
       setProfile(null);
