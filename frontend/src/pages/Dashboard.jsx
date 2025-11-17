@@ -54,7 +54,7 @@ const Dashboard = () => {
     {
       label: "In Progress",
       value: String(
-        userAssignedTask.filter((t) => t.status === "In Progress").length
+        userAssignedTask.filter((t) => t.status === "In-progress").length
       ),
       change: "+0%",
       icon: Clock,
