@@ -65,7 +65,7 @@ export default function TaskDetail() {
 
   const { profile } = useAuth();
 
-  console.log(profile);
+ console.log(taskId)
 
   const taskFromState = location.state?.task || null;
   const viewerRole =
@@ -370,7 +370,6 @@ export default function TaskDetail() {
                   <User className="w-4 h-4" /> {task?.assignedTo?.name}
                 </span>
               )}
-              {console.log(task?.group[0]?.name)}
               {task?.group && (
                 <span className="inline-flex items-center gap-1">
                   <Flag className="w-4 h-4" />{" "}

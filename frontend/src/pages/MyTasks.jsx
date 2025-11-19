@@ -247,7 +247,7 @@ const MyTasks = () => {
                 </p>
               </Card>
             ) : (
-              tasks?.map((task) => (
+            tasks &&  tasks?.map((task) => (
                 <Card key={task.id} hover className="cursor-pointer">
                   {console.log(task)}
                   <div className="flex flex-col   space-y-2 ">
@@ -487,7 +487,7 @@ const MyTasks = () => {
                             </div>
                             <div className="flex items-center space-x-1">
                               <Flag className="w-4 h-4" />
-                              {console.log(task.group[0].name)}
+                              {console.log(task.group[0]?.name)}
                               <span>{task?.group[0]?.name}</span>
                             </div>
                           </div>

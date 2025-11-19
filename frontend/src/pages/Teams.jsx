@@ -349,10 +349,10 @@ const Teams = () => {
             </button>
           )}
           <div>
-            <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
+            <h1 className="text-xl md:text-2xl lg:text-3xl font-bold text-gray-900 dark:text-white">
               {teamData?.name}
             </h1>
-            <div className="flex gap-2 items-center">
+            <div className="flex flex-col md:flex-row gap-1 items-start md:items-center">
               <span className=" flex items-center gap-1 text-gray-600 dark:text-gray-400">
                 <User className="w-4 h-4" />
                 <i> Admin: </i> {teamData?.createdBy?.name}
@@ -482,7 +482,7 @@ const Teams = () => {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Members */}
           <Card className="lg:col-span-1">
-            <div className="flex items-center justify-between mb-4">
+            <div className="flex gap-2 items-center justify-between mb-4">
               <h2 className="text-xl font-bold text-gray-900 dark:text-white">
                 Members
               </h2>
