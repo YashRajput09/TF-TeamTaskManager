@@ -114,11 +114,11 @@ export default function AssignedTasks() {
               <div
                 role="button"
                 tabIndex={0}
-                onClick={() => navigate(`/tasks/${task.id}`, { state: { task, viewerRole: 'admin' } })}
+                onClick={() => navigate(`/tasks/${task._id}`, { state: { task, viewerRole: 'admin' } })}
                 onKeyDown={(e) => {
                   if (e.key === 'Enter' || e.key === ' ') {
                     e.preventDefault();
-                    navigate(`/tasks/${task.id}`, { state: { task, viewerRole: 'admin' } });
+                    navigate(`/tasks/${task._id}`, { state: { task, viewerRole: 'admin' } });
                   }
                 }}
                 className="flex items-start justify-between focus:outline-none"
