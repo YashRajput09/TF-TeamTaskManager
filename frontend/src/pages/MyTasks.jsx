@@ -247,14 +247,25 @@ const MyTasks = () => {
                 </p>
               </Card>
             ) : (
-            tasks &&  tasks?.map((task) => (
-                <Card key={task.id} hover className="cursor-pointer">
-                  {console.log(task)}
-                  <div className="flex flex-col   space-y-2 ">
-                    {/* Task Info */}
-                    <Link to={`/tasks/${task._id}`} className="flex-1 min-w-0">
-                      <div className="flex items-start space-x-3">
-                        {/* <input
+              tasks &&
+              filteredTasks
+                ?.filter((task) => {
+                  if (selectedFilter === "completed") {
+                    return task.status === "Completed";
+                  }
+                  return task.status !=="Completed";
+                })
+                ?.map((task) => (
+                  <Card key={task.id} hover className="cursor-pointer">
+                    {console.log(task)}
+                    <div className="flex flex-col   space-y-2 ">
+                      {/* Task Info */}
+                      <Link
+                        to={`/tasks/${task._id}`}
+                        className="flex-1 min-w-0"
+                      >
+                        <div className="flex items-start space-x-3">
+                          {/* <input
                           type="checkbox"
                           checked={task.status === "Completed"}
                           onChange={() => {
@@ -274,61 +285,62 @@ const MyTasks = () => {
                           }}
                           className="mt-1 w-4 h-4 text-primary-600 bg-gray-100 border-gray-300 rounded focus:ring-primary-500 dark:focus:ring-primary-600 dark:bg-gray-700 dark:border-gray-600"
                         /> */}
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center">
-                            <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
-                              {task.title}
-                            </h3>
-                            <div className="flex items-center space-x-2 md:ml-4">
-                              <span
-                                className={`px-3 py-1 rounded-lg text-xs font-medium ${getPriorityColor(
-                                  task.priority
-                                )}`}
-                              >
-                                {task.priority}
-                              </span>
-                              <span
-                                className={`px-3 py-1 rounded-lg text-xs font-medium ${getStatusColor(
-                                  task.status
-                                )}`}
-                              >
-                                {task?.status}
-                              </span>
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center">
+                              <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+                                {task.title}
+                              </h3>
+                              <div className="flex items-center space-x-2 md:ml-4">
+                                <span
+                                  className={`px-3 py-1 rounded-lg text-xs font-medium ${getPriorityColor(
+                                    task.priority
+                                  )}`}
+                                >
+                                  {task.priority}
+                                </span>
+                                <span
+                                  className={`px-3 py-1 rounded-lg text-xs font-medium ${getStatusColor(
+                                    task.status
+                                  )}`}
+                                >
+                                  {task?.status}
+                                </span>
+                              </div>
                             </div>
-                          </div>
 
-                          <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">
-                            {task.description}
-                          </p>
-                          <div className="mt-3 flex flex-wrap items-center gap-3 text-sm text-gray-600 dark:text-gray-400">
-                            <div className="flex items-center space-x-1">
-                              <User className="w-4 h-4" />
-                              <span>To:{task?.assignedTo?.name}</span>
-                            </div>
-                            <div className="flex items-center space-x-1">
-                              {/* <Calendar className="w-4 h-4" /> */}
-                              {/* <span>Due {task.dueDate}</span> */}
-                              {(() => {
-                                const due = formatDueDate(task?.deadline);
-                                return (
-                                  <span
-                                    className={`inline-flex items-center gap-1 ${due.color}`}
-                                  >
-                                    <Calendar className="w-4 h-4" /> {due.text}
-                                  </span>
-                                );
-                              })()}
-                            </div>
-                            <div className="flex items-center space-x-1">
-                              <Flag className="w-4 h-4" />
-                              <span>{task?.group[0]?.name}</span>
+                            <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">
+                              {task.description}
+                            </p>
+                            <div className="mt-3 flex flex-wrap items-center gap-3 text-sm text-gray-600 dark:text-gray-400">
+                              <div className="flex items-center space-x-1">
+                                <User className="w-4 h-4" />
+                                <span>To:{task?.assignedTo?.name}</span>
+                              </div>
+                              <div className="flex items-center space-x-1">
+                                {/* <Calendar className="w-4 h-4" /> */}
+                                {/* <span>Due {task.dueDate}</span> */}
+                                {(() => {
+                                  const due = formatDueDate(task?.deadline);
+                                  return (
+                                    <span
+                                      className={`inline-flex items-center gap-1 ${due.color}`}
+                                    >
+                                      <Calendar className="w-4 h-4" />{" "}
+                                      {due.text}
+                                    </span>
+                                  );
+                                })()}
+                              </div>
+                              <div className="flex items-center space-x-1">
+                                <Flag className="w-4 h-4" />
+                                <span>{task?.group[0]?.name}</span>
+                              </div>
                             </div>
                           </div>
                         </div>
-                      </div>
 
-                      {/* Task Badges */}
-                      {/* <div className="flex items-center space-x-2 md:ml-4">
+                        {/* Task Badges */}
+                        {/* <div className="flex items-center space-x-2 md:ml-4">
                         <span
                           className={`px-3 py-1 rounded-lg text-xs font-medium ${getPriorityColor(
                             task.priority
@@ -344,61 +356,61 @@ const MyTasks = () => {
                           {task.status}
                         </span>
                       </div> */}
-                    </Link>
+                      </Link>
 
-                    {/* Task History (toggle) */}
-                    <div
-                      onClick={(e) => e.stopPropagation()}
-                      className="border-t border-gray-200 dark:border-gray-700 pt-3"
-                    >
-                      <button
-                        onClick={(e) => toggleHistory(e, task.id)}
-                        className="w-full flex items-center justify-between text-left"
+                      {/* Task History (toggle) */}
+                      <div
+                        onClick={(e) => e.stopPropagation()}
+                        className="border-t border-gray-200 dark:border-gray-700 pt-3"
                       >
-                        <div className="flex items-center gap-2">
-                          <HistoryIcon className="w-4 h-4 text-gray-500" />
-                          <span className="text-sm font-semibold text-gray-900 dark:text-white">
-                            Task History
-                          </span>
-                        </div>
-                        {openHistory[task.id] ? (
-                          <ChevronDown className="w-4 h-4 text-gray-500" />
-                        ) : (
-                          <ChevronRight className="w-4 h-4 text-gray-500" />
-                        )}
-                      </button>
-
-                      {openHistory[task.id] && (
-                        <div className="mt-3 space-y-2">
-                          {(task?.history || []).length === 0 ? (
-                            <p className="text-sm text-gray-500 dark:text-gray-400">
-                              No history yet. {console.log(task)}
-                            </p>
+                        <button
+                          onClick={(e) => toggleHistory(e, task._id)}
+                          className="w-full flex items-center justify-between text-left"
+                        >
+                          <div className="flex items-center gap-2">
+                            <HistoryIcon className="w-4 h-4 text-gray-500" />
+                            <span className="text-sm font-semibold text-gray-900 dark:text-white">
+                              Task History
+                            </span>
+                          </div>
+                          {openHistory[task?._id] ? (
+                            <ChevronDown className="w-4 h-4 text-gray-500" />
                           ) : (
-                            <ul className="space-y-2">
-                              {[...(task?.history || [])] // make a shallow copy first
-                                .reverse()
-                                .map((ev, idx) => (
-                                  <li
-                                    key={`${task.id}-h-${idx}`}
-                                    className="flex items-start justify-between gap-2 px-8 py-2 rounded-lg bg-gray-50 dark:bg-gray-700/50"
-                                  >
-                                    <span className="text-xs font-medium text-gray-700 dark:text-gray-300 w-42 shrink-0">
-                                      {ev?.message}
-                                    </span>
-                                    <span className="text-xs text-gray-600 dark:text-gray-400">
-                                      {new Date(ev.date).toLocaleString()}
-                                    </span>
-                                  </li>
-                                ))}
-                            </ul>
+                            <ChevronRight className="w-4 h-4 text-gray-500" />
                           )}
-                        </div>
-                      )}
+                        </button>
+
+                        {openHistory[task._id] && (
+                          <div className="mt-3 space-y-2">
+                            {(task?.history || []).length === 0 ? (
+                              <p className="text-sm text-gray-500 dark:text-gray-400">
+                                No history yet. {console.log(task)}
+                              </p>
+                            ) : (
+                              <ul className="space-y-2">
+                                {[...(task?.history || [])] // make a shallow copy first
+                                  .reverse()
+                                  .map((ev, idx) => (
+                                    <li
+                                      key={`${task.id}-h-${idx}`}
+                                      className="flex items-start justify-between gap-2 px-8 py-2 rounded-lg bg-gray-50 dark:bg-gray-700/50"
+                                    >
+                                      <span className="text-xs font-medium text-gray-700 dark:text-gray-300 w-42 shrink-0">
+                                        {ev?.message}
+                                      </span>
+                                      <span className="text-xs text-gray-600 dark:text-gray-400">
+                                        {new Date(ev.date).toLocaleString()}
+                                      </span>
+                                    </li>
+                                  ))}
+                              </ul>
+                            )}
+                          </div>
+                        )}
+                      </div>
                     </div>
-                  </div>
-                </Card>
-              ))
+                  </Card>
+                ))
             )}
           </div>
         </div>
@@ -418,7 +430,7 @@ const MyTasks = () => {
                   {console.log(task)}
                   <div className="flex flex-col  space-y-4 ">
                     {/* Task Info */}
-                    <div className="flex-1 min-w-0">
+                    <Link to={`/tasks/${task._id}`} className="flex-1 min-w-0">
                       <div className="flex items-start space-x-3">
                         {/* <input
                           type="checkbox"
@@ -511,7 +523,7 @@ const MyTasks = () => {
                           {task.status}
                         </span>
                       </div> */}
-                    </div>
+                    </Link>
 
                     {/* Task History (toggle) */}
                     <div
