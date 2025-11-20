@@ -352,7 +352,7 @@ const MyTasks = () => {
                       className="border-t border-gray-200 dark:border-gray-700 pt-3"
                     >
                       <button
-                        onClick={(e) => toggleHistory(e, task.id)}
+                        onClick={(e) => toggleHistory(e, task._id)}
                         className="w-full flex items-center justify-between text-left"
                       >
                         <div className="flex items-center gap-2">
@@ -361,14 +361,14 @@ const MyTasks = () => {
                             Task History
                           </span>
                         </div>
-                        {openHistory[task.id] ? (
+                        {openHistory[task?._id] ? (
                           <ChevronDown className="w-4 h-4 text-gray-500" />
                         ) : (
                           <ChevronRight className="w-4 h-4 text-gray-500" />
                         )}
                       </button>
 
-                      {openHistory[task.id] && (
+                      {openHistory[task._id] && (
                         <div className="mt-3 space-y-2">
                           {(task?.history || []).length === 0 ? (
                             <p className="text-sm text-gray-500 dark:text-gray-400">
@@ -418,7 +418,7 @@ const MyTasks = () => {
                   {console.log(task)}
                   <div className="flex flex-col  space-y-4 ">
                     {/* Task Info */}
-                    <div className="flex-1 min-w-0">
+                    <Link to={`/tasks/${task._id}`} className="flex-1 min-w-0">
                       <div className="flex items-start space-x-3">
                         {/* <input
                           type="checkbox"
@@ -511,7 +511,7 @@ const MyTasks = () => {
                           {task.status}
                         </span>
                       </div> */}
-                    </div>
+                    </Link>
 
                     {/* Task History (toggle) */}
                     <div
