@@ -375,7 +375,7 @@ const Teams = () => {
             <Plus className="w-4 h-4" />
             <span>Create Task</span>
           </button>}
-          {!selectedTeam && (
+          {isOwner(teamData) &&
             <>
               <button
                 className="btn-secondary hover:opacity-60 flex items-center space-x-2"
@@ -392,7 +392,7 @@ const Teams = () => {
                 <span>Remove Member</span>
               </button>
             </>
-          )}
+          }
         </div>
       </div>
 
