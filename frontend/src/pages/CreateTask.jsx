@@ -9,7 +9,7 @@ const CreateTask = () => {
   const navigate = useNavigate();
 
   const location = useLocation();
-  const teamData = location.state.teamData;
+  const teamData = location?.state?.teamData;
 
   console.log(teamData);
   // Form state

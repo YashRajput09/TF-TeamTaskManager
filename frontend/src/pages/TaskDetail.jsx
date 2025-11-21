@@ -501,27 +501,27 @@ export default function TaskDetail() {
 
         {/* Right: two stacked rows for Files */}
         <div className="lg:col-span-2 space-y-6">
-          {/* Admin Files */}
-          <Card className="p-6">
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-lg font-bold text-gray-900 dark:text-white flex items-center gap-2">
-                <Paperclip className="w-5 h-5" /> Files shared by Admin
-              </h2>
+         {/* Admin Files */}
+<Card className="p-6">
+  <div className="flex items-center justify-between mb-4">
+    <h2 className="text-lg font-bold text-gray-900 dark:text-white flex items-center gap-2">
+      <Paperclip className="w-5 h-5" /> Files shared by Admin
+    </h2>
 
-              {/* Admin can upload to admin files; members cannot */}
-              {viewerRole === "admin" && (
-                <label className="btn-secondary cursor-pointer inline-flex items-center gap-2">
-                  <UploadCloud className="w-4 h-4" />
-                  <span>Upload</span>
-                  <input
-                    type="file"
-                    className="hidden"
-                    multiple
-                    onChange={onUploadAdmin}
-                  />
-                </label>
-              )}
-            </div>
+    {/* Admin can upload to admin files; members cannot */}
+    {viewerRole === "admin" && (
+      <label className="btn-secondary cursor-pointer inline-flex items-center gap-2">
+        <UploadCloud className="w-4 h-4" />
+        <span>Upload</span>
+        <input
+          type="file"
+          className="hidden"
+          multiple
+          onChange={onUploadAdmin}
+        />
+      </label>
+    )}
+  </div>
 
             {/* Admin controls - shown only to admins */}
             {isTaskAdmin && task?.status === "Pending" && (
@@ -594,12 +594,12 @@ export default function TaskDetail() {
             )}
           </Card>
 
-          {/* Member Files */}
-          <Card className="p-6">
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-lg font-bold text-gray-900 dark:text-white flex items-center gap-2">
-                <Paperclip className="w-5 h-5" /> Files shared by Members
-              </h2>
+{/* Member Files */}
+<Card className="p-6">
+  <div className="flex items-center justify-between mb-4">
+    <h2 className="text-lg font-bold text-gray-900 dark:text-white flex items-center gap-2">
+      <Paperclip className="w-5 h-5" /> Files shared by Members
+    </h2>
 
               {/* Members can upload to members files; admin cannot */}
               {/* {viewerRole !== "admin" && (
@@ -729,19 +729,20 @@ export default function TaskDetail() {
               </ul>
             )}
 
-            {/* Mobile-friendly member input */}
-            {viewerRole !== "admin" && (
-              <div className="mt-4 md:hidden">
-                <input
-                  type="text"
-                  value={memberUploadName}
-                  onChange={(e) => setMemberUploadName(e.target.value)}
-                  placeholder="Your name (optional)"
-                  className="w-full rounded-md bg-gray-50 dark:bg-gray-700/50 px-3 py-2 text-sm outline-none"
-                />
-              </div>
-            )}
-          </Card>
+  {/* Mobile-friendly member input */}
+  {viewerRole !== "admin" && (
+    <div className="mt-4 md:hidden">
+      <input
+        type="text"
+        value={memberUploadName}
+        onChange={(e) => setMemberUploadName(e.target.value)}
+        placeholder="Your name (optional)"
+        className="w-full rounded-md bg-gray-50 dark:bg-gray-700/50 px-3 py-2 text-sm outline-none"
+      />
+    </div>
+  )}
+</Card>
+
         </div>
       </div>
     </div>
