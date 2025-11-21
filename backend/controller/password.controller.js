@@ -1,68 +1,70 @@
 import { sendEmail } from "../config/nodemailer.js";
-import  user  from "../models/user_model.js";
+import user from "../models/user_model.js";
 import crypto from "crypto";
-import bycrypt from "bcryptjs"
+import bycrypt from "bcryptjs";
 import { json } from "express";
 import { otp_model } from "../models/otp.model.js";
 
-
 export const sendOtp = async (req, res) => {
-  const { email ,context } = req.body;
+  const { email, context } = req.body;
 
-  console.log(email,context);
+  console.log(email, context);
   try {
-    let otp,user_name
+    let otp, user_name;
 
-    const all=await user.find();
+    const all = await user.find();
 
     console.log(all);
-    if(context==="forgot-password"){
-      console.log("object")
+    if (context === "forgot-password") {
+      console.log("object");
       const find_user = await user.findOne({ email });
-    
+
       if (!find_user) {
         return res.status(400).json({ message: "Invalid Email" });
       }
-    
-      user_name=find_user.name;
-    
+
+      user_name = find_user.name;
+
       // console.log(user_name , context)
-    
-       otp = crypto.randomInt(100000, 999999).toString();
-    
+
+      otp = crypto.randomInt(100000, 999999).toString();
+
       // console.log(otp)
       // console.log(email);
       find_user.otp = otp;
       find_user.otpExpires = Date.now() + 10 * 60 * 1000;
-    
+
       await find_user.save();
+    } else if (context === "register") {
+      const existing_otp = await otp_model.findOne({ email });
 
-    }else if(context==="register"){
-        const existing_otp=await otp_model.findOne({email});
+      const find_user = await user.findOne({ email });
+      if (find_user)
+        return res.status(400).json({message:"User Already Exist with same email"});
 
-        if(existing_otp){
-          await otp_model.deleteOne({email});
-        }
+      if (existing_otp) {
+        await otp_model.deleteOne({ email });
+      }
 
-        user_name="User";
+      user_name = "User";
 
-        otp = crypto.randomInt(100000, 999999).toString();
-        // console.log(otp);
-        // console.log(email);
-  
-        const otpEntry = new otp_model({
-          email,
-          otp,
-          otpExpires: Date.now() + 10 * 60 * 1000,
-        });
-  
-        await otpEntry.save();
+      otp = crypto.randomInt(100000, 999999).toString();
+      // console.log(otp);
+      // console.log(email);
+
+      const otpEntry = new otp_model({
+        email,
+        otp,
+        otpExpires: Date.now() + 10 * 60 * 1000,
+      });
+
+      await otpEntry.save();
     }
 
-      await sendEmail({
-        to:email,
-        subject: "Email Verification",
-        html: ` <div
+    await sendEmail({
+      to: email,
+      subject: "Email Verification",
+      html: ` <div
         style="
           font-family: Arial, sans-serif;
           max-width: 600px;
@@ -135,84 +137,80 @@ export const sendOtp = async (req, res) => {
         </div>
       </div>
         `,
-
-      });
-    res.status(200).json({message:"Otp Send to "+ email})
+    });
+    res.status(200).json({ message: "Otp Send to " + email });
   } catch (error) {
-    console.log(error)
-    res.status(500).json({message:"Error in sending",error})
+    console.log(error);
+    res.status(500).json({ message: "Error in sending", error });
   }
 };
 
-export const validateOtp= async (req,res)=>{
-     const {email,otp,context}=req.body;
-     try {
-      let find_user;
+export const validateOtp = async (req, res) => {
+  const { email, otp, context } = req.body;
+  try {
+    let find_user;
 
-      if(context==="forgot-password"){
-         find_user=await user.findOne({email});
-        
-      }else if(context==="register"){
-       find_user=await otp_model.findOne({email});
-      }
-     
-      // console.log(find_user);
-       if(!find_user){
-        return res.status(400).json({message:"No User Found"});
-       }
-  
-       if(Date.now() > find_user.otpExpires){
-        return res.status(400).json({message:"OTP has Expired"})
-       }
-  
-       if(otp!==find_user.otp){
-        return res.status(400).json({message:"Invalid OTP"});
-       }
-       find_user.otp=null;
-       find_user.otpExpires=null;
-       find_user.isOtpVerified=true;
-       find_user.save();
-
-       res.status(200).json({message:"Validation Successfull"});
-     } catch (error) {
-        return res.status(500).json({message:"Error in Validation",error})
-     }
-    
-}
-
-export const resetPassword =async (req,res)=>{
-    const {email,new_password,cpassword}=req.body;
-
-    try {
-            const find_user=await user.findOne({email});
-
-            if(!find_user){
-              return res.status(400).json({message:"No User Found"});
-            }
-
-            if(!find_user.isOtpVerified){
-              return res.status(400).json({message:"Verify OTP First"});
-            }
-
-            if(!new_password || !cpassword){
-              return res.status(400).json({message:"All Fields Are Required"});
-            }
-
-            if(new_password!==cpassword){
-              return res.status(400).json({message:"Password Not Matched"});
-            }
-
-            const hashed_password=await bycrypt.hash(new_password,10);
-
-            find_user.password=hashed_password;
-            find_user.isOtpVerified=null;
-            find_user.save();
-
-            res.status(200).json({message:"Password Change Successfully"});
-    } catch(error) {
-      console.log(error)
-      res.status(500).json({message:"Internal Server error",error})
+    if (context === "forgot-password") {
+      find_user = await user.findOne({ email });
+    } else if (context === "register") {
+      find_user = await otp_model.findOne({ email });
     }
 
+    // console.log(find_user);
+    if (!find_user) {
+      return res.status(400).json({ message: "No User Found" });
+    }
+    console.log(find_user)
 
-}
+    if (Date.now() > find_user.otpExpires) {
+      return res.status(400).json({ message: "OTP has Expired" });
+    }
+
+    if (otp !== find_user.otp) {
+      return res.status(400).json({ message: "Invalid OTP" });
+    }
+    find_user.otp = null;
+    find_user.otpExpires = null;
+    find_user.isOtpVerified = true;
+    find_user.save();
+
+    res.status(200).json({ message: "Validation Successfull" });
+  } catch (error) {
+    return res.status(500).json({ message: "Error in Validation", error });
+  }
+};
+
+export const resetPassword = async (req, res) => {
+  const { email, new_password, cpassword } = req.body;
+
+  try {
+    const find_user = await user.findOne({ email });
+
+    if (!find_user) {
+      return res.status(400).json({ message: "No User Found" });
+    }
+
+    if (!find_user.isOtpVerified) {
+      return res.status(400).json({ message: "Verify OTP First" });
+    }
+
+    if (!new_password || !cpassword) {
+      return res.status(400).json({ message: "All Fields Are Required" });
+    }
+
+    if (new_password !== cpassword) {
+      return res.status(400).json({ message: "Password Not Matched" });
+    }
+
+    const hashed_password = await bycrypt.hash(new_password, 10);
+
+    find_user.password = hashed_password;
+    find_user.isOtpVerified = null;
+    find_user.save();
+
+    res.status(200).json({ message: "Password Change Successfully" });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: "Internal Server error", error });
+  }
+};
