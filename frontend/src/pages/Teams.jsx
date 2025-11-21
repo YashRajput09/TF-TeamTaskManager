@@ -531,6 +531,7 @@ const Teams = () => {
                 <ListChecks className="w-5 h-5" /> Tasks
               </h2>
               <div className="flex items-center gap-3">
+                {!isOwner(teamData) && 
                 <label className="flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300">
                   <input
                     type="checkbox"
@@ -539,6 +540,8 @@ const Teams = () => {
                   />
                   Assigned to me
                 </label>
+                }
+                
 
                 {/* Show Create Task only for owner */}
                 {/* {isOwner(teamData) && (
