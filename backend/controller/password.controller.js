@@ -1,5 +1,5 @@
 import { sendEmail } from "../config/nodemailer.js";
-import { user } from "../models/user.model.js";
+import  user  from "../models/user_model.js";
 import crypto from "crypto";
 import bycrypt from "bcryptjs"
 import { json } from "express";
@@ -9,10 +9,15 @@ import { otp_model } from "../models/otp.model.js";
 export const sendOtp = async (req, res) => {
   const { email ,context } = req.body;
 
+  console.log(email,context);
   try {
     let otp,user_name
 
+    const all=await user.find();
+
+    console.log(all);
     if(context==="forgot-password"){
+      console.log("object")
       const find_user = await user.findOne({ email });
     
       if (!find_user) {
