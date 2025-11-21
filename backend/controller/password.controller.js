@@ -78,8 +78,8 @@ export const sendOtp = async (req, res) => {
       >
         <div style="padding: 0px; text-align: center; border-radius: 8px 8px 0 0">
           <h1 style="margin: 0; font-size: 32px">
-            Cool<span style="color: rgb(0, 123, 255); font-weight: bolder"
-              >Blogs</span
+            Task<span style="color: rgb(0, 123, 255); font-weight: bolder"
+              >Manager</span
             >
           </h1>
         </div>
@@ -87,8 +87,8 @@ export const sendOtp = async (req, res) => {
           <h1 style="color: #4caf50; margin-bottom: 10px">Hello, ${user_name}!</h1>
   
           <p style="font-size: 16px; color: #555">
-            We received a request to reset your password. Please use the OTP below
-            to reset your password:
+            We received a request for Sign up or to reset your password. Please use the OTP below
+            to reset your password or create Account:
           </p>
         </div>
         <div
@@ -131,7 +131,7 @@ export const sendOtp = async (req, res) => {
           <p>
             Visit us at
             <a href="#" style="color: #4caf50; text-decoration: none"
-              >www.coolblogs.com</a
+              >www.task-manager.com</a
             >
           </p>
         </div>
