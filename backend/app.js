@@ -160,8 +160,8 @@ async function dbConnection() {
         
         app.listen(port, () => {
             console.log(`🚀 Server running on port: ${port}`);
-            console.log(`📡 Test the server at: http://localhost:${port}/api/test`);
-            console.log(`❤️  Health check at: http://localhost:${port}/health`);
+            // console.log(`📡 Test the server at: http://localhost:${port}/api/test`);
+            // console.log(`❤️  Health check at: http://localhost:${port}/health`);
         });
         
     } catch (error) {
