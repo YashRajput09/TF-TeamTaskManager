@@ -214,7 +214,8 @@ export default function TaskDetail() {
         { message: newComment }
       );
       console.log(data);
-      alert("Comment added");
+      // alert("Comment added");
+      toast.success("Comment Added")
 
       setComments((prev) => [
         { id: `c-${Date.now()}`, author: "You", text: newComment.trim() },
@@ -236,7 +237,8 @@ export default function TaskDetail() {
   const handleSubmitTask = async (e) => {
     e?.preventDefault?.();
     if (!submissionFiles.length) {
-      alert("Please choose files to submit.");
+      // alert("Please choose files to submit.");
+      toast.error("Please choose files to submit.");
       return;
     }
 
@@ -274,10 +276,12 @@ export default function TaskDetail() {
       // reset UI
       setSubmissionFiles([]);
       setSubmissionNote("");
-      alert("Submitted successfully — status pending for admin approval.");
+      // alert("Submitted successfully — status pending for admin approval.");
+      toast.success("Submitted successfully — status pending for admin approval.");
     } catch (err) {
       console.error("Submit error:", err);
-      alert(err?.response?.data?.message || "Submission failed");
+      // alert(err?.response?.data?.message || "Submission failed");
+      toast.error(err?.response?.data?.message || "Submission failed");
     } finally {
       setLoadingSubmit(false);
     }
@@ -305,12 +309,16 @@ export default function TaskDetail() {
       if (data?.task) setTask(data.task);
       else await fetchTask();
 
-      alert(
+      // alert(
+      //   `Task ${action === "approve" ? "approved" : "declined"} successfully.`
+      // );
+      toast.success(
         `Task ${action === "approve" ? "approved" : "declined"} successfully.`
       );
     } catch (err) {
       console.error("Admin action error:", err);
-      alert(err?.response?.data?.message || "Action failed");
+      // alert(err?.response?.data?.message || "Action failed");
+      toast.error(err?.response?.data?.message || "Action failed");
     } finally {
       setProcessingAction(false);
     }

@@ -14,6 +14,7 @@ import {
   Search,
   ArrowLeft,
   User,
+  Trash2,
 } from "lucide-react";
 import axiosInstance from "./utility/axiosInstance";
 import toast from "react-hot-toast";
@@ -329,11 +330,37 @@ const Teams = () => {
   const visibleTask = useMemo(() => {
     if (!teamData) return [];
     const base = onlyMine
-      ? visibleTasks?.filter(task => task.assignedTo?._id=== profile?._id)
+      ? visibleTasks?.filter((task) => task.assignedTo?._id === profile?._id)
       : visibleTasks;
     return base;
-  }, [teamData,visibleTasks,profile, onlyMine]);
- 
+  }, [teamData, visibleTasks, profile, onlyMine]);
+
+  //{can also use sweetalert2 by npm }
+  const handleConfirmation = async () => {
+    return window.confirm("Are you sure you want to delete this task?");
+  };
+
+  const handleDelete = async (taskId) => {
+    console.log(taskId);
+
+    const isConfirm = await handleConfirmation();
+
+    console.log(isConfirm);
+    if (!isConfirm) return;
+
+    try {
+      const res = await axiosInstance.delete(`/task/delete-task/${taskId}`, {
+        withCredentials: true,
+      });
+
+      toast.success("Task deleted successfully");
+      // Refresh UI or remove task from state
+    } catch (err) {
+      console.error(err);
+      toast.error(err?.response?.data?.message || "Failed to delete task");
+    }
+  };
+
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -368,13 +395,15 @@ const Teams = () => {
         </div>
 
         <div className="mt-4 md:mt-0 flex items-center gap-4">
-         {isOwner(teamData) && <button
-            className="btn-primary hover:opacity-60 flex items-center space-x-2"
-            onClick={() => navigate(`/create-task`, { state: { teamData } })}
-          >
-            <Plus className="w-4 h-4" />
-            <span>Create Task</span>
-          </button>}
+          {isOwner(teamData) && (
+            <button
+              className="btn-primary hover:opacity-60 flex items-center space-x-2"
+              onClick={() => navigate(`/create-task`, { state: { teamData } })}
+            >
+              <Plus className="w-4 h-4" />
+              <span>Create Task</span>
+            </button>
+          )}
           {!selectedTeam && (
             <>
               <button
@@ -505,9 +534,19 @@ const Teams = () => {
                   <div className="flex items-center space-x-3">
                     {/* <div className={`w-8 h-8 rounded-lg ${selectedTeam.color}`} /> */}
                     <div>
-                      {console.log(teamData?.createdBy?._id,m?._id,teamData?.createdBy?._id===m?._id)}
+                      {console.log(
+                        teamData?.createdBy?._id,
+                        m?._id,
+                        teamData?.createdBy?._id === m?._id
+                      )}
                       <p className="text-sm font-semibold text-gray-900 dark:text-white">
-                        {m.name } {teamData?.createdBy?._id===m?._id ? (<i>(Admin)</i>) : "" }  {m._id===profile._id ? (<i>(You)</i>) : ""}
+                        {m.name}{" "}
+                        {teamData?.createdBy?._id === m?._id ? (
+                          <i>(Admin)</i>
+                        ) : (
+                          ""
+                        )}{" "}
+                        {m._id === profile._id ? <i>(You)</i> : ""}
                       </p>
                       <p className="text-xs text-gray-600 dark:text-gray-400">
                         {m.role}
@@ -573,14 +612,16 @@ const Teams = () => {
                 <tbody>
                   {visibleTask?.map((task) => (
                     <tr
-                      onClick={() => navigate(`/tasks/${task._id}`)}
                       key={task?._id}
-                      className="border-b border-gray-100 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors"
+                      className="border-b border-gray-100 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700/50  rounded-md transition-colors"
                     >
-                      <td className="py-3 px-4 text-sm text-gray-900 dark:text-white">
+                      <td
+                        onClick={() => navigate(`/tasks/${task?._id}`)}
+                        className="py-3 px-4 text-sm text-gray-900 hover:underline cursor-pointer dark:text-white"
+                      >
                         {task.title}
                       </td>
-                       {console.log(task?.assignedTo) }
+                      {console.log(task?.assignedTo)}
                       <td className="py-3 px-4 text-sm text-gray-700 dark:text-gray-300">
                         {task?.assignedTo?.name}
                       </td>
@@ -612,6 +653,14 @@ const Teams = () => {
                           {task?.priority}
                         </span>
                       </td>
+                      {isOwner(teamData) && (
+                        <td>
+                          <Trash2
+                            onClick={() => handleDelete(task?._id)}
+                            className="w-4 mr-2 text-red-700 opacity-75 cursor-pointer hover:opacity-100 hover:text-600"
+                          />
+                        </td>
+                      )}
                     </tr>
                   ))}
                 </tbody>
