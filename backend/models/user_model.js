@@ -29,6 +29,9 @@ const userSchema = new mongoose.Schema(
   
 //     resetOtp: String,
 //   resetOtpExpires: Date,
+ otp: String,
+  otpExpires: Date,
+  isOtpVerified: Boolean,
 
      profileImage: {
     public_id: {
