@@ -139,6 +139,58 @@ export const createTask = async (req, res) => {
   }
 };
 
+
+export const deleteTask = async (req, res) => {
+  try {
+    const { taskId } = req.params;
+    const loggedUserId = req.user._id;
+
+    // 1. Find task
+    const task = await Task.findById(taskId);
+    if (!task) return res.status(404).json({ message: "Task not found" });
+
+    // 2. Check permission (only creator/admin can delete)
+    if (task.createdBy.toString() !== loggedUserId.toString()) {
+      return res.status(403).json({ message: "Only Admin can delete task" });
+    }
+
+    console.log(task?.createdBy)
+    console.log(task?.assignedTo)
+    console.log(task?.group[0])
+
+    console.log( await User.findById(task.createdBy) )
+    console.log( await User.findById(task.assignedTo) )
+    console.log( await groupModel.findById(task?.group) )
+
+    // 3. DELETE the task from Task collection
+    await Task.findByIdAndDelete(taskId);
+
+    // 4. REMOVE task reference from user who created it
+    await User.findByIdAndUpdate(task.createdBy, {
+      $pull: { createdTasks: taskId }
+    });
+
+    // 5. REMOVE task reference from assigned user
+    await User.findByIdAndUpdate(task.assignedTo, {
+      $pull: { assignedTasks: taskId }
+    });
+
+    // 6. REMOVE task from group
+    await groupModel.findByIdAndUpdate(task.group, {
+      $pull: { allTasks: taskId }
+    });
+
+    return res.status(200).json({
+      message: "Task deleted successfully & cleaned from user and group records"
+    });
+
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({ message: "Internal server error", error });
+  }
+};
+
+
 export const assignTask = async (req, res) => {
   try {
     const { assignedUserId, taskId } = req.body;

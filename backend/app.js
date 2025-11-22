@@ -125,8 +125,8 @@ app.get("/",(req,res)=>{
 
 // Add to your app.js
 app.get("/api/debug-cookie", (req, res) => {
-  // console.log('🍪 Received cookies:', req.cookies);
-  // console.log('🍪 jwttoken present:', !!req.cookies.jwttoken);
+  console.log('🍪 Received cookies:', req.cookies);
+  console.log('🍪 jwttoken present:', !!req.cookies.jwttoken);
   
   res.json({
     cookiesReceived: req.cookies,
