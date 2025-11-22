@@ -3,16 +3,17 @@ import React, { useState } from 'react';
 import axios from 'axios';
 import Card from '../components/Card';
 import { MessageCircle, CheckCircle, Send, Bot, Bell, RefreshCw, Users } from 'lucide-react';
+import axiosInstance from './utility/axiosInstance';
 
 const API_BASE = 'http://localhost:3000';
 
-const api = axios.create({
-  baseURL: API_BASE,
-  withCredentials: true, 
-  headers: {
-    'Content-Type': 'application/json',
-  },
-});
+// const api = axios.create({
+//   baseURL: API_BASE,
+//   withCredentials: true, 
+//   headers: {
+//     'Content-Type': 'application/json',
+//   },
+// });
 
 const TelegramPage = () => {
   const [chatId, setChatId] = useState('');
@@ -24,7 +25,7 @@ const TelegramPage = () => {
     e.preventDefault();
     setLoading(true);
     try {
-      const response = await api.post('/api/telegram/register-user', { 
+      const response = await axiosInstance.post('/api/telegram/register-user', { 
         telegramChatId: chatId 
       });
 
@@ -46,7 +47,7 @@ const TelegramPage = () => {
   const testTelegram = async () => {
     setTesting(true);
     try {
-      const response = await api.get('/api/telegram/test');
+      const response = await axiosInstance.get('/api/telegram/test');
       
       const data = response.data;
       if (data.success) {
