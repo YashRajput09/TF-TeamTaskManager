@@ -39,59 +39,121 @@ export const createGroup = async (req, res) => {
   }
 };
 
+// export const addMember = async (req, res) => {
+//   try {
+//     const { groupId } = req.params;
+//     const { membersId } = req.body;
+
+//     console.log(membersId);
+//     if (!membersId || membersId.length <= 0) {
+//       return res.status(400).json({ message: "Select atleast one" });
+//     }
+
+//     const find_group = await groupModel.findById(groupId);
+//     let response;
+//     let find_user;
+
+//     if (!find_group) {
+//       return res.status(400).json({ message: "Group not Found" });
+//     }
+
+//     for (let i of membersId) {
+//       console.log(i);
+
+//       find_user = await User.findById(i);
+//       if (!find_user) {
+//         // response="No Such Users Found !! Invite on TaskManager";
+//         continue;
+//       }
+//       // Check if already a member
+//       if (find_group.members.some((m) => m._id.toString() === i)) {
+//         // response = "User Already Added in group";
+//         continue;
+//       }
+//       console.log(
+//         find_group?.createdBy?.toString(),
+//         i,
+//         find_group?.createdBy?.toString() === i
+//       );
+//       if (find_group?.createdBy?.toString() === i) {
+//         response = "Admin cant add himself";
+//         continue;
+//       }
+//       find_user?.groups.push(groupId);
+//       // console.log("Members\n",find_user._id,"$\n",find_user?.groups);
+
+//       await find_group.save();
+
+//       find_group?.members?.push(i);
+//       response = response + "Users Add Successfully";
+//     }
+
+//     await find_user.save();
+//     // await find_group.save();
+
+//     res.status(200).json({ message: response, membersId, groupId });
+//   } catch (error) {
+//     console.log(error);
+//     res.status(200).json({ message: "Internal Server Error", error });
+//   }
+// };
+
 export const addMember = async (req, res) => {
   try {
     const { groupId } = req.params;
     const { membersId } = req.body;
 
-    console.log(membersId);
-    if (!membersId || membersId.length <= 0) {
-      return res.status(400).json({ message: "Select atleast one" });
+    if (!membersId || membersId.length === 0) {
+      return res.status(400).json({ message: "Select at least one user" });
     }
 
-    const find_group = await groupModel.findById(groupId);
-    let response;
-    let find_user;
+    const group = await groupModel.findById(groupId);
+    if (!group) return res.status(404).json({ message: "Group not found" });
 
-    if (!find_group) {
-      return res.status(400).json({ message: "Group not Found" });
+    const adminId = group.createdBy.toString();
+
+    // Response summaries
+    const added = [];
+
+    // Filter valid users BEFORE DB update
+    for (const userId of membersId) {
+      const user = await User.findById(userId);
+
+      if (!user) {
+        continue;
+      }
+
+      if (userId === adminId) {
+        continue;
+      }
+
+      if (group.members.includes(userId)) {
+        continue;
+      }
+
+      added.push(userId);
     }
 
-    for (let i of membersId) {
-      console.log(i);
-
-      find_user = await User.findById(i);
-      if (!find_user) {
-        // response="No Such Users Found !! Invite on TaskManager";
-        continue;
-      }
-      // Check if already a member
-      if (find_group.members.some((m) => m._id.toString() === i)) {
-        // response = "User Already Added in group";
-        continue;
-      }
-      console.log(
-        find_group?.createdBy?.toString(),
-        i,
-        find_group?.createdBy?.toString() === i
+    // Bulk update (ONLY valid users)
+    if (added.length > 0) {
+      // Add group to all users
+      await User.updateMany(
+        { _id: { $in: added } },
+        { $addToSet: { groups: groupId } }
       );
-      if (find_group?.createdBy?.toString() === i) {
-        response = "Admin cant add himself";
-        continue;
-      }
-      find_user?.groups.push(groupId);
 
-      find_group?.members?.push(i);
-      response = response + "Users Add Successfully";
+      // Add users to group
+      await groupModel.findByIdAndUpdate(groupId, {
+        $addToSet: { members: { $each: added } },
+      });
     }
 
-    await find_user.save();
-    await find_group.save();
-
-    res.status(200).json({ message: response, membersId, groupId });
+    return res.status(200).json({
+      message: "Member Added successfully",added, groupId
+    });
   } catch (error) {
     console.log(error);
-    res.status(200).json({ message: "Internal Server Error", error });
+    return res.status(500).json({ message: "Internal Server Error", error });
   }
 };
 
