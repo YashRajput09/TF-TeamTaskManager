@@ -4,6 +4,7 @@ import { groupModel } from "../models/group.model.js";
 import { Task } from "../models/task.modal.js";
 import { generateSearchQuery } from "../utils/search.js";
 import User from "../models/user_model.js";
+import { sendTaskNotification } from '../services/telegramNotification.js'
 
 export const searchBlogs = async (req, res) => {
   const searchQuery = req.query.search || ""; // Default to an empty string if search is not provided
@@ -190,37 +191,60 @@ export const deleteTask = async (req, res) => {
   }
 };
 
-
 export const assignTask = async (req, res) => {
   try {
     const { assignedUserId, taskId } = req.body;
     const { groupId } = req.params;
 
+    // 1. Find task
     const find_task = await Task.findById(taskId);
     if (!find_task)
       return res.status(404).json({ message: "Task Not Found !!" });
 
+    // 2. Find group and make sure it exists
     const find_group = await groupModel.findById(groupId);
     if (!find_group)
       return res.status(404).json({ message: "group Not Found !!" });
 
     let find_assignedUser = null;
+
+    // 3. If a user is provided, verify they belong to the group
     if (assignedUserId) {
-      if (!find_group?.members?.some((m) => m.toString() === assignedUserId))
+      const isMember = find_group?.members?.some(
+        (m) => m.toString() === assignedUserId
+      );
+      if (!isMember)
         return res.status(404).json({ message: "User not in group yet !!" });
 
       find_assignedUser = await User.findById(assignedUserId);
+      if (!find_assignedUser) {
+        return res.status(404).json({ message: "Assigned user not found" });
+      }
     }
 
+    // 4. Actually assign the task to this user
     if (assignedUserId) {
-      find_assignedUser?.assignedTasks?.push(taskId);
+      // add task to user's assignedTasks array
+      find_assignedUser.assignedTasks.push(taskId);
+
+      // link user to task
+      find_task.assignedTo = assignedUserId;
+
+      // add history message
       find_task.history.push({
-        message: `Assigned to ${find_assignedUser?.name} `,
+        message: `Assigned to ${find_assignedUser.name}`,
+        date: Date.now(),
       });
     }
 
+    // 5. Save both documents in DB
     await find_assignedUser?.save();
-    await find_task?.save();
+    await find_task.save();
+
+    // 6. 🔔 Send Telegram notification ONLY at assignment time
+    if (assignedUserId) {
+      await sendTaskNotification(assignedUserId, find_task);
+    }
 
     return res.status(200).json({ message: "Task Assigned", find_task });
   } catch (error) {
@@ -228,6 +252,7 @@ export const assignTask = async (req, res) => {
     return res.status(500).json({ message: "Internal Server error" });
   }
 };
+
 
 export const getAllTask = async (req, res) => {
   try {

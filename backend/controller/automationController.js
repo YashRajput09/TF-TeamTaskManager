@@ -1,32 +1,46 @@
+// controller/automationController.js
+
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import { Task } from '../models/task.modal.js';
 import { groupModel } from '../models/group.model.js';
-import userModel from '../models/user_model.js';
-import { sendTelegramMessage } from './telegramController.js';
+// ❌ userModel + sendTelegramMessage were used for direct chat sending
+// ✅ now we reuse your central notification service
+import { sendTaskNotification } from '../services/telegramNotification.js';
 
 // AI Workload Analysis
 export const analyzeWorkload = async (req, res) => {
   try {
     const { timeframe = 7, includePending = true } = req.query;
     
-    const group = await groupModel.findById(req.params.groupId).populate('members', 'name email');
+    const group = await groupModel
+      .findById(req.params.groupId)
+      .populate('members', 'name email');
+
     if (!group) {
       return res.status(404).json({ message: 'Group not found' });
     }
-    
+
+    // 🔧 FIX: use "group" (your Task field), not "groupId"
+    // 🔧 FIX: status comparison uses "Completed" (your app) instead of "Done"
     const tasks = await Task.find({
-      groupId: req.params.groupId,
-      ...(includePending === 'false' ? { status: { $ne: 'Done' } } : {})
+      group: req.params.groupId,
+      ...(includePending === 'false' ? { status: { $ne: 'Completed' } } : {})
     });
-    
-    const analysis = await analyzeWorkloadWithAI(group.members, tasks, parseInt(timeframe));
+
+    const analysis = await analyzeWorkloadWithAI(
+      group.members,
+      tasks,
+      parseInt(timeframe)
+    );
     
     res.json({
       success: true,
       analysis: {
         timeframe: parseInt(timeframe),
         totalTasks: tasks.length,
-        averageLoad: analysis.users.reduce((sum, user) => sum + user.workloadScore, 0) / analysis.users.length,
+        averageLoad:
+          analysis.users.reduce((sum, user) => sum + user.workloadScore, 0) /
+          (analysis.users.length || 1),
         overloadThreshold: 5,
         users: analysis.users
       },
@@ -42,13 +56,17 @@ export const autoRedistributeTasks = async (req, res) => {
   try {
     const { minTasksPerUser = 2, maxTasksPerUser = 4 } = req.body;
     
-    const group = await groupModel.findById(req.params.groupId).populate('members', 'name email');
+    const group = await groupModel
+      .findById(req.params.groupId)
+      .populate('members', 'name email');
+
     if (!group) {
       return res.status(404).json({ message: 'Group not found' });
     }
 
+    // 🔧 FIX: use "group" field here too
     const tasks = await Task.find({
-      groupId: req.params.groupId,
+      group: req.params.groupId,
       status: { $in: ['Assigned', 'In-progress', 'Pending'] }
     });
 
@@ -58,14 +76,14 @@ export const autoRedistributeTasks = async (req, res) => {
     const userTaskCount = {};
     groupMembers.forEach(member => {
       userTaskCount[member._id] = tasks.filter(task => 
-        task.assignedTo.toString() === member._id.toString()
+        task.assignedTo && task.assignedTo.toString() === member._id.toString()
       ).length;
     });
 
     const totalTasks = tasks.length;
     const targetTasksPerUser = Math.min(
       maxTasksPerUser,
-      Math.max(minTasksPerUser, Math.ceil(totalTasks / groupMembers.length))
+      Math.max(minTasksPerUser, Math.ceil(totalTasks / groupMembers.length || 1))
     );
 
     // Find overloaded and underloaded users
@@ -73,13 +91,15 @@ export const autoRedistributeTasks = async (req, res) => {
     const availableUsers = [];
     
     groupMembers.forEach(member => {
-      const currentTasks = userTaskCount[member._id];
+      const currentTasks = userTaskCount[member._id] || 0;
       if (currentTasks > targetTasksPerUser) {
         overloadedUsers.push({
           user: member,
           excessTasks: currentTasks - targetTasksPerUser,
           taskIds: tasks
-            .filter(task => task.assignedTo.toString() === member._id.toString())
+            .filter(task => 
+              task.assignedTo && task.assignedTo.toString() === member._id.toString()
+            )
             .map(task => task._id)
             .slice(0, currentTasks - targetTasksPerUser)
         });
@@ -96,7 +116,7 @@ export const autoRedistributeTasks = async (req, res) => {
 
     overloadedUsers.forEach(overloaded => {
       let tasksToMove = overloaded.excessTasks;
-      const tasksAvailable = overloaded.taskIds;
+      const tasksAvailable = [...overloaded.taskIds];
       
       availableUsers.forEach(available => {
         if (tasksToMove > 0 && available.capacity > 0) {
@@ -141,16 +161,10 @@ export const autoRedistributeTasks = async (req, res) => {
         if (task) {
           results.tasksReassigned++;
           
-          // Send notification if enabled
+          // 🔔 FIX: reuse central task notification flow
           if (plan.notifyUsers) {
-            const newAssignee = await userModel.findById(plan.newAssigneeId);
-            if (newAssignee && newAssignee.telegramChatId) {
-              await sendTelegramMessage(
-                newAssignee.telegramChatId,
-                `🔀 Task "${task.title}" has been assigned to you for workload balancing`
-              );
-              results.notificationsSent++;
-            }
+            await sendTaskNotification(plan.newAssigneeId, task);
+            results.notificationsSent++;
           }
           
           details.push({
@@ -276,8 +290,9 @@ const calculateEnhancedWorkload = (users, tasks, timeframe) => {
       task.assignedTo && task.assignedTo.toString() === user._id.toString()
     );
     
+    // 🔧 FIX: use "Completed" instead of "Done"
     const pendingTasks = userTasks.filter(task => 
-      task.status !== 'Done'
+      task.status !== 'Completed'
     );
     
     let workloadScore = 0;
@@ -306,7 +321,7 @@ const calculateEnhancedWorkload = (users, tasks, timeframe) => {
       name: user.name,
       currentTasks: userTasks.length,
       pendingTasks: pendingTasks.length,
-      completedTasks: userTasks.filter(t => t.status === 'Done').length,
+      completedTasks: userTasks.filter(t => t.status === 'Completed').length,
       workloadScore,
       status,
       recommendedAction
@@ -321,17 +336,22 @@ const calculateEnhancedWorkload = (users, tasks, timeframe) => {
     .filter(user => user.status === 'underloaded' || user.status === 'available')
     .map(user => user.userId);
   
-  const riskTasks = tasks.filter(task => {
-    if (task.priority === 'High' && task.status !== 'Done') {
-      const daysUntilDeadline = (new Date(task.deadline) - new Date()) / (1000 * 60 * 60 * 24);
-      return daysUntilDeadline <= 2;
-    }
-    return false;
-  }).map(task => task._id);
+  const riskTasks = tasks
+    .filter(task => {
+      if (task.priority === 'High' && task.status !== 'Completed') {
+        const daysUntilDeadline =
+          (new Date(task.deadline) - new Date()) / (1000 * 60 * 60 * 24);
+        return daysUntilDeadline <= 2;
+      }
+      return false;
+    })
+    .map(task => task._id);
   
   const recommendations = [];
   const overloadedUsers = userWorkload.filter(u => u.status === 'overloaded');
-  const availableUsers = userWorkload.filter(u => u.status === 'underloaded' || u.status === 'available');
+  const availableUsers = userWorkload.filter(
+    u => u.status === 'underloaded' || u.status === 'available'
+  );
   
   if (overloadedUsers.length > 0 && availableUsers.length > 0) {
     overloadedUsers.forEach(overloaded => {
@@ -344,7 +364,9 @@ const calculateEnhancedWorkload = (users, tasks, timeframe) => {
   }
   
   if (riskTasks.length > 0) {
-    recommendations.push(`Monitor ${riskTasks.length} high-priority tasks with approaching deadlines`);
+    recommendations.push(
+      `Monitor ${riskTasks.length} high-priority tasks with approaching deadlines`
+    );
   }
   
   return {
