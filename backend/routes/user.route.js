@@ -1,7 +1,6 @@
 import express from 'express';
 import {isAuthenticated} from '../middleware/authenticateUser.js'
 import {signUpUser, logInUser, logOutUser, getMyProfile, getAllUsers, updateUserProfile} from '../controller/user.controller.js';
-import { resetPassword, sendOtp, validateOtp } from '../controller/password.controller.js';
 
 const router = express.Router();
 
@@ -11,11 +10,6 @@ router.route('/logout').post(isAuthenticated, logOutUser);
 router.route("/myprofile").get(isAuthenticated, getMyProfile);
 router.get("/get-all-users",isAuthenticated,getAllUsers);
 router.put("/update-profile", isAuthenticated, updateUserProfile);
-
-//Email verification and forgot password route
-router.post("/forgot-password",sendOtp);
-router.post("/verifyotp",validateOtp);
-router.post("/reset-password",resetPassword)
 
 
 export default router;

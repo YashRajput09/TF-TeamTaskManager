@@ -375,7 +375,7 @@ const Teams = () => {
             <Plus className="w-4 h-4" />
             <span>Create Task</span>
           </button>}
-          {isOwner(teamData) &&
+          {!selectedTeam && (
             <>
               <button
                 className="btn-secondary hover:opacity-60 flex items-center space-x-2"
@@ -392,7 +392,7 @@ const Teams = () => {
                 <span>Remove Member</span>
               </button>
             </>
-          }
+          )}
         </div>
       </div>
 
@@ -531,7 +531,6 @@ const Teams = () => {
                 <ListChecks className="w-5 h-5" /> Tasks
               </h2>
               <div className="flex items-center gap-3">
-                {!isOwner(teamData) && 
                 <label className="flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300">
                   <input
                     type="checkbox"
@@ -540,8 +539,6 @@ const Teams = () => {
                   />
                   Assigned to me
                 </label>
-                }
-                
 
                 {/* Show Create Task only for owner */}
                 {/* {isOwner(teamData) && (
@@ -648,7 +645,7 @@ const Teams = () => {
           onClose={() => setShowAdd(false)}
         >
           <AddMemberForm
-            onAdd={{ alluser: alluser, group: teamData }}
+            onAdd={{ alluser: alluser, groupId: teamId }}
             onCancel={() => setShowAdd(false)}
           />
         </InlineModal>
@@ -777,7 +774,7 @@ const AddMemberForm = ({ onAdd, onCancel }) => {
 
   console.log(selectedMembers);
 
-  console.log(onAdd?.group);
+  console.log(onAdd?.groupId);
   // ✅ Handle form submit
   const handleSubmit = async (e) => {
     try {
@@ -788,7 +785,7 @@ const AddMemberForm = ({ onAdd, onCancel }) => {
         return;
       }
       const { data } = await axiosInstance.post(
-        `/group/add-member/${onAdd?.group?._id}`,
+        `/group/add-member/${onAdd?.groupId}`,
         { membersId: selectedMembers }
       );
       console.log(data);
@@ -810,16 +807,12 @@ const AddMemberForm = ({ onAdd, onCancel }) => {
           Select Members
         </label>
         <div className="space-y-2 max-h-48 overflow-y-auto border rounded-md p-2 bg-gray-50 dark:bg-gray-700/30">
-        {console.log(onAdd?.alluser,onAdd?.group) }
           {onAdd?.alluser?.length > 0 ? (
-            onAdd?.alluser
-            ?.filter((user)=>user?._id !==onAdd?.group?.createdBy._id)
-            ?.map((user) => (
+            onAdd?.alluser?.map((user) => (
               <label
-              key={user._id}
-              className="flex items-center gap-2 cursor-pointer text-gray-800 dark:text-gray-200"
+                key={user._id}
+                className="flex items-center gap-2 cursor-pointer text-gray-800 dark:text-gray-200"
               >
-              {  console.log(user?._id ===onAdd?.group?.createdBy._id)}
                 <input
                   type="checkbox"
                   checked={selectedMembers.includes(user._id)}
