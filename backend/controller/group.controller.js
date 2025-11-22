@@ -60,21 +60,29 @@ export const addMember = async (req, res) => {
     for (let i of membersId) {
       console.log(i);
 
-       find_user = await User.findById(i);
+      find_user = await User.findById(i);
       if (!find_user) {
         // response="No Such Users Found !! Invite on TaskManager";
         continue;
       }
-
       // Check if already a member
       if (find_group.members.some((m) => m._id.toString() === i)) {
         // response = "User Already Added in group";
         continue;
       }
+      console.log(
+        find_group?.createdBy?.toString(),
+        i,
+        find_group?.createdBy?.toString() === i
+      );
+      if (find_group?.createdBy?.toString() === i) {
+        response = "Admin cant add himself";
+        continue;
+      }
       find_user?.groups.push(groupId);
 
       find_group?.members?.push(i);
-      response = "Users Add Successfully";
+      response = response + "Users Add Successfully";
     }
 
     await find_user.save();
@@ -100,21 +108,24 @@ export const removeMember = async (req, res) => {
     }
     console.log(find_group.members);
 
-    find_group?.members?.filter((m) =>
-      console.log(m?.toString(), "&", memberId)
-    );
+    // find_group?.members?.filter((m) =>
+    //   console.log(m?.toString(), "&", memberId)
+    // );
 
     find_group.members = find_group?.members?.filter(
       (m) => m?.toString() !== memberId
     );
 
-    const find_member =await  User.findById(memberId);
+    const find_member = await User.findById(memberId);
     if (!find_member)
       return res.status(404).json({ message: "User Not Found" });
 
-    find_member.groups = find_member?.groups?.filter(
-      (group) => group.toString() !== groupId.toString()
-    );
+    // console.log(memberId===find_group.createdBy.toString())
+    if (memberId !== find_group.createdBy?.toString()) {
+      find_member.groups = find_member?.groups?.filter(
+        (group) => group.toString() !== groupId.toString()
+      );
+    }
 
     await find_member.save();
     await find_group.save();
@@ -157,7 +168,9 @@ export const getSingleGroup = async (req, res) => {
   try {
     const { groupId } = req.params;
 
-    const find_group = await groupModel.findById(groupId).populate("members createdBy allTasks");
+    const find_group = await groupModel
+      .findById(groupId)
+      .populate("members createdBy allTasks");
     if (!find_group)
       return res.status(404).json({ messaage: "Group not found" });
 
