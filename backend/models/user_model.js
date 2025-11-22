@@ -57,40 +57,56 @@ const userSchema = new mongoose.Schema(
     default: Date.now,
   },
 
-      // 🔥 NEW FIELDS FOR AUTOMATION
-    telegramChatId: { type: String },
-    googleCalendar: {
+   telegramChatId: {
+    type: String,
+    default: null,   // no chat until linked
+  },
+  telegramLinked: {
+    type: Boolean,
+    default: false,  // useful flag to check quickly
+  },
+  telegramLinkToken: {
+    type: String,
+    default: null,   // temporary code for linking
+  },
+  telegramLinkTokenExpiresAt: {
+    type: Date,
+    default: null,   // security: code valid only for some time
+  },
+
+  googleCalendar: {
       accessToken: String,
       refreshToken: String,
       isConnected: { type: Boolean, default: false },
       lastSync: Date
-    },
+  },
 
-    createdAt: {
+  createdAt: {
       type: Date,
       default: Date.now,
-    },
+  },
 
     // optional: store references for quick user-task queries
-    createdTasks: [
+  createdTasks: [
       {
         type: mongoose.Schema.Types.ObjectId,
         ref: "Task",
       },
-    ],
-    assignedTasks: [
+  ],
+  assignedTasks: [
       {
         type: mongoose.Schema.Types.ObjectId,
         ref: "Task",
       },
-    ],
-    groups: [
+  ],
+  groups: [
       {
         type: mongoose.Schema.Types.ObjectId,
         ref: "Group",
       },
-    ],
+  ],
   },
+  
   
   { timestamps: true }
 );
