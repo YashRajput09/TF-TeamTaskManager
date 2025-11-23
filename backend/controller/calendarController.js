@@ -1,6 +1,7 @@
 import { google } from 'googleapis';
 import userModel from '../models/user_model.js';
 import { Task } from '../models/task.modal.js';
+import { groupModel } from '../models/group.model.js';
 // import Task from "../models/group.model.js"; // adjust path if needed
 
 
@@ -125,7 +126,7 @@ export const syncTaskToCalendar = async (req, res) => {
       }
     };
 
-    const calendarResponse = await calendar.events.insert({
+    const calendarResponse =  calendar.events.insert({
       calendarId: 'primary',
       resource: event,
     });
@@ -162,7 +163,7 @@ export const createGroupMeeting = async (req, res) => {
     }
 
     // Group
-    const group = await Task.findById(groupId).populate("members");
+    const group = await groupModel.findById(groupId).populate("members");
     if (!group) return res.status(404).json({ message: "Group not found." });
 
     // Collect attendee emails
@@ -202,11 +203,11 @@ export const createGroupMeeting = async (req, res) => {
     };
 
     // Insert event to Google Calendar
-    const response = calendarClient.events.insert({
+    const response = await calendarClient.events.insert({
       calendarId: "primary",
-      resource: event,
       conferenceDataVersion: 1,
       sendUpdates: "all",
+       requestBody: event,
     });
 
     return res.status(200).json({
@@ -230,9 +231,9 @@ export const handleCallback = async (req, res) => {
   try {
     const { code, state } = req.query;
     const userId = state;
-    console.log("GOOGLE CALLBACK HIT");
-    console.log("code:", code);
-    console.log("userId from state:", userId);
+    // console.log("GOOGLE CALLBACK HIT");
+    // console.log("code:", code);
+    // console.log("userId from state:", userId);
 
     if (!code) {
       return res.status(400).json({ message: 'Authorization code missing' });
@@ -240,7 +241,7 @@ export const handleCallback = async (req, res) => {
 
     const { tokens } = await oauth2Client.getToken(code);
     oauth2Client.setCredentials(tokens);
-    console.log("google calender token: ", tokens);
+    // console.log("google calender token: ", tokens);
     
     // Save tokens to user
     await userModel.findByIdAndUpdate(userId, {

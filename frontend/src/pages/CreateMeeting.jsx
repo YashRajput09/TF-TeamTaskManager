@@ -2,13 +2,10 @@ import React, { useEffect, useState } from "react";
 import { Calendar, Clock, Users, Send, RefreshCw } from "lucide-react";
 import { useAuth } from "../context/AuthProvider";
 import axiosInstance from "./utility/axiosInstance";
-import axios from "axios";
-
+import toast from "react-hot-toast";
 
 const CreateMeeting = () => {
-  const {profile} = useAuth();
-  // console.log(profile._id);
-  
+  const { profile } = useAuth();
 
   const [groups, setGroups] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -25,14 +22,7 @@ const CreateMeeting = () => {
   // Fetch user's groups
   const fetchGroups = async () => {
     try {
-      const res = await axiosInstance.get(`/group/get-allUserGroup/${profile._id}`, {
-        // headers: {
-        //   Authorization: `Bearer ${localStorage.getItem("token")}`,
-        // },
-      });
-      console.log(res.data);
-      
-      // const data = await res.json();
+      const res = await axiosInstance.get(`/group/get-allUserGroup/${profile._id}`);
       setGroups(res.data || []);
     } catch (err) {
       console.error("Failed to fetch groups:", err);
@@ -57,31 +47,24 @@ const CreateMeeting = () => {
 
     try {
       const response = await axiosInstance.post("/api/calendar/group/meeting", {
-        // method: "POST",
-        // headers: {
-        //   "Content-Type": "application/json",
-        //   Authorization: `Bearer ${localStorage.getItem("token")}`,
-        // },
-        body: JSON.stringify({ 
-          groupId: form.groupId,
-          title: form.title,
-          description: form.description,
-          start,
-          end
-        }),
+        groupId: form.groupId,
+        title: form.title,
+        description: form.description,
+        start,
+        end
       });
 
-      const data = await response.json();
+      const data = response.data;
 
       if (data.success) {
-        alert("Meeting created & Google Calendar invites sent!");
-        console.log("Meet link:", data.meetLink);
+        toast.success("Meeting created & Google Calendar invites sent!");
+        // console.log("Meet link:", data.meetLink);
       } else {
-        alert(data.message || "Failed to create meeting");
+        toast.error(data.message || "Failed to create meeting");
       }
     } catch (error) {
       console.error("Meeting creation failed:", error);
-      alert("Meeting creation failed");
+      toast.error("Meeting creation failed");
     } finally {
       setLoading(false);
     }
@@ -89,7 +72,6 @@ const CreateMeeting = () => {
 
   return (
     <div className="max-w-2xl mx-auto bg-white dark:bg-gray-800 shadow rounded-xl p-6 space-y-6">
-
       <h2 className="text-2xl font-bold flex items-center space-x-2 mb-4 text-gray-900 dark:text-white">
         <Calendar className="w-6 h-6 text-blue-500" />
         <span>Schedule Team Meeting</span>
@@ -97,7 +79,7 @@ const CreateMeeting = () => {
 
       <form onSubmit={handleSubmit} className="space-y-5">
 
-        {/* Group Selection */}
+        {/* Group dropdown */}
         <div>
           <label className="block font-medium mb-1 text-gray-700 dark:text-gray-300">
             <Users className="inline w-4 h-4 mr-1" /> Select Group
@@ -153,7 +135,7 @@ const CreateMeeting = () => {
           />
         </div>
 
-        {/* Time Picker */}
+        {/* Time */}
         <div className="grid grid-cols-2 gap-4">
           <div>
             <label className="block font-medium mb-1 text-gray-700 dark:text-gray-300">
@@ -178,7 +160,7 @@ const CreateMeeting = () => {
           </div>
         </div>
 
-        {/* Submit Button */}
+        {/* Submit */}
         <button
           disabled={loading}
           type="submit"
@@ -191,7 +173,6 @@ const CreateMeeting = () => {
           )}
           <span>{loading ? "Scheduling..." : "Create Meeting"}</span>
         </button>
-
       </form>
     </div>
   );
