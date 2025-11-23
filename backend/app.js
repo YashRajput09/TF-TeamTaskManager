@@ -130,23 +130,23 @@ app.use("/task", fileUploadMiddleware, taskRoute);
 app.use("/comment", commentRoute);
 app.use("/automation", automationRoute);
 app.use("/integration", integrationRoute); 
-app.use("/calendar", calendarRoute);
+app.use("/api/calendar", calendarRoute);
 
 app.get("/",(req,res)=>{
     res.send("Task Manager and Tracker backend Running")
 })
 
 // Add to your app.js
-app.get("/api/debug-cookie", (req, res) => {
-  console.log('🍪 Received cookies:', req.cookies);
-  console.log('🍪 jwttoken present:', !!req.cookies.jwttoken);
+// app.get("/api/debug-cookie", (req, res) => {
+//   // console.log('🍪 Received cookies:', req.cookies);
+//   // console.log('🍪 jwttoken present:', !!req.cookies.jwttoken);
   
-  res.json({
-    cookiesReceived: req.cookies,
-    jwttokenPresent: !!req.cookies.jwttoken,
-    message: "Check your backend console for cookie details"
-  });
-});
+//   res.json({
+//     cookiesReceived: req.cookies,
+//     jwttokenPresent: !!req.cookies.jwttoken,
+//     message: "Check your backend console for cookie details"
+//   });
+// });
 // FIXED: 404 handler - use a proper path
 app.use((req, res) => {
     res.status(404).json({ 
