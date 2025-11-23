@@ -15,7 +15,7 @@ const createTokenAndSaveCookies = async (userId, res, rememberMe = false) => {
         path: '/',
     });
     
-    console.log(token)
+    // console.log(token)
     await userModel.findByIdAndUpdate(userId, { token });
     return token;
 }

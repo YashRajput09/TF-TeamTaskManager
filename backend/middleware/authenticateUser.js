@@ -6,19 +6,19 @@ export const isAuthenticated = async (req, res, next) => {
   try {
     const jwtToken = req.cookies.jwttoken;
     
-    console.log('🔐 Auth Check - Headers:', req.headers);
-    console.log('🔐 Auth Check - Cookies:', req.cookies);
-    console.log('🔐 Extracted Token:', jwtToken ? 'Present' : 'Missing');
+    // console.log('🔐 Auth Check - Headers:', req.headers);
+    // console.log('🔐 Auth Check - Cookies:', req.cookies);
+    // console.log('🔐 Extracted Token:', jwtToken ? 'Present' : 'Missing');
     
     if (!jwtToken) {
       return res.status(401).json({ message: "Unauthorized access, You need to login first." });
     }
     
     const decoded = jwt.verify(jwtToken, process.env.JWT_SECRET || 'fallbackSecret');
-    console.log('🔐 Decoded Token User ID:', decoded.userId);
+    // console.log('🔐 Decoded Token User ID:', decoded.userId);
     
     const user = await userModel.findById(decoded.userId);
-    console.log("🔐 Found User:", user ? user.email : 'No user found');
+    // console.log("🔐 Found User:", user ? user.email : 'No user found');
     
     if (!user) {
       return res.status(401).json({ message: "User not found" });
