@@ -11,9 +11,13 @@ import userRoute from '../backend/routes/user.route.js';
 import groupRoute from '../backend/routes/group.route.js';
 import taskRoute from '../backend/routes/task.route.js';
 import commentRoute from '../backend/routes/comment.route.js';
+
+import integrationRoute from "./routes/integration.route.js";
+
 import automationRoute from './routes/ai.route.jsautomation.route.js';
-import telegramRoute from './routes/telegram.route.js';
 import calendarRoute from './routes/calendar.route.js';
+import bot from './utils/telegramBot.js';
+import { startReminderScheduler } from './services/telegramReminderSchedular.js';
 
 const app = express();
 
@@ -62,6 +66,15 @@ app.use(cors({
   })
 );
 
+
+// Start Telegram bot (long polling mode)
+bot.launch().then(() => {
+  console.log('🤖 Telegram bot is running');
+});
+
+// Graceful shutdown
+process.once('SIGINT', () => bot.stop('SIGINT'));
+process.once('SIGTERM', () => bot.stop('SIGTERM'));
 
 // const allowedOrigins = [
 //     'http://localhost:5173',
@@ -116,7 +129,7 @@ app.use("/group", groupRoute);
 app.use("/task", fileUploadMiddleware, taskRoute);
 app.use("/comment", commentRoute);
 app.use("/automation", automationRoute);
-app.use("/api/telegram", telegramRoute); 
+app.use("/integration", integrationRoute); 
 app.use("/api/calendar", calendarRoute);
 
 app.get("/",(req,res)=>{
@@ -157,6 +170,9 @@ async function dbConnection() {
         console.log('🔗 Attempting to connect to database...');
         await mongoose.connect(dbUrl);
         console.log("✅ DB connected successfully");
+
+        //telegram reminder runner 
+        startReminderScheduler();
         
         app.listen(port, () => {
             console.log(`🚀 Server running on port: ${port}`);

@@ -71,6 +71,11 @@ const taskSchema = new mongoose.Schema(
       type: String,
       default: "uncategorized",
     },
+    reminderSent: {
+      type: Boolean,
+      default: false,
+    }
+
   },
   { timestamps: true }
 );
