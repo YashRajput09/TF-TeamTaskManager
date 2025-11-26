@@ -22,6 +22,7 @@ import Telegram from "./pages/Telegram";
 import Settings from "./pages/Settings";
 import CreateMeeting from "./pages/CreateMeeting";
 import Leaderboard from "./dashboard/Leaderboard";
+import ForgotPassword from "./pages/ForgorPassword";
 
 // --- Protected Route Wrappers ---
 function RequireAuth({ children }) {
@@ -82,6 +83,14 @@ export default function App() {
           element={
             <GuestOnly>
               <Signup />
+            </GuestOnly>
+          }
+        />
+        <Route
+          path="/user/forgot-password"
+          element={
+            <GuestOnly>
+              <ForgotPassword />
             </GuestOnly>
           }
         />
