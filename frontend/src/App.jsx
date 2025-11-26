@@ -21,6 +21,7 @@ import Calendar from "./pages/Calendar";
 import Telegram from "./pages/Telegram";
 import Settings from "./pages/Settings";
 import CreateMeeting from "./pages/CreateMeeting";
+import Leaderboard from "./dashboard/Leaderboard";
 
 // --- Protected Route Wrappers ---
 function RequireAuth({ children }) {
@@ -115,6 +116,7 @@ export default function App() {
           <Route path="calendar" element={<Calendar />} />
           <Route path="telegram" element={<Telegram />} />
           <Route path="calendar/create-meeting" element={<CreateMeeting />} />
+          <Route path="dashboard/leaderboard" element={<Leaderboard />} />
         </Route>
 
         {/* Fallback */}

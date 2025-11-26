@@ -37,7 +37,7 @@ const CreateMeeting = () => {
     e.preventDefault();
 
     if (!form.groupId || !form.title || !form.date || !form.startTime || !form.endTime) {
-      return alert("Please fill all fields");
+      return toast.error("Please fill all fields");
     }
 
     setLoading(true);

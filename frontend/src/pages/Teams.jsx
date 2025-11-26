@@ -219,7 +219,7 @@ const Teams = () => {
           `/group/get-single-group/${teamId}`
         );
 
-        console.log(data);
+        // console.log(data);
         setTeamData(data);
       } catch (error) {
         console.log(error);
@@ -228,7 +228,7 @@ const Teams = () => {
     const getGroupTask = async () => {
       try {
         const { data } = await axiosInstance.get(`/task/getAll-task/${teamId}`);
-        console.log(data?.groupTasks);
+        // console.log(data?.groupTasks);
 
         setVisibleTasks(data?.groupTasks);
       } catch (error) {
@@ -238,10 +238,8 @@ const Teams = () => {
 
     const getAllUsers = async () => {
       try {
-        console.log("object");
         const { data } = await axiosInstance.get(`/user/get-all-users`);
-        console.log(data);
-        console.log("object");
+        // console.log(data);
         // setAlluser(data);
         setAlluser(data);
       } catch (error) {
@@ -254,7 +252,7 @@ const Teams = () => {
     getGroupTask();
   }, [showAdd, showRemove]);
 
-  console.log(alluser);
+  // console.log(alluser);
   // console.log(teamData?.groupTasks)
 
   useEffect(() => {
@@ -341,11 +339,11 @@ const Teams = () => {
   };
 
   const handleDelete = async (taskId) => {
-    console.log(taskId);
+    // console.log(taskId);
 
     const isConfirm = await handleConfirmation();
 
-    console.log(isConfirm);
+    // console.log(isConfirm);
     if (!isConfirm) return;
 
     try {
@@ -469,7 +467,7 @@ const Teams = () => {
                       {team.completedTasks}
                     </p>
                     <p className="text-xs text-gray-600 dark:text-gray-400">
-                      console.log Completed
+                      Completed
                     </p>
                   </div>
                   <div className="text-center p-3 rounded-lg bg-gray-50 dark:bg-gray-700/50">
@@ -514,12 +512,12 @@ const Teams = () => {
                 Members
               </h2>
               <div className="relative">
-                <Search className="w-4 h-4 absolute left-2 top-2.5 text-gray-500" />
+                <Search className="w-4 h-4 absolute right-4 top-2.5 text-gray-500" />
                 <input
                   value={searchMember}
                   onChange={(e) => setSearchMember(e.target.value)}
                   placeholder="Search member..."
-                  className="pl-8 pr-3 py-2 rounded-md bg-gray-50 dark:bg-gray-700/50 text-sm outline-none"
+                  className="pl-2 py-2 rounded-md bg-gray-50 dark:bg-gray-700/50 text-sm outline-none"
                 />
               </div>
             </div>
@@ -532,11 +530,11 @@ const Teams = () => {
                   <div className="flex items-center space-x-3">
                     {/* <div className={`w-8 h-8 rounded-lg ${selectedTeam.color}`} /> */}
                     <div>
-                      {console.log(
+                      {/* {console.log(
                         teamData?.createdBy?._id,
                         m?._id,
                         teamData?.createdBy?._id === m?._id
-                      )}
+                      )} */}
                       <p className="text-sm font-semibold text-gray-900 dark:text-white">
                         {m.name}{" "}
                         {teamData?.createdBy?._id === m?._id ? (
@@ -622,7 +620,7 @@ const Teams = () => {
                       >
                         {task.title}
                       </td>
-                      {console.log(task?.assignedTo)}
+                      {/* {console.log(task?.assignedTo)} */}
                       <td className="py-3 px-4 text-sm text-gray-700 dark:text-gray-300">
                         {task?.assignedTo?.name}
                       </td>
@@ -810,8 +808,8 @@ const AddMemberForm = ({ onAdd, onCancel }) => {
   const [role, setRole] = useState("Member");
   const [loading, setLoading] = useState(false);
 
-  console.log(onAdd);
-  console.log(onCancel);
+  // console.log(onAdd);
+  // console.log(onCancel);
   // ✅ Handle checkbox selection
   const handleCheckboxChange = (userId) => {
     setSelectedMembers(
@@ -822,9 +820,9 @@ const AddMemberForm = ({ onAdd, onCancel }) => {
     );
   };
 
-  console.log(selectedMembers);
+  // console.log(selectedMembers);
 
-  console.log(onAdd?.group);
+  // console.log(onAdd?.group);
   // ✅ Handle form submit
   const handleSubmit = async (e) => {
     try {
@@ -838,7 +836,7 @@ const AddMemberForm = ({ onAdd, onCancel }) => {
         `/group/add-member/${onAdd?.group?._id}`,
         { membersId: selectedMembers }
       );
-      console.log(data);
+      // console.log(data);
       // alert("User Added successsfully");
       setLoading(false);
       onCancel();
@@ -857,7 +855,7 @@ const AddMemberForm = ({ onAdd, onCancel }) => {
           Select Members
         </label>
         <div className="space-y-2 max-h-48 overflow-y-auto border rounded-md p-2 bg-gray-50 dark:bg-gray-700/30">
-        {console.log(onAdd?.alluser,onAdd?.group) }
+        {/* {console.log(onAdd?.alluser,onAdd?.group) } */}
           {onAdd?.alluser?.length > 0 ? (
             onAdd?.alluser
             ?.filter((user)=>user?._id !==onAdd?.group?.createdBy._id)
@@ -866,7 +864,7 @@ const AddMemberForm = ({ onAdd, onCancel }) => {
               key={user._id}
               className="flex items-center gap-2 cursor-pointer text-gray-800 dark:text-gray-200"
               >
-              {  console.log(user?._id ===onAdd?.group?.createdBy._id)}
+              {/* {  console.log(user?._id ===onAdd?.group?.createdBy._id)} */}
                 <input
                   type="checkbox"
                   checked={selectedMembers.includes(user._id)}
@@ -896,7 +894,7 @@ const RemoveMemberForm = ({ onAdd, onCancel }) => {
   const [selectedMembers, setSelectedMembers] = useState("");
   const [loading, setLoading] = useState(false);
 
-  console.log(onAdd);
+  // console.log(onAdd);
   // ✅ Handle checkbox selection
   const handleCheckboxChange = (userId) => {
     setSelectedMembers(
@@ -907,7 +905,7 @@ const RemoveMemberForm = ({ onAdd, onCancel }) => {
     );
   };
 
-  console.log(onAdd?.groupId);
+  // console.log(onAdd?.groupId);
   // ✅ Handle form submit
   const handleSubmit = async (e) => {
     try {
@@ -921,7 +919,7 @@ const RemoveMemberForm = ({ onAdd, onCancel }) => {
         `/group/remove-member/${onAdd?.groupId}`,
         { memberId: selectedMembers }
       );
-      console.log(data);
+      // console.log(data);
       setLoading(false);
       toast.error("User Removed !!");
       onCancel();
