@@ -11,6 +11,7 @@ import {
   Copy,
   ExternalLink,
 } from "lucide-react";
+import axiosInstance from "./utility/axiosInstance";
 
 import axiosInstance from './utility/axiosInstance';
 
@@ -32,7 +33,7 @@ const TelegramPage = () => {
     setLoadingToken(true);
     try {
       // Backend: POST /integration/telegram/link-token
-      const res = await api.post("/integration/telegram/link-token");
+      const res = await axiosInstance.post("/integration/telegram/link-token");
       if (res.data?.token) {
         setLinkToken(res.data.token);
         alert(

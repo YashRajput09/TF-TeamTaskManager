@@ -1,5 +1,7 @@
 import jwt from 'jsonwebtoken';
 import userModel from '../models/user_model.js';
+import dotenv from 'dotenv';
+dotenv.config();
 
 const createTokenAndSaveCookies = async (userId, res, rememberMe = false) => {
     const token = jwt.sign({ userId }, process.env.JWT_SECRET, {
