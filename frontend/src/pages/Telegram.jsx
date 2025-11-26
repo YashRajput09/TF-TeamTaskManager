@@ -12,10 +12,6 @@ import {
   ExternalLink,
 } from "lucide-react";
 
-import React, { useState } from 'react';
-import axios from 'axios';
-import Card from '../components/Card';
-import { MessageCircle, CheckCircle, Send, Bot, Bell, RefreshCw, Users } from 'lucide-react';
 import axiosInstance from './utility/axiosInstance';
 
 const API_BASE = 'http://localhost:3000';

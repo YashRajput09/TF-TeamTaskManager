@@ -68,9 +68,15 @@ app.use(cors({
 
 
 // Start Telegram bot (long polling mode)
-bot.launch().then(() => {
-  console.log('🤖 Telegram bot is running');
-});
+// bot.launch().then(() => {
+//   console.log('🤖 Telegram bot is running');
+// });
+if (process.env.NODE_ENV === "production") {
+  bot.launch().then(() => console.log("🤖 Telegram bot running in production"));
+} else {
+  console.log("⚠ Telegram bot disabled in development to avoid 409 conflict");
+}
+
 
 // Graceful shutdown
 process.once('SIGINT', () => bot.stop('SIGINT'));
