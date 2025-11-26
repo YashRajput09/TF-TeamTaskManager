@@ -14,6 +14,7 @@ import {
   Search,
   ArrowLeft,
   User,
+  Trash2,
 } from "lucide-react";
 import axiosInstance from "./utility/axiosInstance";
 import toast from "react-hot-toast";
@@ -329,11 +330,37 @@ const Teams = () => {
   const visibleTask = useMemo(() => {
     if (!teamData) return [];
     const base = onlyMine
-      ? visibleTasks?.filter(task => task.assignedTo?._id=== profile?._id)
+      ? visibleTasks?.filter((task) => task.assignedTo?._id === profile?._id)
       : visibleTasks;
     return base;
-  }, [teamData, onlyMine]);
- 
+  }, [teamData, visibleTasks, profile, onlyMine]);
+
+  //{can also use sweetalert2 by npm }
+  const handleConfirmation = async () => {
+    return window.confirm("Are you sure you want to delete this task?");
+  };
+
+  const handleDelete = async (taskId) => {
+    console.log(taskId);
+
+    const isConfirm = await handleConfirmation();
+
+    console.log(isConfirm);
+    if (!isConfirm) return;
+
+    try {
+      const res = await axiosInstance.delete(`/task/delete-task/${taskId}`, {
+        withCredentials: true,
+      });
+
+      toast.success("Task deleted successfully");
+      // Refresh UI or remove task from state
+    } catch (err) {
+      console.error(err);
+      toast.error(err?.response?.data?.message || "Failed to delete task");
+    }
+  };
+
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -349,10 +376,10 @@ const Teams = () => {
             </button>
           )}
           <div>
-            <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
+            <h1 className="text-xl md:text-2xl lg:text-3xl font-bold text-gray-900 dark:text-white">
               {teamData?.name}
             </h1>
-            <div className="flex gap-2 items-center">
+            <div className="flex flex-col md:flex-row gap-1 items-start md:items-center">
               <span className=" flex items-center gap-1 text-gray-600 dark:text-gray-400">
                 <User className="w-4 h-4" />
                 <i> Admin: </i> {teamData?.createdBy?.name}
@@ -375,7 +402,7 @@ const Teams = () => {
             <Plus className="w-4 h-4" />
             <span>Create Task</span>
           </button>}
-          {!selectedTeam && (
+          {isOwner(teamData) &&
             <>
               <button
                 className="btn-secondary hover:opacity-60 flex items-center space-x-2"
@@ -392,7 +419,7 @@ const Teams = () => {
                 <span>Remove Member</span>
               </button>
             </>
-          )}
+          }
         </div>
       </div>
 
@@ -482,7 +509,7 @@ const Teams = () => {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Members */}
           <Card className="lg:col-span-1">
-            <div className="flex items-center justify-between mb-4">
+            <div className="flex gap-2 items-center justify-between mb-4">
               <h2 className="text-xl font-bold text-gray-900 dark:text-white">
                 Members
               </h2>
@@ -505,9 +532,19 @@ const Teams = () => {
                   <div className="flex items-center space-x-3">
                     {/* <div className={`w-8 h-8 rounded-lg ${selectedTeam.color}`} /> */}
                     <div>
-                      {console.log(teamData?.createdBy?._id,m?._id,teamData?.createdBy?._id===m?._id)}
+                      {console.log(
+                        teamData?.createdBy?._id,
+                        m?._id,
+                        teamData?.createdBy?._id === m?._id
+                      )}
                       <p className="text-sm font-semibold text-gray-900 dark:text-white">
-                        {m.name } {teamData?.createdBy?._id===m?._id ? (<i>(Admin)</i>) : "" }  {m._id===profile._id ? (<i>(You)</i>) : ""}
+                        {m.name}{" "}
+                        {teamData?.createdBy?._id === m?._id ? (
+                          <i>(Admin)</i>
+                        ) : (
+                          ""
+                        )}{" "}
+                        {m._id === profile._id ? <i>(You)</i> : ""}
                       </p>
                       <p className="text-xs text-gray-600 dark:text-gray-400">
                         {m.role}
@@ -531,6 +568,7 @@ const Teams = () => {
                 <ListChecks className="w-5 h-5" /> Tasks
               </h2>
               <div className="flex items-center gap-3">
+                {!isOwner(teamData) && 
                 <label className="flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300">
                   <input
                     type="checkbox"
@@ -539,6 +577,8 @@ const Teams = () => {
                   />
                   Assigned to me
                 </label>
+                }
+                
 
                 {/* Show Create Task only for owner */}
                 {/* {isOwner(teamData) && (
@@ -573,14 +613,16 @@ const Teams = () => {
                 <tbody>
                   {visibleTask?.map((task) => (
                     <tr
-                      onClick={() => navigate(`/tasks/${task._id}`)}
                       key={task?._id}
-                      className="border-b border-gray-100 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors"
+                      className="border-b border-gray-100 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700/50  rounded-md transition-colors"
                     >
-                      <td className="py-3 px-4 text-sm text-gray-900 dark:text-white">
+                      <td
+                        onClick={() => navigate(`/tasks/${task?._id}`)}
+                        className="py-3 px-4 text-sm text-gray-900 hover:underline cursor-pointer dark:text-white"
+                      >
                         {task.title}
                       </td>
-                       {console.log(task?.assignedTo) }
+                      {console.log(task?.assignedTo)}
                       <td className="py-3 px-4 text-sm text-gray-700 dark:text-gray-300">
                         {task?.assignedTo?.name}
                       </td>
@@ -612,6 +654,14 @@ const Teams = () => {
                           {task?.priority}
                         </span>
                       </td>
+                      {isOwner(teamData) && (
+                        <td>
+                          <Trash2
+                            onClick={() => handleDelete(task?._id)}
+                            className="w-4 mr-2 text-red-700 opacity-75 cursor-pointer hover:opacity-100 hover:text-600"
+                          />
+                        </td>
+                      )}
                     </tr>
                   ))}
                 </tbody>
@@ -645,7 +695,7 @@ const Teams = () => {
           onClose={() => setShowAdd(false)}
         >
           <AddMemberForm
-            onAdd={{ alluser: alluser, groupId: teamId }}
+            onAdd={{ alluser: alluser, group: teamData }}
             onCancel={() => setShowAdd(false)}
           />
         </InlineModal>
@@ -774,7 +824,7 @@ const AddMemberForm = ({ onAdd, onCancel }) => {
 
   console.log(selectedMembers);
 
-  console.log(onAdd?.groupId);
+  console.log(onAdd?.group);
   // ✅ Handle form submit
   const handleSubmit = async (e) => {
     try {
@@ -785,7 +835,7 @@ const AddMemberForm = ({ onAdd, onCancel }) => {
         return;
       }
       const { data } = await axiosInstance.post(
-        `/group/add-member/${onAdd?.groupId}`,
+        `/group/add-member/${onAdd?.group?._id}`,
         { membersId: selectedMembers }
       );
       console.log(data);
@@ -807,12 +857,16 @@ const AddMemberForm = ({ onAdd, onCancel }) => {
           Select Members
         </label>
         <div className="space-y-2 max-h-48 overflow-y-auto border rounded-md p-2 bg-gray-50 dark:bg-gray-700/30">
+        {console.log(onAdd?.alluser,onAdd?.group) }
           {onAdd?.alluser?.length > 0 ? (
-            onAdd?.alluser?.map((user) => (
+            onAdd?.alluser
+            ?.filter((user)=>user?._id !==onAdd?.group?.createdBy._id)
+            ?.map((user) => (
               <label
-                key={user._id}
-                className="flex items-center gap-2 cursor-pointer text-gray-800 dark:text-gray-200"
+              key={user._id}
+              className="flex items-center gap-2 cursor-pointer text-gray-800 dark:text-gray-200"
               >
+              {  console.log(user?._id ===onAdd?.group?.createdBy._id)}
                 <input
                   type="checkbox"
                   checked={selectedMembers.includes(user._id)}

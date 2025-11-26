@@ -23,8 +23,8 @@ const Dashboard = () => {
     const allUserTask = async () => {
       try {
         const { data } = await axiosInstance.get(`/task/get-user-task`);
-        console.log(data?.assignedTasks);
-        console.log(data?.createdTasks);
+        //console.log(data?.assignedTasks);
+        //console.log(data?.createdTasks);
         setUserAssignedTask(data?.assignedTasks);
         setUserCreatedTask(data?.createdTasks);
       } catch (error) {
@@ -33,7 +33,7 @@ const Dashboard = () => {
     };
     const getUserGroups = async () => {
       const { data } = await axiosInstance.get(`/user/myprofile`);
-      console.log(data);
+      //console.log(data);
       setUserGroups(data?.groups);
     };
 
@@ -54,7 +54,7 @@ const Dashboard = () => {
     {
       label: "In Progress",
       value: String(
-        userAssignedTask.filter((t) => t.status === "In Progress").length
+        userAssignedTask.filter((t) => t.status === "In-progress").length
       ),
       change: "+0%",
       icon: Clock,
@@ -90,17 +90,19 @@ const Dashboard = () => {
     color: g.color || "bg-blue-500",
   }));
 
+  console.log(userAssignedTask)
   // Normalize assigned tasks for "My Recent Tasks"
   const recent = userAssignedTask.map((t, idx) => ({
     id: t.id || t._id || idx + 1,
     title: t.title || t.name || "Untitled Task",
-    team: t.team?.name || t.team || t.teamName || "Team",
+    team: t.group[0 ]?.name || t.team || t.teamName || "Team",
     priority: t.priority || "Medium",
     dueDate: t.deadline || t.dueDate || "",
     status: t.status || "Pending",
     description: t.description || "",
-    assignee: t.assignee?.name || t.assignee || "",
+    assignee: t.assignedTo?.name || t.assignee || "",
     raw: t,
+    
   }));
 
   // date formate
@@ -145,11 +147,11 @@ const Dashboard = () => {
 
   const handleAccept = async (task_id) => {
     try {
-      console.log(task_id)
+      //console.log(task_id)
       const { data } = await axiosInstance.put(
         `/task/update-status/${task_id}` ,{status:"In-progress"}
       );
-      console.log(data);
+      //console.log(data);
       // alert("task accepted ");
       toast.success("Accepted")
     } catch (error) {
@@ -246,8 +248,9 @@ const Dashboard = () => {
                     >
                       {task.title}
                     </h3>
+                   {console.log(task.team)}
                     <div className="mt-1 flex items-center space-x-3 text-xs text-gray-600 dark:text-gray-400">
-                      <span>{task?.group?.name}</span>
+                      <span>{task?.team}</span>
                       <span>•</span>
                       <span>
                         {console.log(task)}
@@ -305,7 +308,6 @@ const Dashboard = () => {
             </button>
           </div>
 
-{console.log(teams)}
           <div className="space-y-3">
             {teams?.map((t) => (
               <div
@@ -316,7 +318,6 @@ const Dashboard = () => {
                 className="w-full text-left p-3 rounded-lg bg-gray-50 dark:bg-gray-700/50 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
               >
                 <div className="flex items-center justify-between">
-                  {console.log(t)}
                   <div className="flex items-center space-x-3">
                     <div className={`w-8 h-8 ${t.color} rounded-lg`} />
                     <div>

@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
 import axios from "axios";
+import axiosInstance from "../pages/utility/axiosInstance";
 
 export const AuthContext = createContext();
 
@@ -12,7 +13,7 @@ export const AuthProvider = ({ children }) => {
   const fetchProfile = async () => {
     try {
       console.log("🔐 Fetching profile...");
-      const response = await axios.get("http://localhost:3000/user/myprofile", {
+      const response = await axiosInstance.get("/user/myprofile", {
         withCredentials: true,
         headers: { "Content-Type": "application/json" },
       });
@@ -47,8 +48,8 @@ export const AuthProvider = ({ children }) => {
   const login = async (email, password) => {
     try {
       console.log("🔐 Attempting login...");
-      const response = await axios.post(
-        "http://localhost:3000/user/login",
+      const response = await axiosInstance.post(
+        "/user/login",
         { email, password },
         {
           withCredentials: true,
@@ -70,8 +71,8 @@ export const AuthProvider = ({ children }) => {
   // Logout user and clear context
   const logout = async () => {
     try {
-      await axios.post(
-        "http://localhost:3000/user/logout",
+      await axiosInstance.post(
+        "/user/logout",
         {},
         { withCredentials: true }
       );
@@ -87,8 +88,8 @@ export const AuthProvider = ({ children }) => {
   // Signup new user and refresh profile
   const signup = async (userData) => {
     try {
-      const response = await axios.post(
-        "http://localhost:3000/user/signup",
+      const response = await axiosInstance.post(
+        "/user/signup",
         userData,
         {
           withCredentials: true,
@@ -142,7 +143,6 @@ export const AuthProvider = ({ children }) => {
 // Hook for easy usage
 export const useAuth = () => {
   const context = useContext(AuthContext);
-  if (!context)
-    throw new Error("useAuth must be used within an AuthProvider");
+  if (!context) throw new Error("useAuth must be used within an AuthProvider");
   return context;
 };

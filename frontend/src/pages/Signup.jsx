@@ -13,6 +13,7 @@ import {
 import axios from "axios";
 import toast from "react-hot-toast";
 import { useAuth } from "../context/AuthProvider"; // ✅ auth context
+import axiosInstance from "./utility/axiosInstance";
 
 export default function Signup() {
   const navigate = useNavigate();
@@ -54,7 +55,7 @@ export default function Signup() {
 
     try {
       setSubmitting(true);
-      const res = await axios.post("http://localhost:3000/user/signup", formData, {
+      const res = await axiosInstance.post("/user/signup", formData, {
         withCredentials: true,
         headers: { "Content-Type": "multipart/form-data" },
       });

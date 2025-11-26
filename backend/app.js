@@ -11,9 +11,13 @@ import userRoute from '../backend/routes/user.route.js';
 import groupRoute from '../backend/routes/group.route.js';
 import taskRoute from '../backend/routes/task.route.js';
 import commentRoute from '../backend/routes/comment.route.js';
+
+import integrationRoute from "./routes/integration.route.js";
+
 import automationRoute from './routes/ai.route.jsautomation.route.js';
-import telegramRoute from './routes/telegram.route.js';
 import calendarRoute from './routes/calendar.route.js';
+import bot from './utils/telegramBot.js';
+import { startReminderScheduler } from './services/telegramReminderSchedular.js';
 
 const app = express();
 
@@ -63,6 +67,21 @@ app.use(cors({
 );
 
 
+// Start Telegram bot (long polling mode)
+// bot.launch().then(() => {
+//   console.log('🤖 Telegram bot is running');
+// });
+if (process.env.NODE_ENV === "production") {
+  bot.launch().then(() => console.log("🤖 Telegram bot running in production"));
+} else {
+  console.log("⚠ Telegram bot disabled in development to avoid 409 conflict");
+}
+
+
+// Graceful shutdown
+process.once('SIGINT', () => bot.stop('SIGINT'));
+process.once('SIGTERM', () => bot.stop('SIGTERM'));
+
 // const allowedOrigins = [
 //     'http://localhost:5173',
 //     'http://localhost:3000',
@@ -111,25 +130,29 @@ app.get("/health", (req, res) => {
 });
 
 // Routes
-app.use(["/", "/user"], fileUploadMiddleware, userRoute);
+app.use("/user", fileUploadMiddleware, userRoute);
 app.use("/group", groupRoute);
 app.use("/task", fileUploadMiddleware, taskRoute);
 app.use("/comment", commentRoute);
 app.use("/automation", automationRoute);
-app.use("/api/telegram", telegramRoute); 
-app.use("/calendar", calendarRoute);
+app.use("/integration", integrationRoute); 
+app.use("/api/calendar", calendarRoute);
+
+app.get("/",(req,res)=>{
+    res.send("Task Manager and Tracker backend Running")
+})
 
 // Add to your app.js
-app.get("/api/debug-cookie", (req, res) => {
-  // console.log('🍪 Received cookies:', req.cookies);
-  // console.log('🍪 jwttoken present:', !!req.cookies.jwttoken);
+// app.get("/api/debug-cookie", (req, res) => {
+//   // console.log('🍪 Received cookies:', req.cookies);
+//   // console.log('🍪 jwttoken present:', !!req.cookies.jwttoken);
   
-  res.json({
-    cookiesReceived: req.cookies,
-    jwttokenPresent: !!req.cookies.jwttoken,
-    message: "Check your backend console for cookie details"
-  });
-});
+//   res.json({
+//     cookiesReceived: req.cookies,
+//     jwttokenPresent: !!req.cookies.jwttoken,
+//     message: "Check your backend console for cookie details"
+//   });
+// });
 // FIXED: 404 handler - use a proper path
 app.use((req, res) => {
     res.status(404).json({ 
@@ -153,11 +176,14 @@ async function dbConnection() {
         console.log('🔗 Attempting to connect to database...');
         await mongoose.connect(dbUrl);
         console.log("✅ DB connected successfully");
+
+        //telegram reminder runner 
+        startReminderScheduler();
         
         app.listen(port, () => {
             console.log(`🚀 Server running on port: ${port}`);
-            console.log(`📡 Test the server at: http://localhost:${port}/api/test`);
-            console.log(`❤️  Health check at: http://localhost:${port}/health`);
+            // console.log(`📡 Test the server at: http://localhost:${port}/api/test`);
+            // console.log(`❤️  Health check at: http://localhost:${port}/health`);
         });
         
     } catch (error) {
