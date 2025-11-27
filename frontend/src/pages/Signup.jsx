@@ -59,16 +59,16 @@ export default function Signup() {
     }
     //Send OTP to email
     try {
-      // const { data } = await axiosInstance.post(`/user/forgot-password`, {
-      //   email: form.email,
-      //   context: "register",
-      // });
+      const { data } = await axiosInstance.post(`/user/forgot-password`, {
+        email: form.email,
+        context: "register",
+      });
       // console.log(data);
       setIsModalOpen(true);
-      console.log("object")
+      console.log("object");
     } catch (error) {
       console.log(error);
-      toast.error(error?.response?.data?.message)
+      toast.error(error?.response?.data?.message);
     }
 
     // const formData = new FormData();
@@ -107,54 +107,50 @@ export default function Signup() {
     // }
   };
 
-
   const handleSignUp = async (response) => {
     //Sign Up when OTP Verified
     const formData = new FormData();
     Object.keys(form).forEach((key) => {
       formData.append(key, form[key]);
     });
+    console.log(formData);
 
     try {
       setSubmitting(true);
-      // const res = await axiosInstance.post("/user/signup", formData, {
-      //   withCredentials: true,
-      //   headers: { "Content-Type": "multipart/form-data" },
-      // });
+      const res = await axiosInstance.post("/user/signup", formData, {
+        withCredentials: true,
+        headers: { "Content-Type": "multipart/form-data" },
+      });
 
-      // const userData = res?.data?.newUser || res?.data?.user;
+      const userData = res?.data?.newUser || res?.data?.user;
       toast.success("🎉 Account created successfully!");
 
       // ✅ Auto-login
-      // setIsAuthenticated(true);
-      // setProfile(userData);
-      // localStorage.setItem(
-      //   "auth_user",
-      //   JSON.stringify({
-      //     id: userData._id,
-      //     name: userData.name,
-      //     email: userData.email,
-      //   })
-      // );
-
+      setIsAuthenticated(true);
+      setProfile(userData);
+      
+      localStorage.setItem(
+        "auth_user",
+        JSON.stringify({
+          id: userData._id,
+          name: userData.name,
+          email: userData.email,
+        })
+      );
       // navigate("/dashboard");
+       return { success: true };
     } catch (error) {
       console.error("Signup error:", error);
       toast.error(error.response?.data?.message || "Signup failed!");
+       return { success: false, message: error.response?.data?.message};
     } finally {
       setSubmitting(false);
     }
-
     // setTimeout(() => {
-      console.log("Verification successful:", response);
+    console.log("Verification successful:", response);
     // }, 5000);
+    console.log("object");
 
-
-    setTimeout(() => {
-      
-    }, 5000);
-
-    return {success:true}
     // alert("Email verified successfully! ✅");
   };
 
