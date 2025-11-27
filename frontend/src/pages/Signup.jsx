@@ -14,11 +14,13 @@ import axios from "axios";
 import toast from "react-hot-toast";
 import { useAuth } from "../context/AuthProvider"; // ✅ auth context
 import axiosInstance from "./utility/axiosInstance";
+import EmailVerificationBox from "../components/EmailVerificationBox";
 
 export default function Signup() {
   const navigate = useNavigate();
   const { setIsAuthenticated, setProfile } = useAuth();
 
+  const [isModalOpen, setIsModalOpen] = useState();
   const [form, setForm] = useState({
     name: "",
     email: "",
@@ -43,7 +45,14 @@ export default function Signup() {
     e.preventDefault();
 
     const { name, email, password, mobileNumber, bio, profileImage } = form;
-    if (!name || !email || !password || !mobileNumber || !bio || !profileImage) {
+    if (
+      !name ||
+      !email ||
+      !password ||
+      !mobileNumber ||
+      !bio ||
+      !profileImage
+    ) {
       toast.error("Please fill all fields and upload an image!");
       return;
     }
@@ -84,11 +93,21 @@ export default function Signup() {
     }
   };
 
+  const handleVerificationSuccess = (response) => {
+    console.log("Verification successful:", response);
+    alert("Email verified successfully! ✅");
+  };
+
+  const handleChangeEmail = () => {
+    setIsModalOpen(false);
+  };
+
   return (
     <div className="min-h-[80vh] flex flex-col items-center justify-center px-4 bg-gray-900 ">
       {/* 🏷️ Signup heading */}
       <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-6 text-center">
-        Sign up for <span className="text-primary-600 dark:text-primary-400">TeamTask</span>
+        Sign up for{" "}
+        <span className="text-primary-600 dark:text-primary-400">TeamTask</span>
       </h1>
 
       <Card className="w-full max-w-md p-6 shadow-md">
@@ -226,6 +245,22 @@ export default function Signup() {
               "Create Account"
             )}
           </button>
+          <button
+            onClick={() => setIsModalOpen(true)}
+            disabled={submitting}
+            className={`btn-primary w-full flex items-center justify-center gap-2 ${
+              submitting ? "opacity-70 cursor-not-allowed" : ""
+            }`}
+          >
+            {submitting ? (
+              <>
+                <Loader2 className="w-4 h-4 animate-spin" />
+                <span>Creating account...</span>
+              </>
+            ) : (
+              "Create Account"
+            )}
+          </button>
         </form>
 
         <p className="mt-4 text-sm text-gray-600 dark:text-gray-400 text-center">
@@ -238,6 +273,16 @@ export default function Signup() {
           </Link>
         </p>
       </Card>
+
+      <EmailVerificationBox
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        email={form.email}
+        onSuccess={handleVerificationSuccess}
+        onChangeEmail={handleChangeEmail}
+        otpLength={6}
+        isDark={true}
+      />
     </div>
   );
 }

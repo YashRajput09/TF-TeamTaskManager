@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from "react";
 import { Eye, EyeOff, Mail, Lock, Check, X, Moon, Sun } from "lucide-react";
 import axiosInstance from "./utility/axiosInstance";
 import toast from "react-hot-toast";
+import { useLocation } from "react-router-dom";
 
 const ForgotPassword = () => {
   const [step, setStep] = useState(1);
@@ -21,6 +22,12 @@ const ForgotPassword = () => {
   const [isDark, setIsDark] = useState(false);
 
   const otpRefs = useRef([]);
+
+ const location=useLocation();
+ const autoFillEmail=location?.state?.email
+useEffect(()=>{
+  setEmail(autoFillEmail);
+},[])
 
   useEffect(() => {
     const checkTheme = () => {
@@ -70,6 +77,7 @@ const ForgotPassword = () => {
       console.log(error);
       toast.error(error?.response?.data?.message);
     }
+    setLoading(false);
   };
 
   const handleChangeEmail = () => {
