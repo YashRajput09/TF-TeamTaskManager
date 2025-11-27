@@ -20,6 +20,7 @@ export default function Signup() {
   const navigate = useNavigate();
   const { setIsAuthenticated, setProfile } = useAuth();
 
+  const [loading,setLoading]=useState(false);
   const [isModalOpen, setIsModalOpen] = useState();
   const [form, setForm] = useState({
     name: "",
@@ -58,6 +59,7 @@ export default function Signup() {
       return;
     }
     //Send OTP to email
+    setSubmitting(true)
     try {
       const { data } = await axiosInstance.post(`/user/forgot-password`, {
         email: form.email,
@@ -69,42 +71,10 @@ export default function Signup() {
     } catch (error) {
       console.log(error);
       toast.error(error?.response?.data?.message);
+    }finally{
+      setSubmitting(false)
     }
 
-    // const formData = new FormData();
-    // Object.keys(form).forEach((key) => {
-    //   formData.append(key, form[key]);
-    // });
-
-    // try {
-    //   setSubmitting(true);
-    //   const res = await axiosInstance.post("/user/signup", formData, {
-    //     withCredentials: true,
-    //     headers: { "Content-Type": "multipart/form-data" },
-    //   });
-
-    //   const userData = res.data?.newUser || res.data?.user;
-    //   toast.success("🎉 Account created successfully!");
-
-    //   // ✅ Auto-login
-    //   setIsAuthenticated(true);
-    //   setProfile(userData);
-    //   localStorage.setItem(
-    //     "auth_user",
-    //     JSON.stringify({
-    //       id: userData._id,
-    //       name: userData.name,
-    //       email: userData.email,
-    //     })
-    //   );
-
-    //   navigate("/dashboard");
-    // } catch (error) {
-    //   console.error("Signup error:", error);
-    //   toast.error(error.response?.data?.message || "Signup failed!");
-    // } finally {
-    //   setSubmitting(false);
-    // }
   };
 
   const handleSignUp = async (response) => {
@@ -295,7 +265,7 @@ export default function Signup() {
             {submitting ? (
               <>
                 <Loader2 className="w-4 h-4 animate-spin" />
-                <span>Creating account...</span>
+                <span>Creating ...</span>
               </>
             ) : (
               "Create Account"

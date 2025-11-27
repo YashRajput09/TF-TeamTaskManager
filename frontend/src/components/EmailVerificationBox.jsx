@@ -15,7 +15,7 @@ const api = {
       return { success: true, message: "OTP verified " }
     } catch (error) {
       console.log(error);
-      toast.error(error?.response?.data?.message || "Invalid")
+      // toast.error(error?.response?.data?.message || "Invalid")
       return { success: false, message: "Invalid OTP" }
     }
   },
@@ -190,6 +190,7 @@ const EmailVerificationBox = ({
       if(!response?.success){
         setError(response?.message)
         setIsShaking(true);
+        setTimeout(() => setIsShaking(false), 500);
         return
       }
       // Close modal with delay for success animation

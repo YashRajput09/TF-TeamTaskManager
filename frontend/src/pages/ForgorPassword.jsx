@@ -67,12 +67,10 @@ useEffect(()=>{
         context: "forgot-password",
       });
       toast.success("OTP Send Successfully");
-      setTimeout(() => {
         setLoading(false);
         setEmailDisabled(true);
         setStep(2);
         setResendTimer(30);
-      }, 1500);
     } catch (error) {
       console.log(error);
       toast.error(error?.response?.data?.message);
