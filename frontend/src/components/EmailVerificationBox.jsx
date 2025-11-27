@@ -1,57 +1,69 @@
-import React, { useEffect, useRef, useState } from 'react'
-import { X, Mail, Check, AlertCircle, Moon, Sun } from 'lucide-react';
+import React, { useEffect, useRef, useState } from "react";
+import { X, Mail, Check, AlertCircle, Moon, Sun } from "lucide-react";
+import axiosInstance from "../pages/utility/axiosInstance";
 const api = {
-  sendOTP: async (email) => {
-    // Example: await axios.post('/api/auth/send-otp', { email });
-    return new Promise((resolve) => {
-      setTimeout(() => resolve({ success: true }), 1000);
-    });
+  verifyOT: async (email, otp) => {
+    try {
+      const { data } = await axiosInstance.post("/user/verifyotp", {
+        email,
+        context: "register",
+        otp,
+      });
+    } catch (error) {
+      console.log(error);
+    }
   },
-  
   verifyOTP: async (email, otp) => {
     // Example: await axios.post('/api/auth/verify-otp', { email, otp });
     return new Promise((resolve, reject) => {
       setTimeout(() => {
-        if (otp === '123456') {
-          resolve({ success: true, message: 'OTP verified successfully' });
+        if (otp === "123456") {
+          resolve({ success: true, message: "OTP verified " });
         } else {
-          reject({ success: false, message: 'Invalid OTP' });
+          reject({ success: false, message: "Invalid OTP" });
         }
-      }, 1000);
+      }, 10000);
     });
   },
-  
+
   resendOTP: async (email) => {
     // Example: await axios.post('/api/auth/resend-otp', { email });
     return new Promise((resolve) => {
       setTimeout(() => resolve({ success: true }), 1000);
     });
-  }
+  },
 };
 
-const EmailVerificationBox = ({ 
-  isOpen, 
-  onClose, 
-  email, 
+const EmailVerificationBox = ({
+  isOpen,
+  onClose,
+  email,
   onSuccess,
   onChangeEmail,
   otpLength = 6,
-  isDark = true
+  isDark = true,
 }) => {
-  const [otp, setOtp] = useState(Array(otpLength).fill(''));
+  const [otp, setOtp] = useState(Array(otpLength).fill(""));
   const [loading, setLoading] = useState(false);
   const [resendTimer, setResendTimer] = useState(30);
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
   const [isShaking, setIsShaking] = useState(false);
   const [successState, setSuccessState] = useState(false);
   const otpRefs = useRef([]);
 
+  //Send Email Automatically when Modal open
+  useEffect(() => {
+    {
+      isOpen && console.log("Email Sended");
+    }
+  }, [isOpen]);
+
   // Mask email function
   const maskEmail = (email) => {
-    if (!email) return '';
-    const [localPart, domain] = email.split('@');
+    if (!email) return "";
+    const [localPart, domain] = email.split("@");
     if (localPart.length <= 2) return email;
-    const masked = localPart.slice(0, 2) + '****' + localPart.slice(-1);
+    const masked = localPart.slice(0, 2) + "****" + localPart.slice(-1);
     return `${masked}@${domain}`;
   };
 
@@ -74,11 +86,11 @@ const EmailVerificationBox = ({
   const handleOtpChange = (index, value) => {
     if (value.length > 1) return;
     if (!/^\d*$/.test(value)) return;
-    
+
     const newOtp = [...otp];
     newOtp[index] = value;
     setOtp(newOtp);
-    setError('');
+    setError("");
 
     // Auto-advance to next input
     if (value && index < otpLength - 1) {
@@ -88,7 +100,7 @@ const EmailVerificationBox = ({
 
   // Handle backspace
   const handleKeyDown = (index, e) => {
-    if (e.key === 'Backspace') {
+    if (e.key === "Backspace") {
       if (!otp[index] && index > 0) {
         otpRefs.current[index - 1]?.focus();
       }
@@ -98,47 +110,51 @@ const EmailVerificationBox = ({
   // Handle paste
   const handlePaste = (e) => {
     e.preventDefault();
-    const pastedData = e.clipboardData.getData('text/plain').trim();
+    const pastedData = e.clipboardData.getData("text/plain").trim();
     if (!/^\d+$/.test(pastedData)) return;
-    
-    const digits = pastedData.slice(0, otpLength).split('');
+
+    const digits = pastedData.slice(0, otpLength).split("");
     const newOtp = [...otp];
     digits.forEach((digit, idx) => {
       if (idx < otpLength) newOtp[idx] = digit;
     });
     setOtp(newOtp);
-    
+
     // Focus on next empty input or last input
-    const nextEmptyIndex = newOtp.findIndex(val => !val);
+    const nextEmptyIndex = newOtp.findIndex((val) => !val);
     const focusIndex = nextEmptyIndex === -1 ? otpLength - 1 : nextEmptyIndex;
     otpRefs.current[focusIndex]?.focus();
   };
 
   // Verify OTP
   const handleVerifyOTP = async () => {
-    const otpValue = otp.join('');
+    const otpValue = otp.join("");
     if (otpValue.length !== otpLength) {
-      setError('Please enter complete OTP');
+      setError("Please enter complete OTP");
       return;
     }
-
     setLoading(true);
-    setError('');
+    setError("");
 
     try {
       const response = await api.verifyOTP(email, otpValue);
-      setSuccessState(true);
       
       // Close modal with delay for success animation
-      setTimeout(() => {
-        onSuccess?.(response);
-        handleClose();
-      }, 1500);
+      const signupResult= await onSuccess(response);
+      
+      console.log(signupResult);
+      
+      setSuccessState(true);
+      
+       console.log("object")
+        setTimeout(() => {
+          handleClose();
+        }, 10000);
     } catch (err) {
-      setError(err.message || 'Invalid OTP');
+      setError(err.message || "Invalid OTP");
       setIsShaking(true);
       setTimeout(() => setIsShaking(false), 500);
-      setOtp(Array(otpLength).fill(''));
+      setOtp(Array(otpLength).fill(""));
       otpRefs.current[0]?.focus();
     } finally {
       setLoading(false);
@@ -148,16 +164,16 @@ const EmailVerificationBox = ({
   // Resend OTP
   const handleResendOTP = async () => {
     if (resendTimer > 0) return;
-    
+
     setLoading(true);
     try {
       await api.resendOTP(email);
       setResendTimer(30);
-      setOtp(Array(otpLength).fill(''));
-      setError('');
+      setOtp(Array(otpLength).fill(""));
+      setError("");
       otpRefs.current[0]?.focus();
     } catch (err) {
-      setError('Failed to resend OTP');
+      setError("Failed to resend OTP");
     } finally {
       setLoading(false);
     }
@@ -165,8 +181,8 @@ const EmailVerificationBox = ({
 
   // Close modal and reset state
   const handleClose = () => {
-    setOtp(Array(otpLength).fill(''));
-    setError('');
+    setOtp(Array(otpLength).fill(""));
+    setError("");
     setResendTimer(30);
     setSuccessState(false);
     onClose();
@@ -177,31 +193,27 @@ const EmailVerificationBox = ({
   return (
     <div
       className={`fixed inset-0 z-50 flex items-center justify-center p-4 backdrop-blur-sm ${
-        isDark ? 'bg-black/70' : 'bg-black/60'
+        isDark ? "bg-black/70" : "bg-black/60"
       }`}
       style={{
-        animation: 'fadeIn 0.2s ease-out'
+        animation: "fadeIn 0.2s ease-out",
       }}
     >
       <div
         className={`relative w-full max-w-md rounded-2xl shadow-2xl p-8 transform transition-all duration-300 ${
-          isShaking ? 'animate-shake' : ''
-        } ${
-          isDark 
-            ? 'bg-gray-800 border border-gray-700' 
-            : 'bg-white'
-        }`}
+          isShaking ? "animate-shake" : ""
+        } ${isDark ? "bg-gray-800 border border-gray-700" : "bg-white"}`}
         style={{
-          animation: 'modalSlideIn 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55)'
+          animation: "modalSlideIn 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55)",
         }}
       >
         {/* Close Button */}
         <button
           onClick={handleClose}
           className={`absolute top-4 right-4 p-2 rounded-full transition-colors ${
-            isDark 
-              ? 'text-gray-400 hover:text-gray-300 hover:bg-gray-700' 
-              : 'text-gray-400 hover:text-gray-600 hover:bg-gray-100'
+            isDark
+              ? "text-gray-400 hover:text-gray-300 hover:bg-gray-700"
+              : "text-gray-400 hover:text-gray-600 hover:bg-gray-100"
           }`}
           disabled={loading}
         >
@@ -211,46 +223,73 @@ const EmailVerificationBox = ({
         {/* Success State */}
         {successState ? (
           <div className="text-center py-8 animate-fadeIn">
-            <div className={`w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-4 animate-scaleIn ${
-              isDark ? 'bg-green-900/50' : 'bg-green-100'
-            }`}>
-              <Check className={`w-10 h-10 ${isDark ? 'text-green-400' : 'text-green-600'}`} strokeWidth={3} />
+            <div
+              className={`w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-4 animate-scaleIn ${
+                isDark ? "bg-green-900/50" : "bg-green-100"
+              }`}
+            >
+              <Check
+                className={`w-10 h-10 ${
+                  isDark ? "text-green-400" : "text-green-600"
+                }`}
+                strokeWidth={3}
+              />
             </div>
-            <h3 className={`text-2xl font-bold mb-2 ${isDark ? 'text-white' : 'text-gray-800'}`}>
+            <h3
+              className={`text-2xl font-bold mb-2 ${
+                isDark ? "text-white" : "text-gray-800"
+              }`}
+            >
               Verified!
             </h3>
-            <p className={isDark ? 'text-gray-400' : 'text-gray-600'}>
+            <p className={isDark ? "text-gray-400" : "text-gray-600"}>
               Your email has been successfully verified
             </p>
           </div>
         ) : (
           <>
             {/* Icon */}
-            <div className={`w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-6 ${
-              isDark 
-                ? 'bg-gradient-to-br from-blue-600 to-purple-700' 
-                : 'bg-gradient-to-br from-blue-500 to-purple-600'
-            }`}>
+            <div
+              className={`w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-6 ${
+                isDark
+                  ? "bg-gradient-to-br from-blue-600 to-purple-700"
+                  : "bg-gradient-to-br from-blue-500 to-purple-600"
+              }`}
+            >
               <Mail className="w-8 h-8 text-white" />
             </div>
 
             {/* Title */}
-            <h2 className={`text-2xl font-bold text-center mb-2 ${isDark ? 'text-white' : 'text-gray-800'}`}>
+            <h2
+              className={`text-2xl font-bold text-center mb-2 ${
+                isDark ? "text-white" : "text-gray-800"
+              }`}
+            >
               Verify Your Email
             </h2>
-            <p className={`text-center mb-6 ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
+            <p
+              className={`text-center mb-6 ${
+                isDark ? "text-gray-400" : "text-gray-600"
+              }`}
+            >
               We've sent a {otpLength}-digit code to
               <br />
-              <span className={`font-semibold ${isDark ? 'text-gray-200' : 'text-gray-800'}`}>
+              <span
+                className={`font-semibold ${
+                  isDark ? "text-gray-200" : "text-gray-800"
+                }`}
+              >
                 {maskEmail(email)}
               </span>
             </p>
 
             {/* OTP Input */}
             <div className="mb-6">
-              <label className={`block text-sm font-medium mb-3 text-center ${
-                isDark ? 'text-gray-300' : 'text-gray-700'
-              }`}>
+              <label
+                className={`block text-sm font-medium mb-3 text-center ${
+                  isDark ? "text-gray-300" : "text-gray-700"
+                }`}
+              >
                 Enter Verification Code
               </label>
               <div className="flex gap-2 justify-center">
@@ -269,15 +308,15 @@ const EmailVerificationBox = ({
                     className={`w-12 h-12 sm:w-14 sm:h-14 text-center text-xl font-bold border-2 rounded-lg transition-all focus:outline-none ${
                       error
                         ? isDark
-                          ? 'border-red-500 bg-red-900/30 text-red-400'
-                          : 'border-red-500 bg-red-50 text-red-600'
+                          ? "border-red-500 bg-red-900/30 text-red-400"
+                          : "border-red-500 bg-red-50 text-red-600"
                         : digit
                         ? isDark
-                          ? 'border-blue-500 bg-blue-900/30 text-blue-400 focus:ring-2 focus:ring-blue-500'
-                          : 'border-blue-500 bg-blue-50 text-blue-600 focus:ring-2 focus:ring-blue-500'
+                          ? "border-blue-500 bg-blue-900/30 text-blue-400 focus:ring-2 focus:ring-blue-500"
+                          : "border-blue-500 bg-blue-50 text-blue-600 focus:ring-2 focus:ring-blue-500"
                         : isDark
-                        ? 'border-gray-600 bg-gray-900 text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500'
-                        : 'border-gray-300 bg-white text-gray-900 focus:ring-2 focus:ring-blue-500'
+                        ? "border-gray-600 bg-gray-900 text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                        : "border-gray-300 bg-white text-gray-900 focus:ring-2 focus:ring-blue-500"
                     } disabled:opacity-50 disabled:cursor-not-allowed`}
                   />
                 ))}
@@ -295,26 +334,34 @@ const EmailVerificationBox = ({
             {/* Verify Button */}
             <button
               onClick={handleVerifyOTP}
-              disabled={otp.join('').length !== otpLength || loading}
+              disabled={otp.join("").length !== otpLength || loading}
               className={`w-full py-3 rounded-lg font-semibold transform transition-all flex items-center justify-center ${
-                isDark 
-                  ? 'bg-gradient-to-r from-blue-600 to-purple-700 hover:from-blue-700 hover:to-purple-800' 
-                  : 'bg-gradient-to-r from-blue-500 to-purple-600 hover:shadow-lg hover:scale-[1.02]'
+                isDark
+                  ? "bg-gradient-to-r from-blue-600 to-purple-700 hover:from-blue-700 hover:to-purple-800"
+                  : "bg-gradient-to-r from-blue-500 to-purple-600 hover:shadow-lg hover:scale-[1.02]"
               } text-white disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none`}
             >
               {loading ? (
                 <div className="w-6 h-6 border-2 border-white border-t-transparent rounded-full animate-spin" />
               ) : (
-                'Verify OTP'
+                "Verify OTP"
               )}
             </button>
 
             {/* Resend OTP */}
             <div className="text-center mt-6">
               {resendTimer > 0 ? (
-                <p className={`text-sm ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>
-                  Resend OTP in{' '}
-                  <span className={`font-semibold ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
+                <p
+                  className={`text-sm ${
+                    isDark ? "text-gray-400" : "text-gray-500"
+                  }`}
+                >
+                  Resend OTP in{" "}
+                  <span
+                    className={`font-semibold ${
+                      isDark ? "text-gray-300" : "text-gray-700"
+                    }`}
+                  >
                     {resendTimer}s
                   </span>
                 </p>
@@ -323,7 +370,9 @@ const EmailVerificationBox = ({
                   onClick={handleResendOTP}
                   disabled={loading}
                   className={`text-sm font-medium hover:underline disabled:opacity-50 ${
-                    isDark ? 'text-blue-400 hover:text-blue-300' : 'text-blue-600 hover:text-blue-700'
+                    isDark
+                      ? "text-blue-400 hover:text-blue-300"
+                      : "text-blue-600 hover:text-blue-700"
                   }`}
                 >
                   Resend OTP
@@ -338,7 +387,9 @@ const EmailVerificationBox = ({
                   onClick={onChangeEmail}
                   disabled={loading}
                   className={`text-sm hover:underline disabled:opacity-50 ${
-                    isDark ? 'text-gray-400 hover:text-gray-300' : 'text-gray-600 hover:text-gray-800'
+                    isDark
+                      ? "text-gray-400 hover:text-gray-300"
+                      : "text-gray-600 hover:text-gray-800"
                   }`}
                 >
                   Change Email Address
@@ -347,7 +398,11 @@ const EmailVerificationBox = ({
             )}
 
             {/* Demo Hint */}
-            <p className={`text-xs text-center mt-6 ${isDark ? 'text-gray-500' : 'text-gray-400'}`}>
+            <p
+              className={`text-xs text-center mt-6 ${
+                isDark ? "text-gray-500" : "text-gray-400"
+              }`}
+            >
               Demo: Use code "123456" to verify
             </p>
           </>
@@ -356,27 +411,49 @@ const EmailVerificationBox = ({
 
       <style jsx>{`
         @keyframes fadeIn {
-          from { opacity: 0; }
-          to { opacity: 1; }
+          from {
+            opacity: 0;
+          }
+          to {
+            opacity: 1;
+          }
         }
         @keyframes modalSlideIn {
-          from { 
-            opacity: 0; 
-            transform: scale(0.8) translateY(50px); 
+          from {
+            opacity: 0;
+            transform: scale(0.8) translateY(50px);
           }
-          to { 
-            opacity: 1; 
-            transform: scale(1) translateY(0); 
+          to {
+            opacity: 1;
+            transform: scale(1) translateY(0);
           }
         }
         @keyframes shake {
-          0%, 100% { transform: translateX(0); }
-          10%, 30%, 50%, 70%, 90% { transform: translateX(-10px); }
-          20%, 40%, 60%, 80% { transform: translateX(10px); }
+          0%,
+          100% {
+            transform: translateX(0);
+          }
+          10%,
+          30%,
+          50%,
+          70%,
+          90% {
+            transform: translateX(-10px);
+          }
+          20%,
+          40%,
+          60%,
+          80% {
+            transform: translateX(10px);
+          }
         }
         @keyframes scaleIn {
-          from { transform: scale(0); }
-          to { transform: scale(1); }
+          from {
+            transform: scale(0);
+          }
+          to {
+            transform: scale(1);
+          }
         }
         .animate-shake {
           animation: shake 0.5s;
@@ -392,4 +469,4 @@ const EmailVerificationBox = ({
   );
 };
 
-export default EmailVerificationBox
+export default EmailVerificationBox;
