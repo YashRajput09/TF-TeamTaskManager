@@ -1,19 +1,25 @@
 import React, { useEffect, useRef, useState } from "react";
 import { X, Mail, Check, AlertCircle, Moon, Sun } from "lucide-react";
 import axiosInstance from "../pages/utility/axiosInstance";
+import toast from "react-hot-toast";
+import { Navigate, useNavigate } from "react-router-dom";
 const api = {
-  verifyOT: async (email, otp) => {
+  verifyOTP: async (email, otp) => {
     try {
       const { data } = await axiosInstance.post("/user/verifyotp", {
         email,
         context: "register",
         otp,
       });
+      console.log(data)
+      return { success: true, message: "OTP verified " }
     } catch (error) {
       console.log(error);
+      toast.error(error?.response?.data?.message || "Invalid")
+      return { success: false, message: "Invalid OTP" }
     }
   },
-  verifyOTP: async (email, otp) => {
+  verifyOT: async (email, otp) => {
     // Example: await axios.post('/api/auth/verify-otp', { email, otp });
     return new Promise((resolve, reject) => {
       setTimeout(() => {
@@ -27,10 +33,22 @@ const api = {
   },
 
   resendOTP: async (email) => {
+    console.log("object")
     // Example: await axios.post('/api/auth/resend-otp', { email });
-    return new Promise((resolve) => {
-      setTimeout(() => resolve({ success: true }), 1000);
-    });
+     try {
+      const { data } = await axiosInstance.post(`/user/forgot-password`, {
+        email,
+        context: "register",
+      });
+      // console.log(data);
+      return { success: true }
+    } catch (error) {
+      console.log(error);
+      toast.error(error?.response?.data?.message);
+    }
+    // return new Promise((resolve) => {
+    //   setTimeout(() => resolve({ success: true }), 1000);
+    // });
   },
 };
 
@@ -51,6 +69,7 @@ const EmailVerificationBox = ({
   const [successState, setSuccessState] = useState(false);
   const otpRefs = useRef([]);
 
+  const navigateTo=useNavigate();
   //Send Email Automatically when Modal open
   useEffect(() => {
     {
@@ -81,6 +100,34 @@ const EmailVerificationBox = ({
       setTimeout(() => otpRefs.current[0]?.focus(), 100);
     }
   }, [isOpen]);
+
+  const [redirectTimer, setRedirectTimer] = useState(5);
+
+  useEffect(() => {
+    if (!successState) return; // only run when success UI is shown
+
+    // const timer = setInterval(() => {
+    //   setRedirectTimer((prev) => {
+    //     if (prev <= 1) {
+    //       clearInterval(timer);
+    //       // redirect here
+    //       // navigate("/login") OR handleClose()
+    //       return 0;
+    //     }
+    //     return prev - 1;
+    //   });
+    // }, 1000);
+     const timer = setTimeout(() => {
+      if(redirectTimer>0){
+        clearTimeout(timer)
+        Navigate("/dashboard")
+        return
+      }
+      setRedirectTimer(redirectTimer-1)
+     }, 1000);
+
+    return () => clearTimeout(timer);
+  }, [successState]);
 
   // Handle OTP input change
   const handleOtpChange = (index, value) => {
@@ -138,18 +185,23 @@ const EmailVerificationBox = ({
 
     try {
       const response = await api.verifyOTP(email, otpValue);
-      
+
+      console.log(response);
+      if(!response?.success){
+        setError(response?.message)
+        setIsShaking(true);
+        return
+      }
       // Close modal with delay for success animation
-      const signupResult= await onSuccess(response);
-      
-      console.log(signupResult);
-      
-      setSuccessState(true);
-      
-       console.log("object")
-        setTimeout(() => {
-          handleClose();
-        }, 10000);
+      const signupResult = await onSuccess(response);
+
+      if (signupResult?.success) {
+        setSuccessState(true);
+      } else {
+        toast.error(signupResult?.message);
+        handleClose();
+      }
+      // console.log(signupResult);
     } catch (err) {
       setError(err.message || "Invalid OTP");
       setIsShaking(true);
@@ -224,27 +276,49 @@ const EmailVerificationBox = ({
         {successState ? (
           <div className="text-center py-8 animate-fadeIn">
             <div
-              className={`w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-4 animate-scaleIn ${
+              className={`w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 animate-scaleIn ${
                 isDark ? "bg-green-900/50" : "bg-green-100"
               }`}
             >
               <Check
-                className={`w-10 h-10 ${
+                className={`w-8 h-8 ${
                   isDark ? "text-green-400" : "text-green-600"
                 }`}
                 strokeWidth={3}
               />
             </div>
-            <h3
+            {/* <h3
               className={`text-2xl font-bold mb-2 ${
                 isDark ? "text-white" : "text-gray-800"
               }`}
             >
               Verified!
-            </h3>
-            <p className={isDark ? "text-gray-400" : "text-gray-600"}>
-              Your email has been successfully verified
+            </h3> */}
+            <p
+              className={`${
+                isDark ? "text-gray-400" : "text-gray-600"
+              } text-xl font-bold mb-8 `}
+            >
+              🎉 Account created successfully!
             </p>
+            <span className="text-xs px-2 text-gray-400/60 flex items-start">
+              Auto Redirect in {redirectTimer}
+            </span>
+            <button
+              onClick={() => navigateTo("/dashboard")}
+              disabled={loading}
+              className={`w-full py-3  rounded-lg font-semibold transform transition-all flex flex-col items-center justify-center ${
+                isDark
+                  ? "bg-gradient-to-r from-blue-600 to-purple-700 hover:from-blue-700 hover:to-purple-800"
+                  : "bg-gradient-to-r from-blue-500 to-purple-600 hover:shadow-lg hover:scale-[1.02]"
+              } text-white disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none`}
+            >
+              {loading ? (
+                <div className="w-6 h-6 border-2 border-white border-t-transparent rounded-full animate-spin" />
+              ) : (
+                "Home"
+              )}
+            </button>
           </div>
         ) : (
           <>
