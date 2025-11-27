@@ -111,8 +111,10 @@ export default function Login() {
               <p className="text-sm text-red-600 dark:text-red-400">{error}</p>
             </div>
           )}
+          {console.log(form.email)}
+          {console.log(form)}
           <div className="flex m-0 px-4 w-full">
-            <span onClick={()=>navigate(`/user/forgot-password`)} className="ml-auto text-sm hover:underline text-blue-500 cursor-pointer">
+            <span onClick={()=>navigate(`/user/forgot-password`,{state:{email:form.email}})} className="ml-auto text-sm hover:underline text-blue-500 cursor-pointer">
               Forgot Password ??
             </span>
           </div>
