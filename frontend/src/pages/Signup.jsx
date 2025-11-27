@@ -44,6 +44,7 @@ export default function Signup() {
   const onSubmit = async (e) => {
     e.preventDefault();
 
+    // Automatically call OTP send request when Modal open
     const { name, email, password, mobileNumber, bio, profileImage } = form;
     if (
       !name ||
@@ -56,7 +57,59 @@ export default function Signup() {
       toast.error("Please fill all fields and upload an image!");
       return;
     }
+    //Send OTP to email
+    try {
+      // const { data } = await axiosInstance.post(`/user/forgot-password`, {
+      //   email: form.email,
+      //   context: "register",
+      // });
+      // console.log(data);
+      setIsModalOpen(true);
+      console.log("object")
+    } catch (error) {
+      console.log(error);
+      toast.error(error?.response?.data?.message)
+    }
 
+    // const formData = new FormData();
+    // Object.keys(form).forEach((key) => {
+    //   formData.append(key, form[key]);
+    // });
+
+    // try {
+    //   setSubmitting(true);
+    //   const res = await axiosInstance.post("/user/signup", formData, {
+    //     withCredentials: true,
+    //     headers: { "Content-Type": "multipart/form-data" },
+    //   });
+
+    //   const userData = res.data?.newUser || res.data?.user;
+    //   toast.success("🎉 Account created successfully!");
+
+    //   // ✅ Auto-login
+    //   setIsAuthenticated(true);
+    //   setProfile(userData);
+    //   localStorage.setItem(
+    //     "auth_user",
+    //     JSON.stringify({
+    //       id: userData._id,
+    //       name: userData.name,
+    //       email: userData.email,
+    //     })
+    //   );
+
+    //   navigate("/dashboard");
+    // } catch (error) {
+    //   console.error("Signup error:", error);
+    //   toast.error(error.response?.data?.message || "Signup failed!");
+    // } finally {
+    //   setSubmitting(false);
+    // }
+  };
+
+
+  const handleSignUp = async (response) => {
+    //Sign Up when OTP Verified
     const formData = new FormData();
     Object.keys(form).forEach((key) => {
       formData.append(key, form[key]);
@@ -64,38 +117,45 @@ export default function Signup() {
 
     try {
       setSubmitting(true);
-      const res = await axiosInstance.post("/user/signup", formData, {
-        withCredentials: true,
-        headers: { "Content-Type": "multipart/form-data" },
-      });
+      // const res = await axiosInstance.post("/user/signup", formData, {
+      //   withCredentials: true,
+      //   headers: { "Content-Type": "multipart/form-data" },
+      // });
 
-      const userData = res.data?.newUser || res.data?.user;
+      // const userData = res?.data?.newUser || res?.data?.user;
       toast.success("🎉 Account created successfully!");
 
       // ✅ Auto-login
-      setIsAuthenticated(true);
-      setProfile(userData);
-      localStorage.setItem(
-        "auth_user",
-        JSON.stringify({
-          id: userData._id,
-          name: userData.name,
-          email: userData.email,
-        })
-      );
+      // setIsAuthenticated(true);
+      // setProfile(userData);
+      // localStorage.setItem(
+      //   "auth_user",
+      //   JSON.stringify({
+      //     id: userData._id,
+      //     name: userData.name,
+      //     email: userData.email,
+      //   })
+      // );
 
-      navigate("/dashboard");
+      // navigate("/dashboard");
     } catch (error) {
       console.error("Signup error:", error);
       toast.error(error.response?.data?.message || "Signup failed!");
     } finally {
       setSubmitting(false);
     }
-  };
 
-  const handleVerificationSuccess = (response) => {
-    console.log("Verification successful:", response);
-    alert("Email verified successfully! ✅");
+    // setTimeout(() => {
+      console.log("Verification successful:", response);
+    // }, 5000);
+
+
+    setTimeout(() => {
+      
+    }, 5000);
+
+    return {success:true}
+    // alert("Email verified successfully! ✅");
   };
 
   const handleChangeEmail = () => {
@@ -245,22 +305,6 @@ export default function Signup() {
               "Create Account"
             )}
           </button>
-          <button
-            onClick={() => setIsModalOpen(true)}
-            disabled={submitting}
-            className={`btn-primary w-full flex items-center justify-center gap-2 ${
-              submitting ? "opacity-70 cursor-not-allowed" : ""
-            }`}
-          >
-            {submitting ? (
-              <>
-                <Loader2 className="w-4 h-4 animate-spin" />
-                <span>Creating account...</span>
-              </>
-            ) : (
-              "Create Account"
-            )}
-          </button>
         </form>
 
         <p className="mt-4 text-sm text-gray-600 dark:text-gray-400 text-center">
@@ -278,7 +322,7 @@ export default function Signup() {
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         email={form.email}
-        onSuccess={handleVerificationSuccess}
+        onSuccess={handleSignUp}
         onChangeEmail={handleChangeEmail}
         otpLength={6}
         isDark={true}
