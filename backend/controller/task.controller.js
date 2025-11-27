@@ -4,9 +4,11 @@ import { groupModel } from "../models/group.model.js";
 import { Task } from "../models/task.modal.js";
 import { generateSearchQuery } from "../utils/search.js";
 import User from "../models/user_model.js";
-import { sendTaskNotification } from '../services/telegramNotification.js'
+import { sendTaskNotification } from "../services/telegramNotification.js";
+import Notification from "../models/notification.model.js";
+import { io } from "../app.js";
 
-export const searchBlogs = async (req, res) => {
+export const searchTasks = async (req, res) => {
   const searchQuery = req.query.search || ""; // Default to an empty string if search is not provided
   // console.log(req.query.search);
   if (searchQuery) {
@@ -21,7 +23,7 @@ export const searchBlogs = async (req, res) => {
 
 export const createTask = async (req, res) => {
   try {
-    console.log(req.body);
+    // console.log(req.body);
     const {
       title,
       description,
@@ -33,15 +35,15 @@ export const createTask = async (req, res) => {
     } = req.body;
     // console.log(req.body);
 
-    console.log(req?.files);
+    // console.log(req?.files);
     const { groupId } = req.params;
     const adminId = req?.user?._id;
     const attachment = req.files?.attachments;
 
-    if (attachment) {
-      console.log(attachment);
-      console.log("file aa gyi");
-    }
+    // if (attachment) {
+    //   console.log(attachment);
+    //   console.log("file aa gyi");
+    // }
     // if (!req.files || Object.keys(req.files).length === 0) {
     //   return res
     //     .status(400)
@@ -50,7 +52,7 @@ export const createTask = async (req, res) => {
     if (!title || !priority)
       return res.status(404).json({ message: "Fill All Fields" });
 
-    console.log(groupId);
+    // console.log(groupId);
     const find_group = await groupModel.findById(groupId);
     if (!find_group) {
       return res.status(404).json({ message: "No Such Group Found" });
@@ -82,7 +84,7 @@ export const createTask = async (req, res) => {
           resource_type: "auto",
         }
       );
-      console.log(cloudinaryResponse);
+      // console.log(cloudinaryResponse);
     }
     // console.log(title, description, priority, status, assignedTo, deadline);
     // console.log(cloudinaryResponse?.public_id);
@@ -130,6 +132,25 @@ export const createTask = async (req, res) => {
     await find_group.save();
     await findAdmin.save();
 
+    if (assignedTo) {
+  await Notification.create({
+    user: assignedTo,
+    title: "New Task Assigned",
+    message: `You have been assigned: ${newTask.title}`,
+    type: "task_assigned",
+    icon: "📋",
+  });
+
+  io.to(assignedTo.toString()).emit("notification", {
+    title: "New Task Assigned",
+    message: `You have been assigned: ${newTask.title}`,
+    icon: "📋",
+    read: false,
+    createdAt: new Date(),
+  });
+}
+
+
     const populatedTask = await newTask.populate("group");
     return res
       .status(200)
@@ -139,7 +160,6 @@ export const createTask = async (req, res) => {
     return res.status(500).json({ mwssage: "Internal Server Error", error });
   }
 };
-
 
 export const deleteTask = async (req, res) => {
   try {
@@ -155,36 +175,36 @@ export const deleteTask = async (req, res) => {
       return res.status(403).json({ message: "Only Admin can delete task" });
     }
 
-    console.log(task?.createdBy)
-    console.log(task?.assignedTo)
-    console.log(task?.group[0])
+    // console.log(task?.createdBy);
+    // console.log(task?.assignedTo);
+    // console.log(task?.group[0]);
 
-    console.log( await User.findById(task.createdBy) )
-    console.log( await User.findById(task.assignedTo) )
-    console.log( await groupModel.findById(task?.group) )
+    // console.log(await User.findById(task.createdBy));
+    // console.log(await User.findById(task.assignedTo));
+    // console.log(await groupModel.findById(task?.group));
 
     // 3. DELETE the task from Task collection
     await Task.findByIdAndDelete(taskId);
 
     // 4. REMOVE task reference from user who created it
     await User.findByIdAndUpdate(task.createdBy, {
-      $pull: { createdTasks: taskId }
+      $pull: { createdTasks: taskId },
     });
 
     // 5. REMOVE task reference from assigned user
     await User.findByIdAndUpdate(task.assignedTo, {
-      $pull: { assignedTasks: taskId }
+      $pull: { assignedTasks: taskId },
     });
 
     // 6. REMOVE task from group
     await groupModel.findByIdAndUpdate(task.group, {
-      $pull: { allTasks: taskId }
+      $pull: { allTasks: taskId },
     });
 
     return res.status(200).json({
-      message: "Task deleted successfully & cleaned from user and group records"
+      message:
+        "Task deleted successfully & cleaned from user and group records",
     });
-
   } catch (error) {
     console.log(error);
     return res.status(500).json({ message: "Internal server error", error });
@@ -194,6 +214,9 @@ export const deleteTask = async (req, res) => {
 export const assignTask = async (req, res) => {
   try {
     const { assignedUserId, taskId } = req.body;
+    console.log("assignedUserId body:");
+    console.log("assignedUserId body:", req.body);
+
     const { groupId } = req.params;
 
     // 1. Find task
@@ -241,7 +264,24 @@ export const assignTask = async (req, res) => {
     await find_assignedUser?.save();
     await find_task.save();
 
-    // 6. 🔔 Send Telegram notification ONLY at assignment time
+    // // 6. 🔔 REAL-TIME + DB NOTIFICATION
+    // await Notification.create({
+    //   user: assignedUserId,
+    //   title: "New Task Assigned",
+    //   message: `You have been assigned: ${find_task.title}`,
+    //   type: "task_assigned",
+    //   icon: "📋",
+    // });
+
+    // io.to(assignedUserId.toString()).emit("notification", {
+    //   title: "New Task Assigned",
+    //   message: `You have been assigned: ${find_task.title}`,
+    //   icon: "📋",
+    //   read: false,
+    //   createdAt: new Date(),
+    // });
+
+    // 7. 🔔 Send Telegram notification ONLY at assignment time
     if (assignedUserId) {
       await sendTaskNotification(assignedUserId, find_task);
     }
@@ -252,7 +292,6 @@ export const assignTask = async (req, res) => {
     return res.status(500).json({ message: "Internal Server error" });
   }
 };
-
 
 export const getAllTask = async (req, res) => {
   try {
@@ -280,7 +319,7 @@ export const getUserAllTask = async (req, res) => {
   try {
     const loggedUserId = req?.user?._id;
 
-    console.log(loggedUserId);
+    // console.log(loggedUserId);
     const find_user = await User.findById(loggedUserId)
       // .populate("createdTasks")
       .populate({
@@ -320,7 +359,8 @@ export const getSingleAllTask = async (req, res) => {
     const find_task = await Task.findById(taskId)
       .populate("createdBy")
       .populate("attachments.uploadedBy")
-      .populate("assignedTo").populate("group");
+      .populate("assignedTo")
+      .populate("group");
     if (!find_task) return res.status(404).json({ message: "Task Not Found" });
 
     return res.status(200).json(find_task);
@@ -336,8 +376,8 @@ export const updateTaskStatus = async (req, res) => {
     const { status } = req.body;
     const loggedUserId = req?.user?._id;
 
-    console.log(loggedUserId);
-    console.log("hello");
+    // console.log(loggedUserId);
+    // console.log("hello");
     // 1. Find Task
     const task = await Task.findById(taskId).populate("createdBy assignedTo");
     if (!task) return res.status(404).json({ message: "Task not found" });
@@ -375,7 +415,7 @@ export const submitTask = async (req, res) => {
     const { url, message } = req.body;
     const loggedUserId = req?.user?._id;
 
-    console.log("Incoming files:", req.files);
+    // console.log("Incoming files:", req.files);
 
     // Safely extract single or multiple attachments
     let attachments = req.files?.attachment || null;
@@ -401,7 +441,7 @@ export const submitTask = async (req, res) => {
     if (attachments) {
       attachments = Array.isArray(attachments) ? attachments : [attachments];
 
-      console.log("Attachments to upload:", attachments);
+      // console.log("Attachments to upload:", attachments);
 
       const allowedFormats = [
         "image/jpeg",
@@ -426,7 +466,7 @@ export const submitTask = async (req, res) => {
           }
         );
 
-        console.log("✅ Uploaded file:", cloudinaryResponse.secure_url);
+        // console.log("✅ Uploaded file:", cloudinaryResponse.secure_url);
 
         // ✅ Now safe to push
         find_task.attachments.push({
@@ -476,21 +516,21 @@ export const approveTask = async (req, res) => {
   try {
     const { taskId } = req.params;
     // const { isAccept, declineMessage  ,payload} = req.body;
-    const { action,message} = req.body;
+    const { action, message } = req.body;
     const loggedUserId = req?.user?._id; //Admin and creator of project of Group
 
-console.log(req.body)
-    console.log(action,message);
+    // console.log(req.body);
+    // console.log(action, message);
     const find_task = await Task.findById(taskId);
     if (!find_task) return res.status(400).json({ message: "Task not found" });
 
-    console.log(find_task.createdBy, loggedUserId);
+    // console.log(find_task.createdBy, loggedUserId);
     //Check if logged user is creator of group or not
     const find_loggedUser = await User.findById(loggedUserId);
     if (find_task?.createdBy.toString() !== loggedUserId.toString())
       return res.status(400).json({ message: "Only Admin can approve" });
 
-    if (action=="decline") {
+    if (action == "decline") {
       if (message) {
         find_task.declineMessage = message;
       }
@@ -500,12 +540,10 @@ console.log(req.body)
         date: Date.now(),
       });
 
-      return res
-        .status(400)
-        .json({ message: "Submission Declined",message });
+      return res.status(400).json({ message: "Submission Declined", message });
     }
     find_task.history.push({ message: "Task completed", date: Date.now() });
-   find_task.status="Completed"
+    find_task.status = "Completed";
 
     await find_task.save();
 

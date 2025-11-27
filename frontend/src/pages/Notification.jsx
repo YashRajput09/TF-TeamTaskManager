@@ -1,216 +1,167 @@
-import React, { useState } from 'react';
-import Card from '../components/Card';
-import { Bell, CheckCheck, Trash2, Filter } from 'lucide-react';
+import React, { useState, useEffect } from "react";
+import Card from "../components/Card";
+import { Bell, Trash2, CheckCheck, Filter, Clock } from "lucide-react";
+import axiosInstance from "./utility/axiosInstance";
+import { io } from "socket.io-client";
+import { useAuth } from "../context/AuthProvider";
+
+const socket = io(import.meta.env.VITE_BACKEND_SOCKET_URL || "http://localhost:3000", {
+  transports: ["websocket"],
+  withCredentials: true,
+});
+
+// format time ago
+const formatTimeAgo = (dateString) => {
+  const seconds = Math.floor((new Date() - new Date(dateString)) / 1000);
+  if (seconds < 60) return "Just now";
+  const minutes = Math.floor(seconds / 60);
+  if (minutes < 60) return `${minutes} min ago`;
+  const hours = Math.floor(minutes / 60);
+  if (hours < 24) return `${hours} hr ago`;
+  const days = Math.floor(hours / 24);
+  return `${days} day ago`;
+};
 
 const Notifications = () => {
-  // Sample data - replace with API calls
-  const [notifications, setNotifications] = useState([
-    {
-      id: 1,
-      type: 'task_assigned',
-      title: 'New task assigned',
-      message: 'You have been assigned to "Update landing page design"',
-      time: '5 minutes ago',
-      read: false,
-      icon: '📋'
-    },
-    {
-      id: 2,
-      type: 'task_completed',
-      title: 'Task completed',
-      message: 'Jane Smith completed "Fix authentication bug"',
-      time: '1 hour ago',
-      read: false,
-      icon: '✅'
-    },
-    {
-      id: 3,
-      type: 'comment',
-      title: 'New comment',
-      message: 'Mike Johnson commented on your task "Prepare Q4 presentation"',
-      time: '2 hours ago',
-      read: true,
-      icon: '💬'
-    },
-    {
-      id: 4,
-      type: 'due_soon',
-      title: 'Task due soon',
-      message: '"Code review for PR #234" is due in 2 days',
-      time: '3 hours ago',
-      read: true,
-      icon: '⏰'
-    },
-    {
-      id: 5,
-      type: 'team_update',
-      title: 'Team update',
-      message: 'Design Team reached 80% progress on Q4 goals',
-      time: '5 hours ago',
-      read: true,
-      icon: '🎉'
-    },
-    {
-      id: 6,
-      type: 'mention',
-      title: 'You were mentioned',
-      message: 'Sarah Williams mentioned you in "Marketing Campaign Planning"',
-      time: '1 day ago',
-      read: true,
-      icon: '👤'
-    },
-  ]);
+  const { profile } = useAuth();
+  const [notifications, setNotifications] = useState([]);
+  const [filter, setFilter] = useState("all");
+  const [loading, setLoading] = useState(true);
 
-  const [filter, setFilter] = useState('all'); // all, unread, read
-
-  const handleMarkAsRead = (id) => {
-    setNotifications(notifications.map(notif => 
-      notif.id === id ? { ...notif, read: true } : notif
-    ));
+  // fetch from backend
+  const fetchNotifications = async () => {
+    try {
+      const { data } = await axiosInstance.get("/notifications/my");
+      setNotifications(data.notifications || []);
+    } catch (err) {
+      console.log("Error:", err);
+    }
+    setLoading(false);
   };
 
-  const handleMarkAllAsRead = () => {
-    setNotifications(notifications.map(notif => ({ ...notif, read: true })));
+  // realtime listen
+  useEffect(() => {
+    if (!profile?._id) return;
+
+    socket.emit("join", profile._id);
+
+    socket.on("notification", (notif) => {
+      setNotifications((prev) => [notif, ...prev]);
+    });
+
+    return () => socket.off("notification");
+  }, [profile]);
+
+  useEffect(() => {
+    if (profile?._id) fetchNotifications();
+  }, [profile]);
+
+  // mark one read
+  const markRead = async (id) => {
+    await axiosInstance.put(`/notifications/mark-read/${id}`);
+    setNotifications((prev) =>
+      prev.map((n) => (n._id === id ? { ...n, read: true } : n))
+    );
   };
 
-  const handleDelete = (id) => {
-    setNotifications(notifications.filter(notif => notif.id !== id));
+  // mark all read
+  const markAllRead = async () => {
+    await axiosInstance.put(`/notifications/mark-all-read`);
+    setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
   };
 
-  const filteredNotifications = notifications.filter(notif => {
-    if (filter === 'unread') return !notif.read;
-    if (filter === 'read') return notif.read;
-    return true;
-  });
+  // delete notif
+  const deleteNotif = async (id) => {
+    await axiosInstance.delete(`/notifications/delete/${id}`);
+    setNotifications((prev) => prev.filter((n) => n._id !== id));
+  };
 
-  const unreadCount = notifications.filter(n => !n.read).length;
+  // filtering
+  const filtered =
+    filter === "all"
+      ? notifications
+      : filter === "unread"
+      ? notifications.filter((n) => !n.read)
+      : notifications.filter((n) => n.read);
 
   return (
-    <div className="space-y-6">
-      {/* Page Header */}
-      <div className="flex flex-col md:flex-row md:items-center md:justify-between">
+    <div className="space-y-6 animate-fadeIn">
+      {/* header */}
+      <div className="flex justify-between items-center">
         <div>
           <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Notifications</h1>
-          <p className="mt-1 text-gray-600 dark:text-gray-400">
-            You have {unreadCount} unread notification{unreadCount !== 1 ? 's' : ''}
-          </p>
+          <p className="text-gray-500">{notifications.filter((n) => !n.read).length} unread</p>
         </div>
-        <button 
-          onClick={handleMarkAllAsRead}
-          className="mt-4 md:mt-0 btn-secondary flex items-center space-x-2 w-fit"
-          disabled={unreadCount === 0}
+
+        <button
+          onClick={markAllRead}
+          className="btn-secondary flex items-center gap-2"
         >
-          <CheckCheck className="w-4 h-4" />
-          <span>Mark All as Read</span>
+          <CheckCheck size={16} /> Mark all as read
         </button>
       </div>
 
-      {/* Filters */}
-      <Card>
-        <div className="flex items-center space-x-2">
-          <Filter className="w-4 h-4 text-gray-600 dark:text-gray-400" />
-          <div className="flex items-center space-x-2">
-            {['all', 'unread', 'read'].map((filterOption) => (
-              <button
-                key={filterOption}
-                onClick={() => setFilter(filterOption)}
-                className={`
-                  px-4 py-2 rounded-lg font-medium transition-all capitalize
-                  ${filter === filterOption
-                    ? 'gradient-primary text-white shadow-sm'
-                    : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
-                  }
-                `}
-              >
-                {filterOption}
-              </button>
-            ))}
-          </div>
-        </div>
+      {/* filters */}
+      <Card className="flex items-center gap-3 p-4 backdrop-blur-md">
+        <Filter size={18} className="text-gray-500" />
+        {["all", "unread", "read"].map((f) => (
+          <button
+            key={f}
+            onClick={() => setFilter(f)}
+            className={`px-4 py-1 rounded-lg capitalize transition ${
+              f === filter
+                ? "bg-blue-600 text-white shadow"
+                : "bg-gray-200 dark:bg-gray-700"
+            }`}
+          >
+            {f}
+          </button>
+        ))}
       </Card>
 
-      {/* Notifications List */}
+      {/* list */}
       <div className="space-y-3">
-        {filteredNotifications.length === 0 ? (
-          <Card className="text-center py-12">
-            <Bell className="w-12 h-12 mx-auto mb-4 text-gray-400" />
-            <p className="text-gray-500 dark:text-gray-400">No notifications to display</p>
-          </Card>
-        ) : (
-          filteredNotifications.map((notification) => (
-            <Card 
-              key={notification.id} 
-              hover
-              className={`${!notification.read ? 'border-l-4 border-primary-500' : ''}`}
-            >
-              <div className="flex items-start space-x-4">
-                {/* Icon */}
-                <div className="flex-shrink-0 text-2xl">
-                  {notification.icon}
-                </div>
-
-                {/* Content */}
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-start justify-between">
-                    <div className="flex-1 min-w-0">
-                      <h3 className={`text-sm font-semibold ${!notification.read ? 'text-gray-900 dark:text-white' : 'text-gray-700 dark:text-gray-300'}`}>
-                        {notification.title}
-                      </h3>
-                      <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">
-                        {notification.message}
-                      </p>
-                      <p className="mt-2 text-xs text-gray-500 dark:text-gray-500">
-                        {notification.time}
-                      </p>
-                    </div>
-
-                    {/* Unread indicator */}
-                    {!notification.read && (
-                      <div className="w-2 h-2 mt-2 ml-4 bg-primary-500 rounded-full flex-shrink-0" />
-                    )}
-                  </div>
-                </div>
-
-                {/* Actions */}
-                <div className="flex items-center space-x-2 flex-shrink-0">
-                  {!notification.read && (
-                    <button
-                      onClick={() => handleMarkAsRead(notification.id)}
-                      className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
-                      title="Mark as read"
-                    >
-                      <CheckCheck className="w-4 h-4 text-gray-600 dark:text-gray-400" />
-                    </button>
-                  )}
-                  <button
-                    onClick={() => handleDelete(notification.id)}
-                    className="p-2 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
-                    title="Delete"
-                  >
-                    <Trash2 className="w-4 h-4 text-red-600 dark:text-red-400" />
-                  </button>
+        {filtered.map((n) => (
+          <Card
+            key={n._id}
+            hover
+            className={`relative p-4 border-l-4 ${
+              !n.read ? "border-blue-500" : "border-transparent"
+            }`}
+          >
+            <div className="flex gap-4">
+              <div className="text-2xl">{n.icon || "🔔"}</div>
+              <div className="flex-1">
+                <h3 className="font-semibold text-gray-900 dark:text-white">
+                  {n.title}
+                </h3>
+                <p className="text-gray-600 dark:text-gray-400">{n.message}</p>
+                <div className="mt-2 flex items-center gap-2 text-xs text-gray-500">
+                  <Clock size={14} /> {formatTimeAgo(n.createdAt)}
                 </div>
               </div>
-            </Card>
-          ))
-        )}
-      </div>
 
-      {/* Notification Settings Hint */}
-      {notifications.length > 0 && (
-        <Card className="bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800">
-          <div className="flex items-start space-x-3">
-            <Bell className="w-5 h-5 text-blue-600 dark:text-blue-400 flex-shrink-0 mt-0.5" />
-            <div>
-              <h3 className="text-sm font-semibold text-blue-900 dark:text-blue-300">Manage Notification Preferences</h3>
-              <p className="mt-1 text-sm text-blue-800 dark:text-blue-400">
-                You can customize which notifications you receive in your{' '}
-                <a href="/settings" className="underline hover:no-underline">settings page</a>.
-              </p>
+              {/* actions */}
+              <div className="flex items-center gap-3">
+                {!n.read && (
+                  <button
+                    onClick={() => markRead(n._id)}
+                    className="hover:bg-gray-200 dark:hover:bg-gray-700 p-2 rounded-lg"
+                  >
+                    <CheckCheck size={16} />
+                  </button>
+                )}
+                <button
+                  onClick={() => deleteNotif(n._id)}
+                  className="hover:bg-red-200 dark:hover:bg-red-900 p-2 rounded-lg"
+                >
+                  <Trash2 size={16} className="text-red-500" />
+                </button>
+              </div>
             </div>
-          </div>
-        </Card>
-      )}
+          </Card>
+        ))}
+      </div>
     </div>
   );
 };

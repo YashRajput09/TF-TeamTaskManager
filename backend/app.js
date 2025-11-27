@@ -18,14 +18,10 @@ import automationRoute from './routes/ai.route.jsautomation.route.js';
 import calendarRoute from './routes/calendar.route.js';
 import bot from './utils/telegramBot.js';
 import { startReminderScheduler } from './services/telegramReminderSchedular.js';
+import notificationRoute from "./routes/notification.routes.js";
+import http from "http";
 
 const app = express();
-
-// Debug environment variables
-// console.log('🔧 Environment Variables Check:');
-// console.log('PORT:', process.env.PORT);
-// console.log('JWT_SECRET:', process.env.JWT_SECRET ? 'Present' : 'Missing');
-// console.log('MONGODB_URI:', process.env.MONGODB_ATLUS_URL ? 'Present' : 'Missing');
 
 // Define session options
 const sessionOptions = {
@@ -40,6 +36,12 @@ const sessionOptions = {
         sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax'
     }
 }
+
+// CREATE HTTP SERVER
+const server = http.createServer(app);
+
+// EXPORT IT FOR CONTROLLERS
+export { server };
 
 // MIDDLEWARES
 app.use(session(sessionOptions));
@@ -67,10 +69,6 @@ app.use(cors({
 );
 
 
-// Start Telegram bot (long polling mode)
-// bot.launch().then(() => {
-//   console.log('🤖 Telegram bot is running');
-// });
 if (process.env.NODE_ENV === "production") {
   bot.launch().then(() => console.log("🤖 Telegram bot running in production"));
 } else {
@@ -81,26 +79,6 @@ if (process.env.NODE_ENV === "production") {
 // Graceful shutdown
 process.once('SIGINT', () => bot.stop('SIGINT'));
 process.once('SIGTERM', () => bot.stop('SIGTERM'));
-
-// const allowedOrigins = [
-//     'http://localhost:5173',
-//     'http://localhost:3000',
-//     // 'https://breezblogs.vercel.app',
-//   ];
-
-// app.use(cors({
-//     // origin:'http://localhost:5173',
-//     // origin: "https://breezblogs.vercel.app",
-//     origin: (origin, callback) => {
-//         if (!origin || allowedOrigins.includes(origin)) {
-//           callback(null, true);
-//         } else {
-//           callback(new Error('Not allowed by CORS'));
-//         }
-//       }, 
-//     credentials: true,
-//     methods: ["GET", "POST", "PUT", "DELETE"],
-// }));
 
 // Express-fileupload middleware
 const fileUploadMiddleware = fileUpload({
@@ -137,23 +115,37 @@ app.use("/comment", commentRoute);
 app.use("/automation", automationRoute);
 app.use("/integration", integrationRoute); 
 app.use("/api/calendar", calendarRoute);
+app.use("/notifications", notificationRoute);
 
 app.get("/",(req,res)=>{
     res.send("Task Manager and Tracker backend Running")
 })
 
-// Add to your app.js
-// app.get("/api/debug-cookie", (req, res) => {
-//   // console.log('🍪 Received cookies:', req.cookies);
-//   // console.log('🍪 jwttoken present:', !!req.cookies.jwttoken);
-  
-//   res.json({
-//     cookiesReceived: req.cookies,
-//     jwttokenPresent: !!req.cookies.jwttoken,
-//     message: "Check your backend console for cookie details"
-//   });
-// });
-// FIXED: 404 handler - use a proper path
+// --------------------------
+// SOCKET.IO SETUP HERE
+// --------------------------
+import { Server } from "socket.io";
+
+const io = new Server(server, {
+    cors: { origin: allowedOrigins, credentials: true },
+});
+
+io.on("connection", (socket) => {
+    console.log("🔥 User connected:", socket.id);
+
+    socket.on("join", (userId) => {
+        socket.join(userId.toString());
+        console.log(`📌 User joined room: ${userId}`);
+    });
+
+    socket.on("disconnect", () => {
+        console.log("❌ User disconnected:", socket.id);
+    });
+});
+
+export { io };
+
+
 app.use((req, res) => {
     res.status(404).json({ 
         message: "Route not found",
@@ -182,8 +174,6 @@ async function dbConnection() {
         
         app.listen(port, () => {
             console.log(`🚀 Server running on port: ${port}`);
-            // console.log(`📡 Test the server at: http://localhost:${port}/api/test`);
-            // console.log(`❤️  Health check at: http://localhost:${port}/health`);
         });
         
     } catch (error) {
