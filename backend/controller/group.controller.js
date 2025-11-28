@@ -7,8 +7,6 @@ export const createGroup = async (req, res) => {
     const { name, description, membersId } = req.body;
     const admin = req.user._id;
 
-    console.log(name, description, admin, membersId);
-
     const newGroup = new groupModel({
       name,
       description,
@@ -168,7 +166,7 @@ export const removeMember = async (req, res) => {
     if (!find_group) {
       return res.status(400).json({ message: "Group not Found" });
     }
-    console.log(find_group.members);
+    //console.log(find_group.members);
 
     // find_group?.members?.filter((m) =>
     //   console.log(m?.toString(), "&", memberId)

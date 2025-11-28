@@ -8,15 +8,15 @@ import { otp_model } from "../models/otp.model.js";
 export const sendOtp = async (req, res) => {
   const { email, context } = req.body;
 
-  console.log(email, context);
+  //console.log(email, context);
   try {
     let otp, user_name;
 
     const all = await user.find();
 
-    console.log(all);
+    //console.log(all);
     if (context === "forgot-password") {
-      console.log("object");
+      //console.log("object");
       const find_user = await user.findOne({ email });
 
       if (!find_user) {
@@ -25,12 +25,12 @@ export const sendOtp = async (req, res) => {
 
       user_name = find_user.name;
 
-      // console.log(user_name , context)
+      // //console.log(user_name , context)
 
       otp = crypto.randomInt(100000, 999999).toString();
 
-      // console.log(otp)
-      // console.log(email);
+      // //console.log(otp)
+      // //console.log(email);
       find_user.otp = otp;
       find_user.otpExpires = Date.now() + 10 * 60 * 1000;
 
@@ -49,8 +49,8 @@ export const sendOtp = async (req, res) => {
       user_name = "User";
 
       otp = crypto.randomInt(100000, 999999).toString();
-      // console.log(otp);
-      // console.log(email);
+      // //console.log(otp);
+      // //console.log(email);
 
       const otpEntry = new otp_model({
         email,
@@ -156,11 +156,11 @@ export const validateOtp = async (req, res) => {
       find_user = await otp_model.findOne({ email });
     }
 
-    // console.log(find_user);
+    // //console.log(find_user);
     if (!find_user) {
       return res.status(400).json({ message: "No User Found" });
     }
-    console.log(find_user)
+    //console.log(find_user)
 
     if (Date.now() > find_user.otpExpires) {
       return res.status(400).json({ message: "OTP has Expired" });

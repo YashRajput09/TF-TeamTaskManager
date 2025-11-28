@@ -34,9 +34,7 @@ export const createTask = async (req, res) => {
       deadline,
       category,
     } = req.body;
-    // console.log(req.body);
-
-    // console.log(req?.files);
+   
     const { groupId } = req.params;
     const adminId = req?.user?._id;
     const attachment = req.files?.attachments;
@@ -44,7 +42,6 @@ export const createTask = async (req, res) => {
     if (!title || !priority)
       return res.status(404).json({ message: "Fill All Fields" });
 
-    // console.log(groupId);
     const find_group = await groupModel.findById(groupId);
     if (!find_group) {
       return res.status(404).json({ message: "No Such Group Found" });
@@ -151,13 +148,6 @@ export const deleteTask = async (req, res) => {
       return res.status(403).json({ message: "Only Admin can delete task" });
     }
 
-    // console.log(task?.createdBy);
-    // console.log(task?.assignedTo);
-    // console.log(task?.group[0]);
-
-    // console.log(await User.findById(task.createdBy));
-    // console.log(await User.findById(task.assignedTo));
-    // console.log(await groupModel.findById(task?.group));
 
     // 3. DELETE the task from Task collection
     await Task.findByIdAndDelete(taskId);
@@ -190,9 +180,6 @@ export const deleteTask = async (req, res) => {
 export const assignTask = async (req, res) => {
   try {
     const { assignedUserId, taskId } = req.body;
-    console.log("assignedUserId body:");
-    console.log("assignedUserId body:", req.body);
-
     const { groupId } = req.params;
 
     // 1. Find task
@@ -286,7 +273,6 @@ export const getUserAllTask = async (req, res) => {
   try {
     const loggedUserId = req?.user?._id;
 
-    // console.log(loggedUserId);
     const find_user = await User.findById(loggedUserId)
       // .populate("createdTasks")
       .populate({
@@ -343,14 +329,11 @@ export const updateTaskStatus = async (req, res) => {
     const { status } = req.body;
     const loggedUserId = req?.user?._id;
 
-    // console.log(loggedUserId);
-    // console.log("hello");
     // 1. Find Task
     const task = await Task.findById(taskId).populate("createdBy assignedTo");
     if (!task) return res.status(404).json({ message: "Task not found" });
 
-    // console.log(task.createdBy.id,task.assignedTo.id,loggedUserId)
-    // 3. Permission Check
+        // 3. Permission Check
     const isGroupAdmin = task.createdBy?.id === loggedUserId.toString();
     const isAssignedUser = task.assignedTo?.id === loggedUserId.toString();
 
@@ -382,8 +365,7 @@ export const submitTask = async (req, res) => {
     const { url, message } = req.body;
     const loggedUserId = req?.user?._id;
 
-    // console.log("Incoming files:", req.files);
-
+ 
     // Safely extract single or multiple attachments
     let attachments = req.files?.attachment || null;
 
@@ -408,8 +390,7 @@ export const submitTask = async (req, res) => {
     if (attachments) {
       attachments = Array.isArray(attachments) ? attachments : [attachments];
 
-      // console.log("Attachments to upload:", attachments);
-
+ 
       const allowedFormats = [
         "image/jpeg",
         "image/png",
@@ -433,9 +414,7 @@ export const submitTask = async (req, res) => {
           }
         );
 
-        // console.log("✅ Uploaded file:", cloudinaryResponse.secure_url);
-
-        // ✅ Now safe to push
+       // ✅ Now safe to push
         find_task.attachments.push({
           uploadedBy: loggedUserId,
           url: cloudinaryResponse?.secure_url,
@@ -495,12 +474,9 @@ export const approveTask = async (req, res) => {
     const { action, message } = req.body;
     const loggedUserId = req?.user?._id; //Admin and creator of project of Group
 
-    // console.log(req.body);
-    // console.log(action, message);
     const find_task = await Task.findById(taskId);
     if (!find_task) return res.status(400).json({ message: "Task not found" });
 
-    // console.log(find_task.createdBy, loggedUserId);
     //Check if logged user is creator of group or not
     const find_loggedUser = await User.findById(loggedUserId);
     if (find_task?.createdBy.toString() !== loggedUserId.toString())

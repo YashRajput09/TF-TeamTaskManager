@@ -18,7 +18,7 @@ export const analyzeWorkload = async (req, res) => {
       .findById(groupId)
       .populate("members", "name email");
 
-    console.log(group);
+    //console.log(group);
     if (!group) {
       return res.status(404).json({ message: "Group not found" });
     }
@@ -36,7 +36,7 @@ export const analyzeWorkload = async (req, res) => {
       parseInt(timeframe)
     );
 
-    console.log(analysis);
+    //console.log(analysis);
 
     res.json({
       success: true,
@@ -215,8 +215,8 @@ export const autoRedistributeTasks = async (req, res) => {
 // AI Analysis Function
 const analyzeWorkloadWithAI = async (users, tasks, timeframe = 7) => {
   try {
-    console.log("User\n",users,"Tasks\n", tasks,"Time\n", timeframe = 7)
-    console.log(process.env.GEMINI_API_KEY);
+    //console.log("User\n",users,"Tasks\n", tasks,"Time\n", timeframe = 7)
+    //console.log(process.env.GEMINI_API_KEY);
     const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 
     // const modelConfigs = [
@@ -232,7 +232,7 @@ const analyzeWorkloadWithAI = async (users, tasks, timeframe = 7) => {
       { model: "gemini-1.5-pro" },
     ];
 
-    console.log("After model List");
+    //console.log("After model List");
     let lastError = null;
 
     for (const config of modelConfigs) {

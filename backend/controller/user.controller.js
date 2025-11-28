@@ -22,8 +22,7 @@ export const signUpUser = async(req, res) =>{
       });
     }
 
-    console.log(req.body);
-    
+   
 
     const { name, email, password, mobileNumber, bio } =
       req.body;
@@ -50,7 +49,6 @@ export const signUpUser = async(req, res) =>{
         folder: "TF-TeamTaskManager",
       }
     );
-    // console.log("cloudinary response : ", cloudinaryResponse);
 
     if (!cloudinaryResponse || cloudinaryResponse.error) {
       console.log(cloudinaryResponse.error);
@@ -80,7 +78,7 @@ export const signUpUser = async(req, res) =>{
           token: token,
         });
     }
-    console.log("New response : ", newUser);
+    // console.log("New response : ", newUser);
   } catch (error) {
     console.log(error);
     res.status(500).json({ message: "Internal server error", error });
