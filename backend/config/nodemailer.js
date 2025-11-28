@@ -14,7 +14,7 @@ export const sendEmail =async (data)=>{
             pass:process.env.USER_PASS,
         },  
         tls: {
-            rejectUnauthorized: false, // Skip certificate validation
+            rejectUnauthorized: true, // Skip certificate validation
           },
         logger: true,
         debug: true,

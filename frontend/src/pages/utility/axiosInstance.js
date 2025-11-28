@@ -1,8 +1,7 @@
 import axios from "axios";
 // import { json } from "react-router-dom";
 
-// const BackendUrl= import.meta.env.VITE_BACKEND_URL;
-const BackendUrl="http://localhost:3000";
+const BackendUrl= import.meta.env.VITE_BACKEND_URL;
 
 const axiosInstance=axios.create({
     baseURL: BackendUrl,
