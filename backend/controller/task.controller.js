@@ -7,6 +7,7 @@ import User from "../models/user_model.js";
 import { sendTaskNotification } from "../services/telegramNotification.js";
 import Notification from "../models/notification.model.js";
 import { io } from "../app.js";
+import { pushNotification } from "../utils/sendNotification.js";
 
 export const searchTasks = async (req, res) => {
   const searchQuery = req.query.search || ""; // Default to an empty string if search is not provided
@@ -40,15 +41,6 @@ export const createTask = async (req, res) => {
     const adminId = req?.user?._id;
     const attachment = req.files?.attachments;
 
-    // if (attachment) {
-    //   console.log(attachment);
-    //   console.log("file aa gyi");
-    // }
-    // if (!req.files || Object.keys(req.files).length === 0) {
-    //   return res
-    //     .status(400)
-    //     .json({ message: "User profile image is required" });
-    // }
     if (!title || !priority)
       return res.status(404).json({ message: "Fill All Fields" });
 
@@ -58,8 +50,6 @@ export const createTask = async (req, res) => {
       return res.status(404).json({ message: "No Such Group Found" });
     }
 
-    // const find_assignedUser=find_group?.members?.includes(assignedTo);
-    // console.log(find_group);
     let find_assignedUser = null;
     if (assignedTo) {
       if (!find_group?.members?.some((m) => m.toString() === assignedTo))
@@ -84,12 +74,7 @@ export const createTask = async (req, res) => {
           resource_type: "auto",
         }
       );
-      // console.log(cloudinaryResponse);
     }
-    // console.log(title, description, priority, status, assignedTo, deadline);
-    // console.log(cloudinaryResponse?.public_id);
-    // console.log(cloudinaryResponse?.secure_url);
-    // console.log(cloudinaryResponse?.url);
 
     const newTask = new Task({
       title,
@@ -132,24 +117,15 @@ export const createTask = async (req, res) => {
     await find_group.save();
     await findAdmin.save();
 
-    if (assignedTo) {
-  await Notification.create({
-    user: assignedTo,
-    title: "New Task Assigned",
-    message: `You have been assigned: ${newTask.title}`,
+// 🔔 Send notification IF task has assigned user
+if (assignedTo) {
+  await pushNotification({
+    userId: assignedTo,
+    title: "New Task Created & Assigned",
+    message: `You have been assigned a new task: ${newTask.title}`,
     type: "task_assigned",
-    icon: "📋",
-  });
-
-  io.to(assignedTo.toString()).emit("notification", {
-    title: "New Task Assigned",
-    message: `You have been assigned: ${newTask.title}`,
-    icon: "📋",
-    read: false,
-    createdAt: new Date(),
   });
 }
-
 
     const populatedTask = await newTask.populate("group");
     return res
@@ -264,22 +240,13 @@ export const assignTask = async (req, res) => {
     await find_assignedUser?.save();
     await find_task.save();
 
-    // // 6. 🔔 REAL-TIME + DB NOTIFICATION
-    // await Notification.create({
-    //   user: assignedUserId,
-    //   title: "New Task Assigned",
-    //   message: `You have been assigned: ${find_task.title}`,
-    //   type: "task_assigned",
-    //   icon: "📋",
-    // });
+    await pushNotification({
+  userId: assignedUserId,
+  title: "New Task Assigned",
+  message: `You have been assigned: ${find_task.title}`,
+  type: "task_assigned",
+});
 
-    // io.to(assignedUserId.toString()).emit("notification", {
-    //   title: "New Task Assigned",
-    //   message: `You have been assigned: ${find_task.title}`,
-    //   icon: "📋",
-    //   read: false,
-    //   createdAt: new Date(),
-    // });
 
     // 7. 🔔 Send Telegram notification ONLY at assignment time
     if (assignedUserId) {
@@ -421,8 +388,8 @@ export const submitTask = async (req, res) => {
     let attachments = req.files?.attachment || null;
 
     const find_task = await Task.findById(taskId).populate(
-      "attachments.uploadedBy"
-    );
+      "attachments.uploadedBy", 
+    ).populate("createdBy");
     if (!find_task) return res.status(404).json({ message: "Task not found" });
 
     // ✅ Ensure attachments array exists
@@ -498,6 +465,15 @@ export const submitTask = async (req, res) => {
 
     await find_task.save();
 
+
+await pushNotification({
+  userId: find_task.createdBy.toString(),
+  title: "Task Submitted",
+  message: `${req.user.name} submitted: ${find_task.title}`,
+  type: "task_submitted",
+});
+
+
     return res.status(200).json({
       message: "✅ Task submitted successfully and sent for review.",
       task: find_task,
@@ -540,12 +516,27 @@ export const approveTask = async (req, res) => {
         date: Date.now(),
       });
 
+      await pushNotification({
+  userId: find_task.assignedTo.toString(),
+  title: "Task Rejected",
+  message: `Your task "${find_task.title}" was rejected. Reason: ${message || "No reason provided"}`,
+  type: "task_rejected",
+});
+
+
       return res.status(400).json({ message: "Submission Declined", message });
     }
     find_task.history.push({ message: "Task completed", date: Date.now() });
     find_task.status = "Completed";
 
     await find_task.save();
+
+    await pushNotification({
+  userId: find_task.assignedTo.toString(),
+  title: "Task Approved",
+  message: `Your task "${find_task.title}" has been approved 🎉`,
+  type: "task_approved",
+});
 
     return res.status(200).json({ message: "Task Completed", find_task });
   } catch (error) {
