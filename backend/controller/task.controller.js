@@ -34,7 +34,7 @@ export const createTask = async (req, res) => {
       deadline,
       category,
     } = req.body;
-   
+
     const { groupId } = req.params;
     const adminId = req?.user?._id;
     const attachment = req.files?.attachments;
@@ -114,15 +114,15 @@ export const createTask = async (req, res) => {
     await find_group.save();
     await findAdmin.save();
 
-// 🔔 Send notification IF task has assigned user
-if (assignedTo) {
-  await pushNotification({
-    userId: assignedTo,
-    title: "New Task Created & Assigned",
-    message: `You have been assigned a new task: ${newTask.title}`,
-    type: "task_assigned",
-  });
-}
+    // 🔔 Send notification IF task has assigned user
+    if (assignedTo) {
+      await pushNotification({
+        userId: assignedTo,
+        title: "New Task Created & Assigned",
+        message: `You have been assigned a new task: ${newTask.title}`,
+        type: "task_assigned",
+      });
+    }
 
     const populatedTask = await newTask.populate("group");
     return res
@@ -147,7 +147,6 @@ export const deleteTask = async (req, res) => {
     if (task.createdBy.toString() !== loggedUserId.toString()) {
       return res.status(403).json({ message: "Only Admin can delete task" });
     }
-
 
     // 3. DELETE the task from Task collection
     await Task.findByIdAndDelete(taskId);
@@ -228,12 +227,11 @@ export const assignTask = async (req, res) => {
     await find_task.save();
 
     await pushNotification({
-  userId: assignedUserId,
-  title: "New Task Assigned",
-  message: `You have been assigned: ${find_task.title}`,
-  type: "task_assigned",
-});
-
+      userId: assignedUserId,
+      title: "New Task Assigned",
+      message: `You have been assigned: ${find_task.title}`,
+      type: "task_assigned",
+    });
 
     // 7. 🔔 Send Telegram notification ONLY at assignment time
     if (assignedUserId) {
@@ -333,7 +331,7 @@ export const updateTaskStatus = async (req, res) => {
     const task = await Task.findById(taskId).populate("createdBy assignedTo");
     if (!task) return res.status(404).json({ message: "Task not found" });
 
-        // 3. Permission Check
+    // 3. Permission Check
     const isGroupAdmin = task.createdBy?.id === loggedUserId.toString();
     const isAssignedUser = task.assignedTo?.id === loggedUserId.toString();
 
@@ -365,13 +363,12 @@ export const submitTask = async (req, res) => {
     const { url, message } = req.body;
     const loggedUserId = req?.user?._id;
 
- 
     // Safely extract single or multiple attachments
     let attachments = req.files?.attachment || null;
 
-    const find_task = await Task.findById(taskId).populate(
-      "attachments.uploadedBy", 
-    ).populate("createdBy");
+    const find_task = await Task.findById(taskId)
+      .populate("attachments.uploadedBy")
+      .populate("createdBy");
     if (!find_task) return res.status(404).json({ message: "Task not found" });
 
     // ✅ Ensure attachments array exists
@@ -390,7 +387,6 @@ export const submitTask = async (req, res) => {
     if (attachments) {
       attachments = Array.isArray(attachments) ? attachments : [attachments];
 
- 
       const allowedFormats = [
         "image/jpeg",
         "image/png",
@@ -414,7 +410,7 @@ export const submitTask = async (req, res) => {
           }
         );
 
-       // ✅ Now safe to push
+        // ✅ Now safe to push
         find_task.attachments.push({
           uploadedBy: loggedUserId,
           url: cloudinaryResponse?.secure_url,
@@ -444,14 +440,12 @@ export const submitTask = async (req, res) => {
 
     await find_task.save();
 
-
-await pushNotification({
-  userId: find_task.createdBy.toString(),
-  title: "Task Submitted",
-  message: `${req.user.name} submitted: ${find_task.title}`,
-  type: "task_submitted",
-});
-
+    await pushNotification({
+      userId: find_task.createdBy.toString(),
+      title: "Task Submitted",
+      message: `${req.user.name} submitted: ${find_task.title}`,
+      type: "task_submitted",
+    });
 
     return res.status(200).json({
       message: "✅ Task submitted successfully and sent for review.",
@@ -471,9 +465,10 @@ export const approveTask = async (req, res) => {
   try {
     const { taskId } = req.params;
     // const { isAccept, declineMessage  ,payload} = req.body;
-    const { action, message } = req.body;
+    const { action, mess } = req.body;
     const loggedUserId = req?.user?._id; //Admin and creator of project of Group
 
+    console.log(req.body);
     const find_task = await Task.findById(taskId);
     if (!find_task) return res.status(400).json({ message: "Task not found" });
 
@@ -483,24 +478,30 @@ export const approveTask = async (req, res) => {
       return res.status(400).json({ message: "Only Admin can approve" });
 
     if (action == "decline") {
-      if (message) {
+      if (mess) {
         find_task.declineMessage = message;
       }
 
+      find_task.status="In-progress"
+
       find_task.history.push({
-        message: "submission declined ",
+        message: "submission declined",
         date: Date.now(),
       });
 
       await pushNotification({
-  userId: find_task.assignedTo.toString(),
-  title: "Task Rejected",
-  message: `Your task "${find_task.title}" was rejected. Reason: ${message || "No reason provided"}`,
-  type: "task_rejected",
-});
+        userId: find_task.assignedTo.toString(),
+        title: "Task Rejected",
+        message: `Your task "${find_task.title}" was rejected. Reason: ${
+          mess || "No reason provided"
+        }`,
+        type: "task_rejected",
+      });
 
+      console.log("object")
+      await find_task.save();
 
-      return res.status(400).json({ message: "Submission Declined", message });
+      return res.status(200).json({ message: "Submission Declined", mess });
     }
     find_task.history.push({ message: "Task completed", date: Date.now() });
     find_task.status = "Completed";
@@ -508,11 +509,11 @@ export const approveTask = async (req, res) => {
     await find_task.save();
 
     await pushNotification({
-  userId: find_task.assignedTo.toString(),
-  title: "Task Approved",
-  message: `Your task "${find_task.title}" has been approved 🎉`,
-  type: "task_approved",
-});
+      userId: find_task.assignedTo.toString(),
+      title: "Task Approved",
+      message: `Your task "${find_task.title}" has been approved 🎉`,
+      type: "task_approved",
+    });
 
     return res.status(200).json({ message: "Task Completed", find_task });
   } catch (error) {

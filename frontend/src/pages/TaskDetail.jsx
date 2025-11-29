@@ -66,12 +66,8 @@ export default function TaskDetail() {
 
   const { profile } = useAuth();
 
-
-
   const taskFromState = location.state?.task || null;
-  const viewerRole =
-    location.state?.viewerRole === "admin" ? "admin" : "member"; // <-- role gate
-
+ 
   const [adminFiles, setAdminFiles] = useState([]);
   const [memberFiles, setMemberFiles] = useState([]);
   const [task, setTask] = useState();
@@ -98,7 +94,7 @@ export default function TaskDetail() {
   //  const getTask=async()=>{
   //   try {
   //     const {data}=await axiosInstance.get(`/task/get-single-task/${taskId}`)
-  //    
+  //
   //     setTask(data);
   //   } catch (error) {
   //     console.log(error)
@@ -151,7 +147,6 @@ export default function TaskDetail() {
       console.log(error);
     }
   };
- 
 
   const fetchComments = async () => {
     try {
@@ -172,8 +167,6 @@ export default function TaskDetail() {
     fetchComments();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [taskId]);
-
-
 
   const onUploadAdmin = (e) => {
     const files = Array.from(e.target.files || []);
@@ -208,9 +201,9 @@ export default function TaskDetail() {
         `/comment/add-comment/${taskId}`,
         { message: newComment }
       );
-   
+
       // alert("Comment added");
-      toast.success("Comment Added")
+      toast.success("Comment Added");
 
       setComments((prev) => [
         { id: `c-${Date.now()}`, author: "You", text: newComment.trim() },
@@ -259,7 +252,7 @@ export default function TaskDetail() {
           },
         }
       );
-    
+
       // assume backend returns updated task; if not, we re-fetch
       if (data?.task) {
         setTask(data.task);
@@ -272,7 +265,9 @@ export default function TaskDetail() {
       setSubmissionFiles([]);
       setSubmissionNote("");
       // alert("Submitted successfully — status pending for admin approval.");
-      toast.success("Submitted successfully — status pending for admin approval.");
+      toast.success(
+        "Submitted successfully — status pending for admin approval."
+      );
     } catch (err) {
       console.error("Submit error:", err);
       // alert(err?.response?.data?.message || "Submission failed");
@@ -301,6 +296,7 @@ export default function TaskDetail() {
         payload
       );
 
+      console.log(data);
       if (data?.task) setTask(data.task);
       else await fetchTask();
 
@@ -419,15 +415,16 @@ export default function TaskDetail() {
                 >
                   {task?.status}
                 </span>
-
               </div>
             </div>
-             <div className="mt-2">
-              {task.status === "Declined" ? (
+            <div className="mt-2">
+              {/* {task.status === "Declined" ? ( */}
+              {task.history[task.history.length - 1].message ===
+              "submission declined" ? (
                 <div className="rounded-md bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-700 px-4 py-2 text-sm text-red-700 dark:text-red-300">
                   ❌ Task declined by <strong>{task?.createdBy?.name}</strong>
                   <div className="mt-2 text-xs italic text-red-500 dark:text-red-400">
-                    Reason: “Incomplete deliverables and missing documentation.”
+                    Reason: {task?.declineMessage}
                   </div>
                 </div>
               ) : task.status === "Completed" ? (
@@ -438,7 +435,9 @@ export default function TaskDetail() {
                 <div className="rounded-md bg-yellow-50 dark:bg-yellow-900/30 border border-yellow-200 dark:border-yellow-700 px-4 py-2 text-sm text-yellow-700 dark:text-yellow-300">
                   ⏳ Task submission pending review by {task?.createdBy?.name}
                 </div>
-              ):("")}
+              ) : (
+                ""
+              )}
             </div>
           </div>
         </div>
@@ -504,27 +503,27 @@ export default function TaskDetail() {
 
         {/* Right: two stacked rows for Files */}
         <div className="lg:col-span-2 space-y-6">
-         {/* Admin Files */}
-<Card className="p-6">
-  <div className="flex items-center justify-between mb-4">
-    <h2 className="text-lg font-bold text-gray-900 dark:text-white flex items-center gap-2">
-      <Paperclip className="w-5 h-5" /> Files shared by Admin
-    </h2>
+          {/* Admin Files */}
+          <Card className="p-6">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-lg font-bold text-gray-900 dark:text-white flex items-center gap-2">
+                <Paperclip className="w-5 h-5" /> Files shared by Admin
+              </h2>
 
-    {/* Admin can upload to admin files; members cannot */}
-    {viewerRole === "admin" && (
-      <label className="btn-secondary cursor-pointer inline-flex items-center gap-2">
-        <UploadCloud className="w-4 h-4" />
-        <span>Upload</span>
-        <input
-          type="file"
-          className="hidden"
-          multiple
-          onChange={onUploadAdmin}
-        />
-      </label>
-    )}
-  </div>
+              {/* Admin can upload to admin files; members cannot */}
+              {isTaskAdmin && (
+                <label className="btn-secondary cursor-pointer inline-flex items-center gap-2">
+                  <UploadCloud className="w-4 h-4" />
+                  <span>Upload</span>
+                  <input
+                    type="file"
+                    className="hidden"
+                    multiple
+                    onChange={onUploadAdmin}
+                  />
+                </label>
+              )}
+            </div>
 
             {/* Admin controls - shown only to admins */}
             {isTaskAdmin && task?.status === "Pending" && (
@@ -597,12 +596,12 @@ export default function TaskDetail() {
             )}
           </Card>
 
-{/* Member Files */}
-<Card className="p-6">
-  <div className="flex items-center justify-between mb-4">
-    <h2 className="text-lg font-bold text-gray-900 dark:text-white flex items-center gap-2">
-      <Paperclip className="w-5 h-5" /> Files shared by Members
-    </h2>
+          {/* Member Files */}
+          <Card className="p-6">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-lg font-bold text-gray-900 dark:text-white flex items-center gap-2">
+                <Paperclip className="w-5 h-5" /> Files shared by Members
+              </h2>
 
               {/* Members can upload to members files; admin cannot */}
               {/* {viewerRole !== "admin" && (
@@ -627,7 +626,7 @@ export default function TaskDetail() {
                 </div>
               )} */}
               {/* Member submission area - visible to members (not admin) */}
-              {viewerRole !== "admin" && (
+              {!isTaskAdmin && (
                 <div className="mb-4 border rounded p-3 bg-gray-50 dark:bg-gray-800">
                   <h3 className="text-sm font-semibold mb-2">
                     Submit your work
@@ -693,7 +692,6 @@ export default function TaskDetail() {
               </p>
             ) : (
               <ul className="divide-y divide-gray-200 dark:divide-gray-700">
-              
                 {memberFiles?.map((f) => (
                   <li
                     key={f.id}
@@ -732,20 +730,19 @@ export default function TaskDetail() {
               </ul>
             )}
 
-  {/* Mobile-friendly member input */}
-  {viewerRole !== "admin" && (
-    <div className="mt-4 md:hidden">
-      <input
-        type="text"
-        value={memberUploadName}
-        onChange={(e) => setMemberUploadName(e.target.value)}
-        placeholder="Your name (optional)"
-        className="w-full rounded-md bg-gray-50 dark:bg-gray-700/50 px-3 py-2 text-sm outline-none"
-      />
-    </div>
-  )}
-</Card>
-
+            {/* Mobile-friendly member input */}
+            {isTaskAdmin && (
+              <div className="mt-4 md:hidden">
+                <input
+                  type="text"
+                  value={memberUploadName}
+                  onChange={(e) => setMemberUploadName(e.target.value)}
+                  placeholder="Your name (optional)"
+                  className="w-full rounded-md bg-gray-50 dark:bg-gray-700/50 px-3 py-2 text-sm outline-none"
+                />
+              </div>
+            )}
+          </Card>
         </div>
       </div>
     </div>
