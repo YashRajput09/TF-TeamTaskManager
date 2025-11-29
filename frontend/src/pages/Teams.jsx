@@ -666,6 +666,7 @@ const Teams = () => {
 
                       return true;
                     })
+                    .reverse()
                     .map((task) => (
                       <tr
                         key={task?._id}
