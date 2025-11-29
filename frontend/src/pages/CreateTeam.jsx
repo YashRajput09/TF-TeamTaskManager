@@ -23,18 +23,18 @@ const CreateTask = () => {
 
   const handleSubmit = async(e) => {
     e.preventDefault();
-    console.log(formData)
+   
     // TODO: Integrate with API to create task
     try {
        const {data}=await axiosInstance.post(`/group/create-group`,formData) 
 
-       console.log(data)
+     
     } catch (error) {
        toast.error(error.response?.data?.message || "Failed to create group");
         console.log(error)
     }
 
-    console.log('Creating task:', formData);
+
     
     // Simulate success and navigate back
     toast.success('Team created successfully!')

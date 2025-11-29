@@ -117,7 +117,7 @@ useEffect(()=>{
         context: "forgot-password",
         otp: otpValue,
       });
-      console.log(data);
+    
       //   setTimeout(() => {
       //   setLoading(false);
       // if (otpValue === "123456") {

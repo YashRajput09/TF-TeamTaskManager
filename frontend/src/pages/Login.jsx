@@ -18,7 +18,7 @@ export default function Login() {
 
   const onSubmit = async (e) => {
     e.preventDefault();
-    console.log("🔐 Login attempt:", form);
+    console.log("🔐 Login attempt:");
     setError("");
 
     if (!form.email.trim() || !form.password.trim()) {
@@ -37,7 +37,7 @@ export default function Login() {
 
       const { data } = await axiosInstance.post("/user/login", form);
       // pretend API call
-      console.log(data);
+     
       toast.success("loged in successfully");
       await new Promise((r) => setTimeout(r, 600));
       localStorage.setItem("auth_user", JSON.stringify({ email: form.email }));
@@ -111,8 +111,7 @@ export default function Login() {
               <p className="text-sm text-red-600 dark:text-red-400">{error}</p>
             </div>
           )}
-          {console.log(form.email)}
-          {console.log(form)}
+         
           <div className="flex m-0 px-4 w-full">
             <span onClick={()=>navigate(`/user/forgot-password`,{state:{email:form.email}})} className="ml-auto text-sm hover:underline text-blue-500 cursor-pointer">
               Forgot Password ??

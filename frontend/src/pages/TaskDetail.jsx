@@ -66,7 +66,7 @@ export default function TaskDetail() {
 
   const { profile } = useAuth();
 
- console.log(taskId)
+
 
   const taskFromState = location.state?.task || null;
   const viewerRole =
@@ -83,8 +83,6 @@ export default function TaskDetail() {
 
   // const task = useMemo(() => taskFromState, [taskFromState]);
 
-  console.log(task);
-
   // New states
   const [submissionFiles, setSubmissionFiles] = useState([]); // files member selects to submit
   const [submissionNote, setSubmissionNote] = useState(""); // optional message by member
@@ -100,7 +98,7 @@ export default function TaskDetail() {
   //  const getTask=async()=>{
   //   try {
   //     const {data}=await axiosInstance.get(`/task/get-single-task/${taskId}`)
-  //     console.log(data);
+  //    
   //     setTask(data);
   //   } catch (error) {
   //     console.log(error)
@@ -153,8 +151,7 @@ export default function TaskDetail() {
       console.log(error);
     }
   };
-  console.log(adminFiles);
-  console.log(memberFiles);
+ 
 
   const fetchComments = async () => {
     try {
@@ -176,10 +173,7 @@ export default function TaskDetail() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [taskId]);
 
-  console.log(adminFiles);
-  console.log(memberFiles);
 
-  console.log(task);
 
   const onUploadAdmin = (e) => {
     const files = Array.from(e.target.files || []);
@@ -214,7 +208,7 @@ export default function TaskDetail() {
         `/comment/add-comment/${taskId}`,
         { message: newComment }
       );
-      console.log(data);
+   
       // alert("Comment added");
       toast.success("Comment Added")
 
@@ -265,7 +259,7 @@ export default function TaskDetail() {
           },
         }
       );
-      console.log(data);
+    
       // assume backend returns updated task; if not, we re-fetch
       if (data?.task) {
         setTask(data.task);
@@ -699,7 +693,7 @@ export default function TaskDetail() {
               </p>
             ) : (
               <ul className="divide-y divide-gray-200 dark:divide-gray-700">
-                {/* console.log(memberFiles) */}
+              
                 {memberFiles?.map((f) => (
                   <li
                     key={f.id}

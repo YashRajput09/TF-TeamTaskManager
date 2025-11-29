@@ -18,7 +18,8 @@ export const AuthProvider = ({ children }) => {
         headers: { "Content-Type": "application/json" },
       });
 
-      console.log("✅ Profile data:", response.data);
+      // console.log("✅ Profile data:", response.data);
+      console.log("✅ Profile data Fetched:");
       setIsAuthenticated(true);
       setProfile(response.data);
 
@@ -57,7 +58,8 @@ export const AuthProvider = ({ children }) => {
         }
       );
 
-      console.log("✅ Login successful:", response.data);
+      // console.log("✅ Login successful:", response.data);
+      console.log("✅ Login successful:");
 
       // Fetch user profile after successful login
       await fetchProfile();
@@ -97,7 +99,8 @@ export const AuthProvider = ({ children }) => {
         }
       );
 
-      console.log("✅ Signup successful:", response.data);
+      // console.log("✅ Signup successful:", response.data);
+      console.log("✅ Signup successful:");
 
       // Fetch user profile after signup
       await fetchProfile();

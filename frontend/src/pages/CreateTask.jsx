@@ -11,7 +11,7 @@ const CreateTask = () => {
   const location = useLocation();
   const teamData = location?.state?.teamData;
 
-  console.log(teamData);
+
   // Form state
   const [formData, setFormData] = useState({
     title: "",
@@ -40,12 +40,11 @@ const CreateTask = () => {
     }
   };
 
-  console.log(formData);
   const handleSubmit = async (e) => {
     e.preventDefault();
     // TODO: Integrate with API to create task
     try {
-      console.log("Creating task:", formData);
+      // console.log("Creating task:", formData);
 
       const { data } = await axiosInstance.post(
         `/task/create-task/${teamData._id}`,
@@ -57,7 +56,7 @@ const CreateTask = () => {
         }
       );
 
-      console.log(data);
+     
       // Simulate success and navigate back
       // alert("Task created successfully!");
       toast.success("Task Created Successfully")

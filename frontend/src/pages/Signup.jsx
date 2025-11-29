@@ -63,9 +63,9 @@ export default function Signup() {
         email: form.email,
         context: "register",
       });
-      // console.log(data);
+    
       setIsModalOpen(true);
-      console.log("object");
+      
     } catch (error) {
       console.log(error);
       toast.error(error?.response?.data?.message);
@@ -113,7 +113,7 @@ export default function Signup() {
     Object.keys(form).forEach((key) => {
       formData.append(key, form[key]);
     });
-    console.log(formData);
+  
 
     try {
       setSubmitting(true);
@@ -146,10 +146,6 @@ export default function Signup() {
     } finally {
       setSubmitting(false);
     }
-    // setTimeout(() => {
-    console.log("Verification successful:", response);
-    // }, 5000);
-    console.log("object");
 
     // alert("Email verified successfully! ✅");
   };

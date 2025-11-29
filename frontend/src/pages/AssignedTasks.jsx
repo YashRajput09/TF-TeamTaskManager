@@ -41,8 +41,6 @@ export default function AssignedTasks() {
     const allUserTask=async ()=>{
          try {
           const {data}=await axiosInstance.get(`/task/get-user-task`);
-          console.log(data?.assignedTasks)
-          console.log(data?.createdTasks)
         setTasks(data?.assignedTasks);
         // setCreatedTasks(data?.createdTasks);
          } catch (error) {

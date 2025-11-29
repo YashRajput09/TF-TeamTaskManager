@@ -23,8 +23,7 @@ const Dashboard = () => {
     const allUserTask = async () => {
       try {
         const { data } = await axiosInstance.get(`/task/get-user-task`);
-        //console.log(data?.assignedTasks);
-        //console.log(data?.createdTasks);
+   
         setUserAssignedTask(data?.assignedTasks);
         setUserCreatedTask(data?.createdTasks);
       } catch (error) {
@@ -33,7 +32,7 @@ const Dashboard = () => {
     };
     const getUserGroups = async () => {
       const { data } = await axiosInstance.get(`/user/myprofile`);
-      //console.log(data);
+      
       setUserGroups(data?.groups);
     };
 
@@ -90,7 +89,7 @@ const Dashboard = () => {
     color: g.color || "bg-blue-500",
   }));
 
-  console.log(userAssignedTask)
+  
   // Normalize assigned tasks for "My Recent Tasks"
   const recent = userAssignedTask.map((t, idx) => ({
     id: t.id || t._id || idx + 1,
@@ -147,11 +146,11 @@ const Dashboard = () => {
 
   const handleAccept = async (task_id) => {
     try {
-      //console.log(task_id)
+      
       const { data } = await axiosInstance.put(
         `/task/update-status/${task_id}` ,{status:"In-progress"}
       );
-      //console.log(data);
+     
       // alert("task accepted ");
       toast.success("Accepted")
     } catch (error) {
@@ -248,12 +247,12 @@ const Dashboard = () => {
                     >
                       {task.title}
                     </h3>
-                   {console.log(task.team)}
+                   
                     <div className="mt-1 flex items-center space-x-3 text-xs text-gray-600 dark:text-gray-400">
                       <span>{task?.team}</span>
                       <span>•</span>
                       <span>
-                        {console.log(task)}
+                       
                         {/* {task.dueDate ? `Due ${task.dueDate}` : "No due date"} */}
                         {(() => {
                           const due = formatDueDate(task.dueDate);
@@ -270,7 +269,7 @@ const Dashboard = () => {
                     </div>
                   </div>
                   <div className="flex items-center space-x-2 ml-4">
-                    {/* { console.log(task?.id)} */}
+                   
                     {task.status === "Assigned" && (
                       <button
                         onClick={() => {

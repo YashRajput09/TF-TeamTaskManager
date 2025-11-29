@@ -11,7 +11,7 @@ const api = {
         context: "register",
         otp,
       });
-      console.log(data)
+      // console.log(data)
       return { success: true, message: "OTP verified " }
     } catch (error) {
       console.log(error);
@@ -33,7 +33,7 @@ const api = {
   },
 
   resendOTP: async (email) => {
-    console.log("object")
+
     // Example: await axios.post('/api/auth/resend-otp', { email });
      try {
       const { data } = await axiosInstance.post(`/user/forgot-password`, {
@@ -71,11 +71,6 @@ const EmailVerificationBox = ({
 
   const navigateTo=useNavigate();
   //Send Email Automatically when Modal open
-  useEffect(() => {
-    {
-      isOpen && console.log("Email Sended");
-    }
-  }, [isOpen]);
 
   // Mask email function
   const maskEmail = (email) => {
@@ -186,7 +181,7 @@ const EmailVerificationBox = ({
     try {
       const response = await api.verifyOTP(email, otpValue);
 
-      console.log(response);
+      // console.log(response);
       if(!response?.success){
         setError(response?.message)
         setIsShaking(true);

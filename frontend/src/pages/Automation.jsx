@@ -27,7 +27,7 @@ const Automation = () => {
         //   }
         // }
       );
-      console.log(data);
+      
       setAnalysis(data);
     } catch (error) {
       console.error("Analysis failed:", error);
