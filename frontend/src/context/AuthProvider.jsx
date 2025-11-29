@@ -12,14 +12,12 @@ export const AuthProvider = ({ children }) => {
   // Fetch user profile using cookie-based authentication
   const fetchProfile = async () => {
     try {
-      console.log("🔐 Fetching profile...");
+      
       const response = await axiosInstance.get("/user/myprofile", {
         withCredentials: true,
         headers: { "Content-Type": "application/json" },
       });
 
-      // console.log("✅ Profile data:", response.data);
-      console.log("✅ Profile data Fetched:");
       setIsAuthenticated(true);
       setProfile(response.data);
 
@@ -48,7 +46,6 @@ export const AuthProvider = ({ children }) => {
   // Login user and refresh profile
   const login = async (email, password) => {
     try {
-      console.log("🔐 Attempting login...");
       const response = await axiosInstance.post(
         "/user/login",
         { email, password },
@@ -57,9 +54,6 @@ export const AuthProvider = ({ children }) => {
           headers: { "Content-Type": "application/json" },
         }
       );
-
-      // console.log("✅ Login successful:", response.data);
-      console.log("✅ Login successful:");
 
       // Fetch user profile after successful login
       await fetchProfile();
@@ -98,9 +92,6 @@ export const AuthProvider = ({ children }) => {
           headers: { "Content-Type": "multipart/form-data" },
         }
       );
-
-      // console.log("✅ Signup successful:", response.data);
-      console.log("✅ Signup successful:");
 
       // Fetch user profile after signup
       await fetchProfile();

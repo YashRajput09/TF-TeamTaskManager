@@ -1,5 +1,5 @@
 //Automation.jsx
-import React, { useState } from "react";
+import React, { use, useState } from "react";
 import Card from "../components/Card";
 import {
   Brain,
@@ -10,12 +10,29 @@ import {
   TrendingUp,
 } from "lucide-react";
 import axiosInstance from "./utility/axiosInstance";
+// import ToggleAnalyzeResults from "../components/ToggleAnalyzeResults";
+import SmallToggle from "../components/SmallToggle";
+import { useEffect } from "react";
 
-const Automation = () => {
+const Automation = ({ profile }) => {
   const [analysis, setAnalysis] = useState(null);
+  const [userGroups, setUserGroups] = useState(profile.groups);
   const [loading, setLoading] = useState(false);
   const [redistributing, setRedistributing] = useState(false);
+  const [mode, setMode] = useState("analyze");
 
+  useEffect(() => {
+    if(mode==="analyze"){
+      setAnalysis(null)
+    }
+    // mode === "analyze" ? setAnalysis(null) : setAnalysis();
+  }, [mode]);
+
+  useEffect(() => {
+    analysis === null ? setMode("analyze") : setMode("results");
+  }, [analysis]);
+
+  console.log(userGroups);
   const analyzeWorkload = async (groupId) => {
     setLoading(true);
     try {
@@ -27,7 +44,8 @@ const Automation = () => {
         //   }
         // }
       );
-      
+
+      setMode("results");
       setAnalysis(data);
     } catch (error) {
       console.error("Analysis failed:", error);
@@ -39,7 +57,7 @@ const Automation = () => {
   const autoRedistribute = async (groupId) => {
     setRedistributing(true);
     try {
-      const response = await fetch(
+      const { data } = await axiosInstance.post(
         `/automation/groups/${groupId}/auto-redistribute`,
         {
           method: "POST",
@@ -53,7 +71,7 @@ const Automation = () => {
           }),
         }
       );
-      const data = await response.json();
+      console.log(data);
       alert(`Redistribution completed: ${data.message}`);
     } catch (error) {
       console.error("Redistribution failed:", error);
@@ -78,64 +96,83 @@ const Automation = () => {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Workload Analysis Card */}
         <Card>
-          <div className="flex items-center space-x-3 mb-4">
-            <Brain className="w-6 h-6 text-purple-500" />
-            <h2 className="text-xl font-bold text-gray-900 dark:text-white">
-              Workload Analysis
-            </h2>
+          <div className="flex w-full flex-col md:flex-row items-start p-0 md:items-center justify-between space-x-1 ">
+            <div className="flex gap-2 items-center">
+              <Brain className="w-6 h-6 text-purple-500" />
+              <h2 className="text-xl font-bold text-gray-900 dark:text-white">
+                Workload Analysis
+              </h2>
+            </div>
+
+            <div className="p-2 ml-auto">
+              <SmallToggle value={mode} onChange={setMode} />
+            </div>
           </div>
 
-          <p className="text-gray-600 dark:text-gray-400 mb-4">
+          {/* <p className="text-gray-600 dark:text-gray-400 mb-2  ">
             Analyze team workload distribution and get AI-powered insights
-          </p>
+          </p> */}
 
-          <button
-            onClick={() => analyzeWorkload("your-group-id-here")}
-            disabled={loading}
-            className="btn-primary w-full flex items-center justify-center space-x-2"
-          >
-            {loading ? (
-              <RefreshCw className="w-4 h-4 animate-spin" />
-            ) : (
-              <Brain className="w-4 h-4" />
-            )}
-            <span>{loading ? "Analyzing..." : "Run Workload Analysis"}</span>
-          </button>
+          {!analysis && (
+            <>
+              <button
+                onClick={() => analyzeWorkload("your-group-id-here")}
+                disabled={loading}
+                className="btn-primary w-full flex items-center justify-center space-x-2"
+              >
+                {loading ? (
+                  <RefreshCw className="w-4 h-4 animate-spin" />
+                ) : (
+                  <Brain className="w-4 h-4" />
+                )}
+                <span>
+                  {loading ? "Analyzing..." : "Run Workload Analysis"}
+                </span>
+              </button>
 
-          {/* //dummy data  */}
-          <div className="w-full text-left p-3 rounded-lg bg-gray-50 dark:bg-gray-700/50 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-3">
-                <div className={`w-8 h-8 rounded-lg`} />
-                <div>
-                  <p className="text-sm font-semibold text-gray-900 dark:text-white">
-                    SIH group
-                  </p>
-                  <p className="text-xs text-gray-600 dark:text-gray-400">
-                    5 members • 3 active
-                  </p>
-                </div>
-                <div className="flex items-center space-x-2">
-                  {/* <div className="w-24 bg-gray-200 dark:bg-gray-700 rounded-full h-2 overflow-hidden">
+              {/* //dummy data  */}
+              <div className="space-y-1 ">
+                {userGroups &&
+                  userGroups?.map((group) => (
+                    <div
+                      key={group._id}
+                      className="w-full text-left p-3 rounded-lg bg-gray-50 dark:bg-gray-700/50 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                    >
+                      <div className="flex items-center justify-between">
+                        {console.log(group._id)}
+                        <div className="flex items-center space-x-3">
+                          <div className={`w-8 h-8 rounded-lg`} />
+                          <div>
+                            <p className="text-sm font-semibold text-gray-900 dark:text-white">
+                              {group?.name}
+                            </p>
+                            <p className="text-xs text-gray-600 dark:text-gray-400">
+                              {group?.members?.length} members • 3 active
+                            </p>
+                          </div>
+                          <div className="flex items-center space-x-2">
+                            {/* <div className="w-24 bg-gray-200 dark:bg-gray-700 rounded-full h-2 overflow-hidden">
                         <div
                           className={`h-full ${t.color}`}
                           style={{ width: `${t.progress}%` }}
                         />
                       </div> */}
-                  <span className="text-xs ml-auto font-medium text-gray-700 dark:text-gray-300">
-                    <button
-                      onClick={() =>
-                        analyzeWorkload("690daf645852fe35171324c3")
-                      }
-                      className="bg-red-700/70 px-4 py-1 rounded-md"
-                    >
-                      Analyze
-                    </button>
-                  </span>
-                </div>
+                            <span className="text-xs ml-auto font-medium text-gray-700 dark:text-gray-300">
+                              <button
+                                onClick={() => analyzeWorkload(group?._id)}
+                                className="bg-red-700/70 px-4 py-1 rounded-md"
+                              >
+                                Analyze
+                              </button>
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
               </div>
-            </div>
-          </div>
+            </>
+          )}
 
           {/* //Dummy data */}
 
@@ -194,7 +231,7 @@ const Automation = () => {
 
               {/* Auto Redistribute Button */}
               <button
-                onClick={() => autoRedistribute("your-group-id-here")}
+                onClick={() => autoRedistribute("692ad56ff2bb87381d42b37d")}
                 disabled={redistributing}
                 className="btn-secondary w-full flex items-center justify-center space-x-2 mt-4"
               >

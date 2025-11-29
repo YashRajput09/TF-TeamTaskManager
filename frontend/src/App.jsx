@@ -55,7 +55,7 @@ function GuestOnly({ children }) {
 
 // --- App Component ---
 export default function App() {
-  const { isAuthenticated, loading } = useAuth();
+  const { isAuthenticated,profile, loading } = useAuth();
 
   if (loading) {
     return (
@@ -121,7 +121,7 @@ export default function App() {
           <Route path="assigned-tasks" element={<AssignedTasks />} />
 
           {/* Extra Features */}
-          <Route path="automation" element={<Automation />} />
+          <Route path="automation" element={<Automation profile={profile} />} />
           <Route path="calendar" element={<Calendar />} />
           <Route path="telegram" element={<Telegram />} />
           <Route path="calendar/create-meeting" element={<CreateMeeting />} />
