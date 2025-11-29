@@ -203,6 +203,8 @@ const Teams = () => {
   const [showRemove, setShowRemove] = useState(false);
   const [alluser, setAlluser] = useState();
   const [loading, setLoading] = useState();
+  const [statusFilter, setStatusFilter] = useState("all");
+  const [priorityFilter, setPriorityFilter] = useState("all");
 
   const { profile } = useAuth();
   // NEW: create task modal state
@@ -574,6 +576,59 @@ const Teams = () => {
               </div>
             </div>
 
+            {/* FILTERS */}
+            <div className="flex flex-col gap-4 mb-6">
+              {/* STATUS FILTER */}
+              <div className="flex flex-col gap-2">
+                <label className="text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wide">
+                  Status
+                </label>
+                <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-hide">
+                  {[
+                    "all",
+                    "Assigned",
+                    "Pending",
+                    "In-progress",
+                    "Completed",
+                  ].map((s) => (
+                    <button
+                      key={s}
+                      onClick={() => setStatusFilter(s)}
+                      className={`px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 whitespace-nowrap flex-shrink-0 ${
+                        statusFilter === s
+                          ? "bg-gradient-to-r from-blue-500 to-blue-600 text-white shadow-lg shadow-blue-500/30 scale-105"
+                          : "bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-700 hover:border-blue-400 hover:shadow-md"
+                      }`}
+                    >
+                      {s === "all" ? "All" : s}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* PRIORITY FILTER */}
+              <div className="flex flex-col gap-2">
+                <label className="text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wide">
+                  Priority
+                </label>
+                <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-hide">
+                  {["all", "High", "Medium", "Low"].map((p) => (
+                    <button
+                      key={p}
+                      onClick={() => setPriorityFilter(p)}
+                      className={`px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 whitespace-nowrap flex-shrink-0 ${
+                        priorityFilter === p
+                          ? "bg-gradient-to-r from-purple-500 to-purple-600 text-white shadow-lg shadow-purple-500/30 scale-105"
+                          : "bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-700 hover:border-purple-400 hover:shadow-md"
+                      }`}
+                    >
+                      {p === "all" ? "All" : p}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
+
             <div className="overflow-x-auto">
               <table className="w-full">
                 <thead>
@@ -593,58 +648,76 @@ const Teams = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  {visibleTask?.map((task) => (
-                    <tr
-                      key={task?._id}
-                      className="border-b border-gray-100 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700/50  rounded-md transition-colors"
-                    >
-                      <td
-                        onClick={() => navigate(`/tasks/${task?._id}`)}
-                        className="py-3 px-4 text-sm text-gray-900 hover:underline cursor-pointer dark:text-white"
+                  {visibleTask
+                    ?.filter((task) => {
+                      // status filter
+                      if (
+                        statusFilter !== "all" &&
+                        task.status !== statusFilter
+                      )
+                        return false;
+
+                      // priority filter
+                      if (
+                        priorityFilter !== "all" &&
+                        task.priority !== priorityFilter
+                      )
+                        return false;
+
+                      return true;
+                    })
+                    .map((task) => (
+                      <tr
+                        key={task?._id}
+                        className="border-b border-gray-100 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700/50  rounded-md transition-colors"
                       >
-                        {task.title}
-                      </td>
-                      <td className="py-3 px-4 text-sm text-gray-700 dark:text-gray-300">
-                        {task?.assignedTo?.name}
-                      </td>
-                      <td className="py-3 px-4">
-                        <span
-                          className={`px-2 py-1 rounded-md text-xs font-medium ${
-                            task.status === "Completed"
-                              ? "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400"
-                              : task.status === "In-progress"
-                              ? "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400"
-                              : "bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300"
-                          }`}
+                        <td
+                          onClick={() => navigate(`/tasks/${task?._id}`)}
+                          className="py-3 px-4 text-sm text-gray-900 hover:underline cursor-pointer dark:text-white"
                         >
-                          {task?.status}
-                        </span>
-                      </td>
-                      <td className="py-3 px-4">
-                        <span
-                          className={`px-2 py-1 rounded-md text-xs font-medium ${
-                            task.priority === "Critical"
-                              ? "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400"
-                              : task.priority === "High"
-                              ? "bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400"
-                              : task.priority === "Medium"
-                              ? "bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400"
-                              : "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400"
-                          }`}
-                        >
-                          {task?.priority}
-                        </span>
-                      </td>
-                      {isOwner(teamData) && (
-                        <td>
-                          <Trash2
-                            onClick={() => handleDelete(task?._id)}
-                            className="w-4 mr-2 text-red-700 opacity-75 cursor-pointer hover:opacity-100 hover:text-600"
-                          />
+                          {task.title}
                         </td>
-                      )}
-                    </tr>
-                  ))}
+                        <td className="py-3 px-4 text-sm text-gray-700 dark:text-gray-300">
+                          {task?.assignedTo?.name}
+                        </td>
+                        <td className="py-3 px-4">
+                          <span
+                            className={`px-2 py-1 rounded-md text-xs font-medium ${
+                              task.status === "Completed"
+                                ? "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400"
+                                : task.status === "In-progress"
+                                ? "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400"
+                                : "bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300"
+                            }`}
+                          >
+                            {task?.status}
+                          </span>
+                        </td>
+                        <td className="py-3 px-4">
+                          <span
+                            className={`px-2 py-1 rounded-md text-xs font-medium ${
+                              task.priority === "Critical"
+                                ? "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400"
+                                : task.priority === "High"
+                                ? "bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400"
+                                : task.priority === "Medium"
+                                ? "bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400"
+                                : "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400"
+                            }`}
+                          >
+                            {task?.priority}
+                          </span>
+                        </td>
+                        {isOwner(teamData) && (
+                          <td>
+                            <Trash2
+                              onClick={() => handleDelete(task?._id)}
+                              className="w-4 mr-2 text-red-700 opacity-75 cursor-pointer hover:opacity-100 hover:text-600"
+                            />
+                          </td>
+                        )}
+                      </tr>
+                    ))}
                 </tbody>
               </table>
               {visibleTasks?.length === 0 && (

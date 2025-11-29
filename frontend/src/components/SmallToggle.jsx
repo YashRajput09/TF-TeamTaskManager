@@ -38,7 +38,7 @@ export default function SmallToggles({ value = "analyze", onChange }) {
 
       {/* Results */}
       <span
-        onClick={() => onChange("results")}
+        // onClick={() => onChange("results")}
         className={`
           z-10 w-[62px] text-center text-[11px] font-medium 
           transition-colors duration-150
