@@ -19,6 +19,7 @@ import {
 import axiosInstance from "./utility/axiosInstance";
 import toast from "react-hot-toast";
 import { useAuth } from "../context/AuthProvider";
+import ConfirmDialog from "../UI/reusable-components/ConfirmDialog";
 
 // Helper to read ?team= from URL
 const useQuery = () => new URLSearchParams(useLocation().search);
@@ -205,6 +206,14 @@ const Teams = () => {
   const [loading, setLoading] = useState();
   const [statusFilter, setStatusFilter] = useState("all");
   const [priorityFilter, setPriorityFilter] = useState("all");
+  const [confirm, setConfirm] = useState({
+    open: false,
+    title: "",
+    message: "",
+    confirmText: "",
+    cancelText: "Cancel",
+    onConfirm: () => {},
+  });
 
   const { profile } = useAuth();
   // NEW: create task modal state
@@ -333,9 +342,9 @@ const Teams = () => {
   };
 
   const handleDelete = async (taskId) => {
-    const isConfirm = await handleConfirmation();
+    // const isConfirm = await handleConfirmation();
 
-    if (!isConfirm) return;
+    // if (!isConfirm) return;
     try {
       const res = await axiosInstance.delete(`/task/delete-task/${taskId}`, {
         withCredentials: true,
@@ -347,6 +356,18 @@ const Teams = () => {
       console.error(err);
       toast.error(err?.response?.data?.message || "Failed to delete task");
     }
+  };
+
+  // TO open dialogbox
+  const openConfirm = ({ title, message, confirmText, onConfirm }) => {
+    setConfirm({
+      open: true,
+      title,
+      message,
+      confirmText,
+      cancelText: "Cancel",
+      onConfirm,
+    });
   };
 
   return (
@@ -382,31 +403,36 @@ const Teams = () => {
           </div>
         </div>
 
-        <div className="mt-4 md:mt-0 flex items-center gap-4">
+        <div className="mt-4 md:mt-0 flex flex-wrap items-center gap-3">
           {isOwner(teamData) && (
             <button
-              className="btn-primary hover:opacity-60 flex items-center space-x-2"
               onClick={() => navigate(`/create-task`, { state: { teamData } })}
+              className="px-3 py-1 md:py-2 rounded-xl backdrop-blur-md bg-white/10 border border-white/20 
+                 text-white shadow-lg hover:bg-white/20 transition flex items-center gap-2"
             >
               <Plus className="w-4 h-4" />
-              <span>Create Task</span>
+              New
             </button>
           )}
+
           {isOwner(teamData) && (
             <>
               <button
-                className="btn-secondary hover:opacity-60 flex items-center space-x-2"
                 onClick={() => setShowAdd(true)}
+                className="px-3 py-1 md:py-2 rounded-xl backdrop-blur-md bg-white/10 border border-white/20 
+                   text-white shadow-lg hover:bg-white/20 transition flex items-center gap-2"
               >
                 <UserPlus className="w-4 h-4" />
-                <span>Add Member</span>
+                Add 
               </button>
+
               <button
-                className="btn-secondary hover:opacity-60 flex items-center space-x-2"
                 onClick={() => setShowRemove(true)}
+                className="px-3 py-1 md:py-2 rounded-xl backdrop-blur-md bg-white/10 border border-white/20 
+                   text-white shadow-lg hover:bg-white/20 transition flex items-center gap-2"
               >
                 <UserMinus className="w-4 h-4" />
-                <span>Remove Member</span>
+                Remove 
               </button>
             </>
           )}
@@ -563,72 +589,131 @@ const Teams = () => {
                     Assigned to me
                   </label>
                 )}
-
-                {/* Show Create Task only for owner */}
-                {/* {isOwner(teamData) && (
-                  <button
-                    className="btn-primary"
-                    onClick={() => setShowCreateTask(true)}
-                  >
-                    Create Task
-                  </button>
-                )} */}
               </div>
             </div>
 
             {/* FILTERS */}
-            <div className="flex flex-col gap-4 mb-6">
+            <div className="flex flex-wrap gap-3 mb-6">
               {/* STATUS FILTER */}
-              <div className="flex flex-col gap-2">
-                <label className="text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wide">
-                  Status
-                </label>
-                <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-hide">
-                  {[
-                    "all",
-                    "Assigned",
-                    "Pending",
-                    "In-progress",
-                    "Completed",
-                  ].map((s) => (
-                    <button
-                      key={s}
-                      onClick={() => setStatusFilter(s)}
-                      className={`px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 whitespace-nowrap flex-shrink-0 ${
-                        statusFilter === s
-                          ? "bg-gradient-to-r from-blue-500 to-blue-600 text-white shadow-lg shadow-blue-500/30 scale-105"
-                          : "bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-700 hover:border-blue-400 hover:shadow-md"
-                      }`}
-                    >
-                      {s === "all" ? "All" : s}
-                    </button>
-                  ))}
+              <div className="relative group">
+                <button className="flex items-center gap-2 px-4 py-2 rounded-full bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 hover:border-blue-400 dark:hover:border-blue-500 transition-all shadow-sm hover:shadow-md">
+                  <svg
+                    className="w-4 h-4 text-gray-600 dark:text-gray-400"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"
+                    />
+                  </svg>
+                  <span className="text-xs font-medium text-gray-700 dark:text-gray-300">
+                    Status:{" "}
+                    <span className="text-blue-600 dark:text-blue-400">
+                      {statusFilter === "all" ? "All" : statusFilter}
+                    </span>
+                  </span>
+                  <svg
+                    className="w-4 h-4 text-gray-400 group-hover:rotate-180 transition-transform"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M19 9l-7 7-7-7"
+                    />
+                  </svg>
+                </button>
+
+                {/* Dropdown */}
+                <div className="absolute top-full left-0 mt-2 w-64 bg-white dark:bg-gray-800 rounded-2xl shadow-2xl border border-gray-200 dark:border-gray-700 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50 p-2">
+                  <div className="flex flex-wrap gap-2">
+                    {[
+                      "all",
+                      "Assigned",
+                      "Pending",
+                      "In-progress",
+                      "Completed",
+                    ].map((s) => (
+                      <button
+                        key={s}
+                        onClick={() => setStatusFilter(s)}
+                        className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all ${
+                          statusFilter === s
+                            ? "bg-blue-500 text-white"
+                            : "bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-blue-100 dark:hover:bg-gray-600"
+                        }`}
+                      >
+                        {s === "all" ? "All" : s}
+                      </button>
+                    ))}
+                  </div>
                 </div>
               </div>
 
               {/* PRIORITY FILTER */}
-              <div className="flex flex-col gap-2">
-                <label className="text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wide">
-                  Priority
-                </label>
-                <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-hide">
-                  {["all", "High", "Medium", "Low"].map((p) => (
-                    <button
-                      key={p}
-                      onClick={() => setPriorityFilter(p)}
-                      className={`px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 whitespace-nowrap flex-shrink-0 ${
-                        priorityFilter === p
-                          ? "bg-gradient-to-r from-purple-500 to-purple-600 text-white shadow-lg shadow-purple-500/30 scale-105"
-                          : "bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-700 hover:border-purple-400 hover:shadow-md"
-                      }`}
-                    >
-                      {p === "all" ? "All" : p}
-                    </button>
-                  ))}
+              <div className="relative group">
+                <button className="flex items-center gap-2 px-4 py-2 rounded-full bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 hover:border-purple-400 dark:hover:border-purple-500 transition-all shadow-sm hover:shadow-md">
+                  <svg
+                    className="w-4 h-4 text-gray-600 dark:text-gray-400"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M3 21v-4m0 0V5a2 2 0 012-2h6.5l1 1H21l-3 6 3 6h-8.5l-1-1H5a2 2 0 00-2 2zm9-13.5V9"
+                    />
+                  </svg>
+                  <span className="text-xs font-medium text-gray-700 dark:text-gray-300">
+                    Priority:{" "}
+                    <span className="text-purple-600 dark:text-purple-400">
+                      {priorityFilter === "all" ? "All" : priorityFilter}
+                    </span>
+                  </span>
+                  <svg
+                    className="w-4 h-4 text-gray-400 group-hover:rotate-180 transition-transform"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M19 9l-7 7-7-7"
+                    />
+                  </svg>
+                </button>
+
+                {/* Dropdown */}
+                <div className="absolute top-full left-0 mt-2 w-48 bg-white dark:bg-gray-800 rounded-2xl shadow-2xl border border-gray-200 dark:border-gray-700 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50 p-2">
+                  <div className="flex flex-wrap gap-2">
+                    {["all", "High", "Medium", "Low"].map((p) => (
+                      <button
+                        key={p}
+                        onClick={() => setPriorityFilter(p)}
+                        className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all ${
+                          priorityFilter === p
+                            ? "bg-purple-500 text-white"
+                            : "bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-purple-100 dark:hover:bg-gray-600"
+                        }`}
+                      >
+                        {p === "all" ? "All" : p}
+                      </button>
+                    ))}
+                  </div>
                 </div>
               </div>
             </div>
-
             <div className="overflow-x-auto">
               <table className="w-full">
                 <thead>
@@ -712,7 +797,16 @@ const Teams = () => {
                         {isOwner(teamData) && (
                           <td>
                             <Trash2
-                              onClick={() => handleDelete(task?._id)}
+                              // onClick={() => handleDelete(task?._id)}
+                              onClick={() => {
+                                openConfirm({
+                                  title: "Delete Task?",
+                                  message:
+                                    "Are you sure you want to delete this task?",
+                                  confirmText: "Delete",
+                                  onConfirm: () => handleDelete(task._id),
+                                });
+                              }}
                               className="w-4 mr-2 text-red-700 opacity-75 cursor-pointer hover:opacity-100 hover:text-600"
                             />
                           </td>
@@ -802,6 +896,19 @@ const Teams = () => {
           />
         </InlineModal>
       )}
+
+      <ConfirmDialog
+        open={confirm.open}
+        title={confirm.title}
+        message={confirm.message}
+        confirmText={confirm.confirmText}
+        cancelText={confirm.cancelText}
+        onConfirm={() => {
+          confirm.onConfirm(); // run the action
+          setConfirm({ ...confirm, open: false }); // close dialog
+        }}
+        onCancel={() => setConfirm({ ...confirm, open: false })}
+      />
     </div>
   );
 };
@@ -1014,46 +1121,6 @@ const RemoveMemberForm = ({ onAdd, onCancel }) => {
     </form>
   );
 };
-
-// const RemoveMemberForm = ({ members, onRemove, onCancel }) => {
-//   const [name, setName] = useState("");
-//   return (
-//     <form
-//       onSubmit={(e) => {
-//         e.preventDefault();
-//         if (name) onRemove(name);
-//       }}
-//       className="space-y-4"
-//     >
-//       <div>
-//         <label className="block text-sm mb-1 text-gray-700 dark:text-gray-300">
-//           Select Member
-//         </label>
-//         <select
-//           value={name}
-//           onChange={(e) => setName(e.target.value)}
-//           className="w-full rounded-md bg-gray-50 dark:bg-gray-700/50 px-3 py-2 outline-none"
-//         >
-//           <option value="">Choose…</option>
-//           {members.map((m) => (
-//             <option key={m.id} value={m.name}>
-//               {m.name}
-//             </option>
-//           ))}
-//         </select>
-//       </div>
-//       <div className="flex justify-end gap-2">
-//         <button type="button" className="btn-secondary" onClick={onCancel}>
-//           Cancel
-//         </button>
-//         <button type="submit" className="btn-primary flex items-center gap-2">
-//           <UserMinus className="w-4 h-4" /> Remove
-//         </button>
-//       </div>
-//     </form>
-//   );
-// };
-
 // NEW: Create Task form (modal content)
 const CreateTaskForm = ({ members, onCreate, onCancel }) => {
   const [title, setTitle] = useState("");

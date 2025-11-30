@@ -12,3 +12,30 @@
   /* button text defaults (kept subtle so only neutral buttons change) */
   button { @apply text-gray-900 dark:text-gray-100; }
 }
+
+/* Fade-in background dilogbox*/
+@keyframes fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.animate-fade-in {
+  animation: fade-in 0.25s ease-out;
+}
+
+/* Dialog pop-in animation */
+@keyframes scale-fade {
+  0% {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.animate-scale-fade {
+  animation: scale-fade 0.25s ease-out;
+}
+
