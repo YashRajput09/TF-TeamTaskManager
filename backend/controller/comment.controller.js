@@ -51,9 +51,6 @@ export const deleteComment = async (req, res) => {
     const { taskId, commentId } = req.params;
     const userId = req.user?._id;
 
-    console.log("sd2");
-    console.log(taskId);
-    console.log(commentId);
     //Find Task First
     const find_task = await Task.findById(taskId).populate("comment.commentedBy");
     if (!find_task) return res.status(500).json({ message: "Task Not Found" });
@@ -120,8 +117,6 @@ export const editComment = async (req, res) => {
     //   commentId, { $set: {comment: newText,modifyAt: Date.now(), },},{ new: true}
     // );
     await updated_comment.populate("commentedBy");
-
-    console.log(updated_comment);
     res.status(200).json({ message: "Updated Successfully", updated_comment });
   } catch (error) {
     console.log(error);

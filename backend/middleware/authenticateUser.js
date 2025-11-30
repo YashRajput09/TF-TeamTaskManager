@@ -14,21 +14,18 @@ export const isAuthenticated = async (req, res, next) => {
       return res.status(401).json({ message: "Unauthorized access, You need to login first." });
     }
     
-    console.log("s1")
     const decoded = jwt.verify(jwtToken, process.env.JWT_SECRET || 'fallbackSecret');
     // console.log('🔐 Decoded Token User ID:', decoded.userId);
     
     const user = await userModel.findById(decoded.userId);
     // console.log("🔐 Found User:", user ? user.email : 'No user found');
     
-    console.log("s2")
     if (!user) {
       return res.status(401).json({ message: "User not found" });
     }
     
     req.user = user;
     next();
-    console.log("s3")
   } catch (error) {
     console.log('🔐 Auth Error:', error.message);
     return res.status(401).json({ message: "Unauthorized - Invalid token" });
