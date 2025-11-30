@@ -13,6 +13,7 @@ import {
 import axiosInstance from "./utility/axiosInstance";
 import { useAuth } from "../context/AuthProvider";
 import toast from "react-hot-toast";
+import { MoreVertical, Edit2, Trash2 } from "lucide-react";
 
 // 🧠 Utility: Format and colorize due date
 const formatDueDate = (dateString) => {
@@ -85,6 +86,8 @@ export default function TaskDetail() {
   const [submissionNote, setSubmissionNote] = useState(""); // optional message by member
   const [loadingSubmit, setLoadingSubmit] = useState(false);
   const [processingAction, setProcessingAction] = useState(false);
+  // Add state for managing dropdown
+const [openDropdown, setOpenDropdown] = useState(null);
 
   // helper to know if current user is task creator (admin for this task)
   const isTaskAdmin =
@@ -481,42 +484,116 @@ export default function TaskDetail() {
               rows={3}
             />
             <div className="mt-2 flex justify-end">
-              <button type="submit" className="btn-primary">
+              <button type="submit" className="px-4 border border-white text-gray-300 bg-slate-700 rounded-xl">
                 {loadingAdd ? (
                   <>
-                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                    <div className="flex w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
                     Adding...
                   </>
                 ) : (
-                  "Add Comment"
+                  "Add"
                 )}
               </button>
             </div>
           </form>
 
-          <div className="space-y-3 ">
-            {comments?.length === 0 ? (
-              <p className="text-sm text-gray-500 dark:text-gray-400">
-                No comments yet.
+    <div className="space-y-3">
+  {comments?.length === 0 ? (
+    <p className="text-sm text-gray-500 dark:text-gray-400">
+      No comments yet.
+    </p>
+  ) : (
+    comments?.map((c) => (
+      <div
+        key={c._id}
+        className={`${
+          c?.commentedBy?._id === profile._id ? "ml-auto" : "mr-auto"
+        } max-w-[80%] relative group`}
+      >
+        <div
+          className={`${
+            c?.commentedBy?._id === profile._id
+              ? "bg-slate-700 text-white"
+              : "bg-gray-50 dark:bg-gray-700/50"
+          } px-4 py-3 rounded-2xl relative`}
+        >
+          <div className="flex items-start justify-between gap-3">
+            <div className="flex-1">
+              <p
+                className={`text-xs ${
+                  c?.commentedBy?._id === profile._id
+                    ? "text-blue-100"
+                    : "text-gray-500 dark:text-gray-400"
+                } mb-1 font-medium`}
+              >
+                @{c?.commentedBy?.name}
               </p>
-            ) : (
-              comments?.map((c) => (
-                <div
-                  key={c._id}
-                  className={`${c?.commentedBy?._id===profile._id ? "text-end" : "text-start"} px-6 py-1 rounded-lg  bg-gray-50 dark:bg-gray-700/50`}
+              <p
+                className={`text-sm ${
+                  c?.commentedBy?._id === profile._id
+                    ? "text-white"
+                    : "text-gray-900 dark:text-gray-100"
+                }`}
+              >
+                {c.message}
+              </p>
+            </div>
+
+            {/* Three Dot Menu - Only for user's own comments */}
+            {c?.commentedBy?._id === profile._id && (
+              <div className="relative">
+                <button
+                  onClick={() =>
+                    setOpenDropdown(openDropdown === c._id ? null : c._id)
+                  }
+                  className="p-1 rounded-full hover:bg-white/20 transition-colors"
                 >
-                  {console.log(c,"**",profile)}
-                  {console.log(c?.commentedBy?._id,"**",profile._id)}
-                  <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">
-                    {c?.commentedBy?.name}
-                  </p>
-                  <p className="text-sm text-gray-900 dark:text-gray-100">
-                    {c.message}
-                  </p>
-                </div>
-              ))
+                  <MoreVertical className="w-4 h-4" />
+                </button>
+
+                {/* Dropdown Menu */}
+                {openDropdown === c._id && (
+                  <>
+                    {/* Backdrop to close dropdown */}
+                    <div
+                      className="fixed inset-0 z-10"
+                      onClick={() => setOpenDropdown(null)}
+                    />
+                    
+                    <div className="absolute right-0 top-8 z-20 w-32 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 py-1">
+                      <button
+                        onClick={() => {
+                          // Handle edit
+                          console.log("Edit comment:", c._id);
+                          setOpenDropdown(null);
+                        }}
+                        className="w-full px-4 py-2 text-left text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center gap-2 transition-colors"
+                      >
+                        <Edit2 className="w-4 h-4" />
+                        Edit
+                      </button>
+                      <button
+                        onClick={() => {
+                          // Handle delete
+                          console.log("Delete comment:", c._id);
+                          setOpenDropdown(null);
+                        }}
+                        className="w-full px-4 py-2 text-left text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 flex items-center gap-2 transition-colors"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                        Delete
+                      </button>
+                    </div>
+                  </>
+                )}
+              </div>
             )}
           </div>
+        </div>
+      </div>
+    ))
+  )}
+</div>
         </Card>
 
         {/* Right: two stacked rows for Files */}
