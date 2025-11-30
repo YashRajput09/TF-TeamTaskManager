@@ -87,7 +87,7 @@ export const deleteComment = async (req, res) => {
     //   date: new Date()
     // });
 
-    res.status(200).json({ message: "Comment Deleted " });
+    res.status(200).json({ message: "Comment Deleted ",all_comment });
     // res.status(200).json({ message: "Comment Deleted ", all_comment });
   } catch (error) {}
 };

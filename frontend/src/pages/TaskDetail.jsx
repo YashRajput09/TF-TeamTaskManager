@@ -87,7 +87,7 @@ export default function TaskDetail() {
   const [loadingSubmit, setLoadingSubmit] = useState(false);
   const [processingAction, setProcessingAction] = useState(false);
   // Add state for managing dropdown
-const [openDropdown, setOpenDropdown] = useState(null);
+  const [openDropdown, setOpenDropdown] = useState(null);
 
   // helper to know if current user is task creator (admin for this task)
   const isTaskAdmin =
@@ -161,7 +161,6 @@ const [openDropdown, setOpenDropdown] = useState(null);
         (a, b) => new Date(b.date) - new Date(a.date)
       );
       setComments(sorted || []);
-      
     } catch (error) {
       console.log(error);
     }
@@ -172,8 +171,6 @@ const [openDropdown, setOpenDropdown] = useState(null);
     fetchComments();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [taskId]);
-
-  console.log(comments)
 
   const onUploadAdmin = (e) => {
     const files = Array.from(e.target.files || []);
@@ -213,19 +210,23 @@ const [openDropdown, setOpenDropdown] = useState(null);
       // alert("Comment added");
       console.log(data);
       setComments((prev) => [
-        { id: `c-${Date.now()}`, commentedBy:profile, message: newComment.trim() },
+        {
+          _id: `${Date.now()}`,
+          commentedBy: profile,
+          message: newComment.trim(),
+        },
         ...prev,
       ]);
-        toast.success("Comment Added");
+      console.log(comments);
+      toast.success("Comment Added");
       setNewComment("");
     } catch (error) {
       console.log(error);
-    }finally{
-      setLoadingAdd(false)
+    } finally {
+      setLoadingAdd(false);
     }
-    
   };
-  console.log(profile);
+
   // Member selects files to submit
   const handleSubmissionFilesChange = (e) => {
     const files = Array.from(e.target.files || []);
@@ -308,7 +309,6 @@ const [openDropdown, setOpenDropdown] = useState(null);
         payload
       );
 
-      console.log(data);
       if (data?.task) setTask(data.task);
       else await fetchTask();
 
@@ -324,6 +324,22 @@ const [openDropdown, setOpenDropdown] = useState(null);
       toast.error(err?.response?.data?.message || "Action failed");
     } finally {
       setProcessingAction(false);
+    }
+  };
+
+  const deleteComment = async (commentId) => {
+    // Handle delete
+    console.log("Delete comment:", commentId);
+    try {
+      const { data } = await axiosInstance.delete(
+        `comment/${task?._id}/comment/${commentId}/delete`
+      );
+      console.log(data);
+      setComments(data?.all_comment.reverse());
+      toast.success("Comment deleted");
+      setOpenDropdown(null);
+    } catch (error) {
+      console.log(error);
     }
   };
 
@@ -484,7 +500,10 @@ const [openDropdown, setOpenDropdown] = useState(null);
               rows={3}
             />
             <div className="mt-2 flex justify-end">
-              <button type="submit" className="px-4 border border-white text-gray-300 bg-slate-700 rounded-xl">
+              <button
+                type="submit"
+                className="px-4 border border-white text-gray-300 bg-slate-700 rounded-xl"
+              >
                 {loadingAdd ? (
                   <>
                     <div className="flex w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
@@ -497,103 +516,101 @@ const [openDropdown, setOpenDropdown] = useState(null);
             </div>
           </form>
 
-    <div className="space-y-3">
-  {comments?.length === 0 ? (
-    <p className="text-sm text-gray-500 dark:text-gray-400">
-      No comments yet.
-    </p>
-  ) : (
-    comments?.map((c) => (
-      <div
-        key={c._id}
-        className={`${
-          c?.commentedBy?._id === profile._id ? "ml-auto" : "mr-auto"
-        } max-w-[80%] relative group`}
-      >
-        <div
-          className={`${
-            c?.commentedBy?._id === profile._id
-              ? "bg-slate-700 text-white"
-              : "bg-gray-50 dark:bg-gray-700/50"
-          } px-4 py-3 rounded-2xl relative`}
-        >
-          <div className="flex items-start justify-between gap-3">
-            <div className="flex-1">
-              <p
-                className={`text-xs ${
-                  c?.commentedBy?._id === profile._id
-                    ? "text-blue-100"
-                    : "text-gray-500 dark:text-gray-400"
-                } mb-1 font-medium`}
-              >
-                @{c?.commentedBy?.name}
+          <div className="space-y-3">
+            {comments?.length === 0 ? (
+              <p className="text-sm text-gray-500 dark:text-gray-400">
+                No comments yet.
               </p>
-              <p
-                className={`text-sm ${
-                  c?.commentedBy?._id === profile._id
-                    ? "text-white"
-                    : "text-gray-900 dark:text-gray-100"
-                }`}
-              >
-                {c.message}
-              </p>
-            </div>
-
-            {/* Three Dot Menu - Only for user's own comments */}
-            {c?.commentedBy?._id === profile._id && (
-              <div className="relative">
-                <button
-                  onClick={() =>
-                    setOpenDropdown(openDropdown === c._id ? null : c._id)
-                  }
-                  className="p-1 rounded-full hover:bg-white/20 transition-colors"
+            ) : (
+              comments?.map((c) => (
+                <div
+                  key={c._id}
+                  className={`${
+                    c?.commentedBy?._id === profile._id ? "ml-auto" : "mr-auto"
+                  } max-w-[80%] relative group`}
                 >
-                  <MoreVertical className="w-4 h-4" />
-                </button>
+                  <div
+                    className={`${
+                      c?.commentedBy?._id === profile._id
+                        ? "bg-slate-700 text-white"
+                        : "bg-gray-50 dark:bg-gray-700/50"
+                    } px-4 py-3 rounded-2xl relative`}
+                  >
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="flex-1">
+                        <p
+                          className={`text-xs ${
+                            c?.commentedBy?._id === profile._id
+                              ? "text-blue-100"
+                              : "text-gray-500 dark:text-gray-400"
+                          } mb-1 font-medium`}
+                        >
+                          @{c?.commentedBy?.name}
+                        </p>
+                        <p
+                          className={`text-sm ${
+                            c?.commentedBy?._id === profile._id
+                              ? "text-white"
+                              : "text-gray-900 dark:text-gray-100"
+                          }`}
+                        >
+                          {c.message}
+                        </p>
+                      </div>
 
-                {/* Dropdown Menu */}
-                {openDropdown === c._id && (
-                  <>
-                    {/* Backdrop to close dropdown */}
-                    <div
-                      className="fixed inset-0 z-10"
-                      onClick={() => setOpenDropdown(null)}
-                    />
-                    
-                    <div className="absolute right-0 top-8 z-20 w-32 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 py-1">
-                      <button
-                        onClick={() => {
-                          // Handle edit
-                          console.log("Edit comment:", c._id);
-                          setOpenDropdown(null);
-                        }}
-                        className="w-full px-4 py-2 text-left text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center gap-2 transition-colors"
-                      >
-                        <Edit2 className="w-4 h-4" />
-                        Edit
-                      </button>
-                      <button
-                        onClick={() => {
-                          // Handle delete
-                          console.log("Delete comment:", c._id);
-                          setOpenDropdown(null);
-                        }}
-                        className="w-full px-4 py-2 text-left text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 flex items-center gap-2 transition-colors"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                        Delete
-                      </button>
+                      {/* Three Dot Menu - Only for user's own comments */}
+                      {c?.commentedBy?._id === profile._id && (
+                        <div className="relative">
+                          <button
+                            onClick={() =>
+                              setOpenDropdown(
+                                openDropdown === c._id ? null : c._id
+                              )
+                            }
+                            className="p-1 rounded-full hover:bg-white/20 transition-colors"
+                          >
+                            <MoreVertical className="w-4 h-4" />
+                          </button>
+
+                          {/* Dropdown Menu */}
+                          {openDropdown === c._id && (
+                            <>
+                              {/* Backdrop to close dropdown */}
+                              <div
+                                className="fixed inset-0 z-10"
+                                onClick={() => setOpenDropdown(null)}
+                              />
+
+                              <div className="absolute right-0 top-8 z-20 w-32 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 py-1">
+                                <button
+                                  onClick={() => {
+                                    // Handle edit
+                                    console.log("Edit comment:", c._id);
+                                    setOpenDropdown(null);
+                                  }}
+                                  className="w-full px-4 py-2 text-left text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center gap-2 transition-colors"
+                                >
+                                  <Edit2 className="w-4 h-4" />
+                                  Edit
+                                </button>
+                                <button
+                                  onClick={() => deleteComment(c?._id)}
+                                  className="w-full px-4 py-2 text-left text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 flex items-center gap-2 transition-colors"
+                                >
+                                  <Trash2 className="w-4 h-4" />
+                                  Delete
+                                </button>
+                              </div>
+                            </>
+                          )}
+                        </div>
+                      )}
                     </div>
-                  </>
-                )}
-              </div>
+                  </div>
+                </div>
+              ))
             )}
           </div>
-        </div>
-      </div>
-    ))
-  )}
-</div>
         </Card>
 
         {/* Right: two stacked rows for Files */}
