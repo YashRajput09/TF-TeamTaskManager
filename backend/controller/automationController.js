@@ -40,6 +40,7 @@ export const analyzeWorkload = async (req, res) => {
 
     res.json({
       success: true,
+      groupId:groupId,
       analysis: {
         timeframe: parseInt(timeframe),
         totalTasks: tasks.length,
