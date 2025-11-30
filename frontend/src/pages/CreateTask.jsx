@@ -1,16 +1,15 @@
 import React, { useState } from "react";
 import Card from "../components/Card";
-import { Save, X, Calendar, Flag, Users, FileImage } from "lucide-react";
+import { Save, X, Calendar, Flag, Users, FileImage, Loader2 } from "lucide-react";
 import { useLocation, useNavigate } from "react-router-dom";
 import axiosInstance from "./utility/axiosInstance";
 import toast from "react-hot-toast";
 
 const CreateTask = () => {
   const navigate = useNavigate();
-
   const location = useLocation();
   const teamData = location?.state?.teamData;
-
+  const [loading, setLoading] = useState(false);
 
   // Form state
   const [formData, setFormData] = useState({
@@ -23,14 +22,6 @@ const CreateTask = () => {
     attachments: null,
   });
 
-  // const handleChange = (e) => {
-  //   const { name, value,files } = e.target;
-  //   setFormData((prev) => ({
-  //     ...prev,
-  //     [name]: value,
-  //   }));
-  // };
-
   const handleChange = (e) => {
     const { name, value, files } = e.target;
     if (name === "attachments") {
@@ -42,10 +33,8 @@ const CreateTask = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    // TODO: Integrate with API to create task
+    setLoading(true);
     try {
-      // console.log("Creating task:", formData);
-
       const { data } = await axiosInstance.post(
         `/task/create-task/${teamData._id}`,
         formData,
@@ -56,16 +45,15 @@ const CreateTask = () => {
         }
       );
 
-     
-      // Simulate success and navigate back
-      // alert("Task created successfully!");
-      toast.success("Task Created Successfully")
+      toast.success("Task Created Successfully");
       navigate(`/teams/${teamData._id}`);
     } catch (error) {
       console.log(error);
       if (error?.response?.data?.message) {
         alert(error?.response?.data?.message);
       }
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -74,13 +62,13 @@ const CreateTask = () => {
   };
 
   return (
-    <div className="max-w-4xl mx-auto space-y-6">
+    <div className="max-w-4xl mx-auto px-4 py-6 space-y-6">
       {/* Page Header */}
-      <div>
-        <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
+      <div className="text-center md:text-left">
+        <h1 className="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white">
           Create New Task
         </h1>
-        <p className="mt-1 text-gray-600 dark:text-gray-400">
+        <p className="mt-1 text-sm md:text-base text-gray-600 dark:text-gray-400">
           Fill in the details to create a new task
         </p>
       </div>
@@ -103,8 +91,9 @@ const CreateTask = () => {
               value={formData.title}
               onChange={handleChange}
               required
+              disabled={loading}
               placeholder="Enter task title"
-              className="input-field"
+              className="w-full px-4 py-2.5 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all disabled:opacity-50 disabled:cursor-not-allowed"
             />
           </div>
 
@@ -122,21 +111,22 @@ const CreateTask = () => {
               value={formData.description}
               onChange={handleChange}
               required
+              disabled={loading}
               rows={4}
               placeholder="Describe the task in detail..."
-              className="input-field resize-none"
+              className="w-full px-4 py-2.5 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all resize-none disabled:opacity-50 disabled:cursor-not-allowed"
             />
           </div>
 
-          {/* Row: Priority and Status */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {/* Row: Priority and Due Date */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6">
             {/* Priority */}
             <div>
               <label
                 htmlFor="priority"
                 className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
               >
-                <div className="flex items-center space-x-2">
+                <div className="flex items-center gap-2">
                   <Flag className="w-4 h-4" />
                   <span>Priority *</span>
                 </div>
@@ -147,7 +137,8 @@ const CreateTask = () => {
                 value={formData.priority}
                 onChange={handleChange}
                 required
-                className="input-field"
+                disabled={loading}
+                className="w-full px-4 py-2.5 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <option value="Low">Low</option>
                 <option value="Medium">Medium</option>
@@ -155,35 +146,13 @@ const CreateTask = () => {
               </select>
             </div>
 
-            {/* Status */}
-            <div>
-              {/* <label htmlFor="status" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                Status *
-              </label>
-              <select
-                id="status"
-                name="status"
-                value={formData.status}
-                onChange={handleChange}
-                required
-                className="input-field"
-              >
-                <option value="Pending">Pending</option>
-                <option value="In Progress">In Progress</option>
-                <option value="Completed">Completed</option>
-              </select> */}
-            </div>
-          </div>
-
-          {/* Row: Due Date and Team */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {/* Due Date */}
             <div>
               <label
                 htmlFor="deadline"
                 className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
               >
-                <div className="flex items-center space-x-2">
+                <div className="flex items-center gap-2">
                   <Calendar className="w-4 h-4" />
                   <span>Due Date *</span>
                 </div>
@@ -195,43 +164,20 @@ const CreateTask = () => {
                 value={formData.deadline}
                 onChange={handleChange}
                 required
-                className="input-field"
+                disabled={loading}
+                className="w-full px-4 py-2.5 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all disabled:opacity-50 disabled:cursor-not-allowed"
               />
             </div>
-
-            {/* Team */}
-            {/* <div>
-              <label htmlFor="team" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                <div className="flex items-center space-x-2">
-                  <Users className="w-4 h-4" />
-                  <span>Team *</span>
-                </div>
-              </label>
-              <select
-                id="team"
-                name="team"
-                value={formData.team}
-                onChange={handleChange}
-                required
-                className="input-field"
-              >
-                <option value="">Select a team</option>
-                <option value="Design Team">Design Team</option>
-                <option value="Dev Team">Dev Team</option>
-                <option value="Marketing">Marketing</option>
-                <option value="Sales">Sales</option>
-                <option value="Product">Product</option>
-              </select>
-            </div> */}
-          </div>
-
-          {/* assignedTo */}
+                     {/* assignedTo */}
           <div>
             <label
               htmlFor="assignedTo"
               className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
             >
-              Assign To *
+              <div className="flex items-center gap-2">
+                <Users className="w-4 h-4" />
+                <span>Assign To *</span>
+              </div>
             </label>
             <select
               id="assignedTo"
@@ -239,10 +185,10 @@ const CreateTask = () => {
               value={formData.assignedTo}
               onChange={handleChange}
               required
-              className="input-field"
+              disabled={loading}
+              className="w-full px-4 py-2.5 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <option value="">Select team member</option>
-
               {teamData?.members?.map((member) => (
                 <option key={member._id} value={member._id}>
                   {member.name}
@@ -250,39 +196,61 @@ const CreateTask = () => {
               ))}
             </select>
           </div>
+          </div>
 
+
+          {/* Attachment */}
           <div>
-            <label className="block text-sm mb-1 text-gray-700 dark:text-gray-300">
-              Attachment
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              <div className="flex items-center gap-2">
+                <FileImage className="w-4 h-4" />
+                <span>Attachment</span>
+              </div>
             </label>
             <div className="relative">
-              <FileImage className="w-4 h-4 absolute left-3 top-3 text-gray-400" />
               <input
                 name="attachments"
                 type="file"
                 accept="image/png, image/jpeg, application/pdf"
                 onChange={handleChange}
-                className="w-full pl-9 pr-3 py-2 rounded-md bg-gray-50 dark:bg-gray-700/50 outline-none"
+                disabled={loading}
+                className="w-full px-4 py-2.5 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white file:mr-4 file:py-1.5 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-medium file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 dark:file:bg-gray-700 dark:file:text-gray-300 outline-none transition-all disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
               />
             </div>
+            {formData.attachments && (
+              <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">
+                Selected: {formData.attachments.name}
+              </p>
+            )}
           </div>
 
           {/* Form Actions */}
-          <div className="flex items-center justify-end space-x-3 pt-6 border-t border-gray-200 dark:border-gray-700">
+          <div className="flex flex-col-reverse sm:flex-row items-stretch sm:items-center justify-end gap-3 pt-6 border-t border-gray-200 dark:border-gray-700">
             <button
               type="button"
               onClick={handleCancel}
-              className="btn-secondary flex items-center space-x-2"
+              disabled={loading}
+              className="w-full sm:w-auto px-4 py-2 lg:px-6 lg:py-2.5 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 font-medium hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <X className="w-4 h-4" />
               <span>Cancel</span>
             </button>
             <button
               type="submit"
-              className="btn-primary flex items-center space-x-2"
+              disabled={loading}
+              className="w-full sm:w-auto px-6 py-2.5 rounded-lg bg-blue-600 dark:bg-blue-500 text-white font-medium hover:bg-blue-700 dark:hover:bg-blue-600 transition-colors flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              <Save className="w-4 h-4" />
-              <span>Create Task</span>
+              {loading ? (
+                <>
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                  <span>Creating...</span>
+                </>
+              ) : (
+                <>
+                  <Save className="w-4 h-4" />
+                  <span>Create Task</span>
+                </>
+              )}
             </button>
           </div>
         </form>
