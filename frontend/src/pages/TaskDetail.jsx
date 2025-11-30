@@ -67,12 +67,13 @@ export default function TaskDetail() {
   const { profile } = useAuth();
 
   const taskFromState = location.state?.task || null;
- 
+
   const [adminFiles, setAdminFiles] = useState([]);
   const [memberFiles, setMemberFiles] = useState([]);
   const [task, setTask] = useState();
   const [comments, setComments] = useState();
   const [newComment, setNewComment] = useState("");
+  const [loadingAdd, setLoadingAdd] = useState(false);
 
   // For member uploads, optional display name
   const [memberUploadName, setMemberUploadName] = useState("");
@@ -157,6 +158,7 @@ export default function TaskDetail() {
         (a, b) => new Date(b.date) - new Date(a.date)
       );
       setComments(sorted || []);
+      
     } catch (error) {
       console.log(error);
     }
@@ -167,6 +169,8 @@ export default function TaskDetail() {
     fetchComments();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [taskId]);
+
+  console.log(comments)
 
   const onUploadAdmin = (e) => {
     const files = Array.from(e.target.files || []);
@@ -197,23 +201,28 @@ export default function TaskDetail() {
       e.preventDefault();
       if (!newComment.trim()) return;
 
+      setLoadingAdd(true);
       const { data } = await axiosInstance.post(
         `/comment/add-comment/${taskId}`,
         { message: newComment }
       );
 
       // alert("Comment added");
-      toast.success("Comment Added");
-
+      console.log(data);
       setComments((prev) => [
-        { id: `c-${Date.now()}`, author: "You", text: newComment.trim() },
+        { id: `c-${Date.now()}`, commentedBy:profile, message: newComment.trim() },
         ...prev,
       ]);
+        toast.success("Comment Added");
       setNewComment("");
     } catch (error) {
       console.log(error);
+    }finally{
+      setLoadingAdd(false)
     }
+    
   };
+  console.log(profile);
   // Member selects files to submit
   const handleSubmissionFilesChange = (e) => {
     const files = Array.from(e.target.files || []);
@@ -473,12 +482,19 @@ export default function TaskDetail() {
             />
             <div className="mt-2 flex justify-end">
               <button type="submit" className="btn-primary">
-                Add Comment
+                {loadingAdd ? (
+                  <>
+                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                    Adding...
+                  </>
+                ) : (
+                  "Add Comment"
+                )}
               </button>
             </div>
           </form>
 
-          <div className="space-y-3">
+          <div className="space-y-3 ">
             {comments?.length === 0 ? (
               <p className="text-sm text-gray-500 dark:text-gray-400">
                 No comments yet.
@@ -486,9 +502,11 @@ export default function TaskDetail() {
             ) : (
               comments?.map((c) => (
                 <div
-                  key={c.id}
-                  className="p-3 rounded-lg bg-gray-50 dark:bg-gray-700/50"
+                  key={c._id}
+                  className={`${c?.commentedBy?._id===profile._id ? "text-end" : "text-start"} px-6 py-1 rounded-lg  bg-gray-50 dark:bg-gray-700/50`}
                 >
+                  {console.log(c,"**",profile)}
+                  {console.log(c?.commentedBy?._id,"**",profile._id)}
                   <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">
                     {c?.commentedBy?.name}
                   </p>
