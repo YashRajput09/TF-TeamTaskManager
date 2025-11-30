@@ -32,7 +32,6 @@ const Automation = ({ profile }) => {
     analysis === null ? setMode("analyze") : setMode("results");
   }, [analysis]);
 
-  console.log(userGroups);
   const analyzeWorkload = async (groupId) => {
     setLoading(true);
     try {
@@ -71,7 +70,7 @@ const Automation = ({ profile }) => {
           }),
         }
       );
-      console.log(data);
+  
       alert(`Redistribution completed: ${data.message}`);
     } catch (error) {
       console.error("Redistribution failed:", error);
@@ -133,13 +132,16 @@ const Automation = ({ profile }) => {
               {/* //dummy data  */}
               <div className="space-y-1 ">
                 {userGroups &&
-                  userGroups?.map((group) => (
+                  userGroups
+                  ?.filter(group => group.createdBy === profile?._id)
+                  ?.map((group) => (
                     <div
                       key={group._id}
                       className="w-full text-left p-3 rounded-lg bg-gray-50 dark:bg-gray-700/50 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
                     >
+                
                       <div className="flex items-center justify-between">
-                        {console.log(group._id)}
+                       
                         <div className="flex items-center space-x-3">
                           <div className={`w-8 h-8 rounded-lg`} />
                           <div>
