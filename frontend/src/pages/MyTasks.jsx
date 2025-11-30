@@ -182,13 +182,13 @@ const MyTasks = () => {
             Manage and track your assigned tasks
           </p>
         </div>
-        <Link
+        {/* <Link
           to="/create-task"
           className="mt-4 md:mt-0 btn-primary flex items-center space-x-2 w-fit"
         >
           <Plus className="w-4 h-4" />
           <span>Create Task</span>
-        </Link>
+        </Link> */}
       </div>
 
       {/* Filters and Search */}
