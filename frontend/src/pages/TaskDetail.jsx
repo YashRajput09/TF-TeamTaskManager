@@ -11,6 +11,7 @@ import {
   User,
 } from "lucide-react";
 import axiosInstance from "./utility/axiosInstance";
+// import { IoCheckmarkCircle, IoCheckmarkDoneSharp } from "react-icons/io5";
 import { useAuth } from "../context/AuthProvider";
 import toast from "react-hot-toast";
 import { MoreVertical, Edit2, Trash2 } from "lucide-react";
@@ -75,6 +76,8 @@ export default function TaskDetail() {
   const [comments, setComments] = useState();
   const [newComment, setNewComment] = useState("");
   const [loadingAdd, setLoadingAdd] = useState(false);
+  const [editField, setEditField] = useState({});
+  const [editText, setEditText] = useState();
 
   // For member uploads, optional display name
   const [memberUploadName, setMemberUploadName] = useState("");
@@ -343,6 +346,28 @@ export default function TaskDetail() {
     }
   };
 
+  const handleEdit = async (commentId) => {
+    try {
+      const { data } = await axiosInstance.put(
+        `/comment/${task?._id}/comment/${commentId}/edit-comment`,
+        {
+          newText: editText,
+        }
+      );
+console.log(commentId)
+      console.log(data);
+      const updatedComment=data?.updated_comment
+      setComments((prev) =>
+        prev.map((comment) =>
+          comment._id === commentId ? updatedComment : comment
+        )
+      );
+    } catch (error) {
+      console.log(error);
+    }
+  };
+console.log(comments)
+  const isChanged = (commentText) => commentText !== editText?.trim();
   if (!task) {
     return (
       <div className="space-y-6">
@@ -524,7 +549,7 @@ export default function TaskDetail() {
             ) : (
               comments?.map((c) => (
                 <div
-                  key={c._id}
+                  key={c?._id}
                   className={`${
                     c?.commentedBy?._id === profile._id ? "ml-auto" : "mr-auto"
                   } max-w-[80%] relative group`}
@@ -554,7 +579,45 @@ export default function TaskDetail() {
                               : "text-gray-900 dark:text-gray-100"
                           }`}
                         >
-                          {c.message}
+                          {!editField[c?._id] ? (
+                            c?.message
+                          ) : (
+                            <div className="flex transition-all duration-300 w-full space-x-1">
+                              <div className="flex flex-grow  rounded focus-within:border-b-2  bg-red-800/10 transition-all duration-100 border-red-800 overflow-auto justify-start items-center">
+                                <textarea
+                                  name="editText"
+                                  placeholder="Type new Comment"
+                                  value={editText}
+                                  onBlur={() =>
+                                    setTimeout(() => {
+                                      setEditField({
+                                        [c._id]: false,
+                                      });
+                                    }, 300)
+                                  }
+                                  autoFocus
+                                  onChange={(e) => {
+                                    setEditText(e.target.value);
+                                  }}
+                                  className="input resize-y h-[30px] bg-transparent focus:outline-none flex-grow  rounded-md  "
+                                />
+                              </div>
+
+                              <button
+                                disabled={!isChanged(c?.message)}
+                                onClick={() => {
+                                  handleEdit(c?._id);
+                                }}
+                                className={` ${
+                                  isChanged(c.message)
+                                    ? "bg-green-500/20 text-green-500 hover:bg-green-900/40"
+                                    : "bg-gray-400/20 text-gray-400"
+                                } active:scale-95  p-1 rounded  cursor-pointer duration-300 `}
+                              >
+                                {/* <IoCheckmarkDoneSharp size={20} /> */} edit
+                              </button>
+                            </div>
+                          )}
                         </p>
                       </div>
 
@@ -580,11 +643,15 @@ export default function TaskDetail() {
                                 className="fixed inset-0 z-10"
                                 onClick={() => setOpenDropdown(null)}
                               />
-
+                              {console.log(editField)}
                               <div className="absolute right-0 top-8 z-20 w-32 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 py-1">
                                 <button
                                   onClick={() => {
                                     // Handle edit
+                                    setEditText(c?.message);
+                                    setEditField({
+                                      [c?._id]: !editField[c?._id],
+                                    });
                                     console.log("Edit comment:", c._id);
                                     setOpenDropdown(null);
                                   }}
