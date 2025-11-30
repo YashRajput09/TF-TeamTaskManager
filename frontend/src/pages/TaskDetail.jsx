@@ -173,8 +173,6 @@ const [openDropdown, setOpenDropdown] = useState(null);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [taskId]);
 
-  console.log(comments)
-
   const onUploadAdmin = (e) => {
     const files = Array.from(e.target.files || []);
     const mapped = files.map((f) => ({
@@ -211,7 +209,7 @@ const [openDropdown, setOpenDropdown] = useState(null);
       );
 
       // alert("Comment added");
-      console.log(data);
+     
       setComments((prev) => [
         { id: `c-${Date.now()}`, commentedBy:profile, message: newComment.trim() },
         ...prev,
@@ -225,7 +223,7 @@ const [openDropdown, setOpenDropdown] = useState(null);
     }
     
   };
-  console.log(profile);
+ 
   // Member selects files to submit
   const handleSubmissionFilesChange = (e) => {
     const files = Array.from(e.target.files || []);
@@ -308,7 +306,7 @@ const [openDropdown, setOpenDropdown] = useState(null);
         payload
       );
 
-      console.log(data);
+    
       if (data?.task) setTask(data.task);
       else await fetchTask();
 

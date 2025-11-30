@@ -40,7 +40,7 @@ export const analyzeWorkload = async (req, res) => {
 
     res.json({
       success: true,
-      groupId:groupId,
+      groupId: groupId,
       analysis: {
         timeframe: parseInt(timeframe),
         totalTasks: tasks.length,
@@ -172,9 +172,27 @@ export const autoRedistributeTasks = async (req, res) => {
         ).populate("assignedTo", "name");
 
         if (task) {
+          // 🆕⏬ ADD THIS BLOCK
+          // ---------------------------------------------
+          // Get previous assignment (before change)
+          const previousTaskData = await Task.findById(plan.taskId);
+          const previousAssigneeId = previousTaskData?.assignedTo?.toString();
+
+          // Remove from previous user (if not same)
+          if (previousAssigneeId && previousAssigneeId !== plan.newAssigneeId) {
+            await User.findByIdAndUpdate(previousAssigneeId, {
+              $pull: { assignedTasks: plan.taskId },
+            });
+          }
+
+          // Add to new user
+          await User.findByIdAndUpdate(plan.newAssigneeId, {
+            $addToSet: { assignedTasks: plan.taskId },
+          });
+          // ---------------------------------------------
+
           results.tasksReassigned++;
 
-          // 🔔 FIX: reuse central task notification flow
           if (plan.notifyUsers) {
             await sendTaskNotification(plan.newAssigneeId, task);
             results.notificationsSent++;
