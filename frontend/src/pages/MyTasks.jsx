@@ -39,7 +39,7 @@ const MyTasks = () => {
     const allUserTask = async () => {
       try {
         const { data } = await axiosInstance.get(`/task/get-user-task`);
-        
+
         setTasks(data?.assignedTasks);
         setCreatedTasks(data?.createdTasks);
       } catch (error) {
@@ -247,15 +247,15 @@ const MyTasks = () => {
             ) : (
               tasks &&
               filteredTasks
+                ?.reverse()
                 ?.filter((task) => {
                   if (selectedFilter === "completed") {
                     return task.status === "Completed";
                   }
-                  return task.status !=="Completed";
+                  return task.status !== "Completed";
                 })
                 ?.map((task) => (
                   <Card key={task.id} hover className="cursor-pointer">
-                   
                     <div className="flex flex-col   space-y-2 ">
                       {/* Task Info */}
                       <Link
@@ -382,7 +382,7 @@ const MyTasks = () => {
                           <div className="mt-3 space-y-2">
                             {(task?.history || []).length === 0 ? (
                               <p className="text-sm text-gray-500 dark:text-gray-400">
-                                No history yet. 
+                                No history yet.
                               </p>
                             ) : (
                               <ul className="space-y-2">
@@ -423,9 +423,8 @@ const MyTasks = () => {
                 </p>
               </Card>
             ) : (
-              createdTasks?.map((task) => (
+              createdTasks?.reverse()?.map((task) => (
                 <Card key={task.id} hover className="cursor-pointer">
-                 
                   <div className="flex flex-col  space-y-4 ">
                     {/* Task Info */}
                     <Link to={`/tasks/${task._id}`} className="flex-1 min-w-0">
@@ -497,7 +496,7 @@ const MyTasks = () => {
                             </div>
                             <div className="flex items-center space-x-1">
                               <Flag className="w-4 h-4" />
-                             
+
                               <span>{task?.group[0]?.name}</span>
                             </div>
                           </div>

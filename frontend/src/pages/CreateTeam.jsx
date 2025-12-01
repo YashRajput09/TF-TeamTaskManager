@@ -1,56 +1,61 @@
-import React, { useState } from 'react';
-import Card from '../components/Card';
-import { Save, X } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
-import axiosInstance from './utility/axiosInstance';
-import toast from 'react-hot-toast';
+import React, { useState } from "react";
+import Card from "../components/Card";
+import { Save, X } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import axiosInstance from "./utility/axiosInstance";
+import toast from "react-hot-toast";
 
 const CreateTask = () => {
   const navigate = useNavigate();
   // Form state
   const [formData, setFormData] = useState({
-    name: '',
-    description: ''
+    name: "",
+    description: "",
   });
+  const [loading, setLoading] = useState();
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      [name]: value
+      [name]: value,
     }));
   };
 
-  const handleSubmit = async(e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-   
+    setLoading(true);
     // TODO: Integrate with API to create task
     try {
-       const {data}=await axiosInstance.post(`/group/create-group`,formData) 
-
-     
+      const { data } = await axiosInstance.post(
+        `/group/create-group`,
+        formData
+      );
+      // Simulate success and navigate back
+      toast.success("Team created successfully!");
+      navigate("/dashboard");
     } catch (error) {
-       toast.error(error.response?.data?.message || "Failed to create group");
-        console.log(error)
+      toast.error(error.response?.data?.message || "Failed to create group");
+      console.log(error);
+    }finally{
+      setLoading(false);
     }
-
-
-    
-    // Simulate success and navigate back
-    toast.success('Team created successfully!')
-    navigate('/my-tasks');
   };
 
   const handleCancel = () => {
-    navigate('/my-tasks');
+    navigate("/dashboard");
   };
 
   return (
     <div className="max-w-3xl mx-auto py-8">
       {/* Page Header */}
       <div className="mb-6">
-        <h1 className="text-2xl font-semibold text-gray-900 dark:text-white">Create New Team</h1>
-        <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">Fill in the details to create a new team</p>
+        <h1 className="text-2xl font-semibold text-gray-900 dark:text-white">
+          Create New Team
+        </h1>
+        <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">
+          Fill in the details to create a new team
+        </p>
       </div>
 
       {/* Create Task Form */}
@@ -58,7 +63,10 @@ const CreateTask = () => {
         <form onSubmit={handleSubmit} className="space-y-6">
           {/* Task Title */}
           <div className="grid grid-cols-1 gap-1">
-            <label htmlFor="title" className="text-sm font-medium text-gray-700 dark:text-gray-300">
+            <label
+              htmlFor="title"
+              className="text-sm font-medium text-gray-700 dark:text-gray-300"
+            >
               Team Name <span className="text-red-500">*</span>
             </label>
             <input
@@ -71,12 +79,17 @@ const CreateTask = () => {
               placeholder="e.g. Frontend Team, Marketing Squad"
               className="mt-2 block w-full rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 px-4 py-3 text-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
-            <p className="text-xs text-gray-500 mt-1">Choose a short, descriptive team name.</p>
+            <p className="text-xs text-gray-500 mt-1">
+              Choose a short, descriptive team name.
+            </p>
           </div>
 
           {/* Task Description */}
           <div className="grid grid-cols-1 gap-1">
-            <label htmlFor="description" className="text-sm font-medium text-gray-700 dark:text-gray-300">
+            <label
+              htmlFor="description"
+              className="text-sm font-medium text-gray-700 dark:text-gray-300"
+            >
               Description <span className="text-red-500">*</span>
             </label>
             <textarea
@@ -89,7 +102,9 @@ const CreateTask = () => {
               placeholder="Describe the team, responsibilities, or purpose."
               className="mt-2 block w-full rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 px-4 py-3 text-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
             />
-            <p className="text-xs text-gray-500 mt-1">A concise description helps others understand the team's focus.</p>
+            <p className="text-xs text-gray-500 mt-1">
+              A concise description helps others understand the team's focus.
+            </p>
           </div>
 
           {/* Form Actions */}
@@ -103,11 +118,21 @@ const CreateTask = () => {
               <span>Cancel</span>
             </button>
             <button
+              disabled={loading}
               type="submit"
-              className="inline-flex items-center gap-2 rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="inline-flex items-center gap-2 rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-blue-700 focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed focus:ring-2 focus:ring-blue-500"
             >
-              <Save className="w-4 h-4" />
-              <span>Create Team</span>
+              {!loading ? (
+                <>
+                  <Save className="w-4 h-4" />
+                  <span>Create Team</span>
+                </>
+              ) : (
+                <>
+                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                  Creating...
+                </>
+              )}
             </button>
           </div>
         </form>
@@ -115,7 +140,9 @@ const CreateTask = () => {
 
       {/* Tips Card */}
       <Card className="p-4 mt-5 bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800">
-        <h3 className="text-sm font-semibold text-blue-900 dark:text-blue-300 mb-2">💡 Tips for Creating Teams</h3>
+        <h3 className="text-sm font-semibold text-blue-900 dark:text-blue-300 mb-2">
+          💡 Tips for Creating Teams
+        </h3>
         <ul className="text-sm text-blue-800 dark:text-blue-400 space-y-1 list-disc list-inside">
           <li>Use clear and descriptive titles</li>
           <li>Break down large teams into subgroups if needed</li>
