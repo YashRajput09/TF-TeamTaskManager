@@ -11,7 +11,7 @@ import {
   User,
 } from "lucide-react";
 import axiosInstance from "./utility/axiosInstance";
-// import { IoCheckmarkCircle, IoCheckmarkDoneSharp } from "react-icons/io5";
+import { IoCheckmarkCircle, IoCheckmarkDoneSharp } from "react-icons/io5";
 import { useAuth } from "../context/AuthProvider";
 import toast from "react-hot-toast";
 import { MoreVertical, Edit2, Trash2 } from "lucide-react";
@@ -614,7 +614,7 @@ console.log(comments)
                                     : "bg-gray-400/20 text-gray-400"
                                 } active:scale-95  p-1 rounded  cursor-pointer duration-300 `}
                               >
-                                {/* <IoCheckmarkDoneSharp size={20} /> */} edit
+                                <IoCheckmarkDoneSharp size={20} />
                               </button>
                             </div>
                           )}
