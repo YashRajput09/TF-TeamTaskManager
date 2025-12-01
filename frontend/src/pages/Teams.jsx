@@ -386,26 +386,30 @@ const Teams = () => {
             </button>
           )}
           <div>
-            <h1 className="flex gap-3 text-xl md:text-2xl lg:text-3xl font-bold text-gray-900 dark:text-white">
+            <h1 className="flex gap-3 items-center text-xl md:text-2xl lg:text-3xl font-bold text-gray-900 dark:text-white">
               {teamData?.name}
-              <div className="rounded-md overflow-hidden">
-                <DeleteButton
-                  onDelete={async () => {
-                    await axiosInstance.delete(`/group/delete-group/${teamId}`);
-                    toast.success("Group deleted successfully");
-                    navigate("/dashboard")
-                    // setOpenDropdown(null);
-                    // fetchGroups(); // Refresh the list
-                  }}
-                  title="Delete Group"
-                  message="Are you sure you want to delete this group? All tasks and data associated with this group will be permanently removed."
-                  itemName={teams.name}
-                  confirmText="Delete Group"
-                  variant="icon"
-                  size="sm"
-                  className="w-full justify-start px-4 py-2 text-left text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-none"
-                />
-              </div>
+              {isOwner(teamData) && (
+                <div className="rounded-md overflow-hidden">
+                  <DeleteButton
+                    onDelete={async () => {
+                      await axiosInstance.delete(
+                        `/group/delete-group/${teamId}`
+                      );
+                      toast.success("Group deleted successfully");
+                      navigate("/dashboard");
+                      // setOpenDropdown(null);
+                      // fetchGroups(); // Refresh the list
+                    }}
+                    title="Delete Group"
+                    message="Are you sure you want to delete this group? All tasks and data associated with this group will be permanently removed."
+                    itemName={teams.name}
+                    confirmText="Delete Group"
+                    variant="icon"
+                    size="sm"
+                    className="w-full justify-start px-4 py-2 text-left text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-none"
+                  />
+                </div>
+              )}
             </h1>
             <div className="flex flex-col md:flex-row gap-1 items-start md:items-center">
               <span className=" flex items-center gap-1 text-gray-600 dark:text-gray-400">
