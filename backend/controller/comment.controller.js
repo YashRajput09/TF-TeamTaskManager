@@ -87,37 +87,37 @@ export const deleteComment = async (req, res) => {
     //   date: new Date()
     // });
 
-    res.status(200).json({ message: "Comment Deleted " });
+    res.status(200).json({ message: "Comment Deleted ",all_comment });
     // res.status(200).json({ message: "Comment Deleted ", all_comment });
   } catch (error) {}
 };
 
 export const editComment = async (req, res) => {
   try {
-    const { commentId, newText } = req.body;
-    const userId = req.users._id;
+    const {taskId,commentId}=req.params
+    const { newText} = req.body;
+    const userId = req.user?._id;
 
-    const find_comment = await comment_model.findById(commentId);
+    const find_task = await Task.findById(taskId).populate("comment.commentedBy");
+       if (!find_task)
+      return res.status(500).json({ message: "Task Not Found" });
 
+
+       const find_comment=find_task.comment.id(commentId)
     if (!find_comment)
       return res.status(500).json({ message: "Comment Not Found" });
 
-    if (find_comment.commentedBy.toString() !== userId.toString())
+    if (find_comment.commentedBy?._id.toString() !== userId.toString())
       return res.status(500).json({ message: "You Not Created this Comment" });
 
-    const updated_comment = await comment_model.findByIdAndUpdate(
-      commentId,
-      {
-        comment: newText,
-        modifyAt: Date.now(),
-      },
-      { new: true, runValidation: true } // use $set:{} if new data is bounded in object insted of destructured
-    );
+  find_comment.message=newText;
+
     // const updated_comment = await comment_model.findByIdAndUpdate(
     //   commentId, { $set: {comment: newText,modifyAt: Date.now(), },},{ new: true}
     // );
-    await updated_comment.populate("commentedBy");
-    res.status(200).json({ message: "Updated Successfully", updated_comment });
+    await find_task.save();
+  //  find_comment.populate("commentedBy");
+    res.status(200).json({ message: "Updated Successfully", updated_comment:find_comment });
   } catch (error) {
     console.log(error);
   }

@@ -7,7 +7,7 @@ const router=express.Router();
 router.post("/add-comment/:taskId",isAuthenticated,addComment);
 router.get("/getAll-comment/:taskId",isAuthenticated,getAllComments);
 
-router.put("/:taskId/edit-comment",isAuthenticated,editComment);
+router.put("/:taskId/comment/:commentId/edit-comment",isAuthenticated,editComment);
 router.delete("/:taskId/comment/:commentId/delete",isAuthenticated,deleteComment);
 
 

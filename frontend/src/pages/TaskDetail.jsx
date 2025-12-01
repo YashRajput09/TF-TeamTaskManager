@@ -11,6 +11,7 @@ import {
   User,
 } from "lucide-react";
 import axiosInstance from "./utility/axiosInstance";
+import { IoCheckmarkCircle, IoCheckmarkDoneSharp } from "react-icons/io5";
 import { useAuth } from "../context/AuthProvider";
 import toast from "react-hot-toast";
 import { MoreVertical, Edit2, Trash2 } from "lucide-react";
@@ -75,6 +76,8 @@ export default function TaskDetail() {
   const [comments, setComments] = useState();
   const [newComment, setNewComment] = useState("");
   const [loadingAdd, setLoadingAdd] = useState(false);
+  const [editField, setEditField] = useState({});
+  const [editText, setEditText] = useState();
 
   // For member uploads, optional display name
   const [memberUploadName, setMemberUploadName] = useState("");
@@ -87,7 +90,7 @@ export default function TaskDetail() {
   const [loadingSubmit, setLoadingSubmit] = useState(false);
   const [processingAction, setProcessingAction] = useState(false);
   // Add state for managing dropdown
-const [openDropdown, setOpenDropdown] = useState(null);
+  const [openDropdown, setOpenDropdown] = useState(null);
 
   // helper to know if current user is task creator (admin for this task)
   const isTaskAdmin =
@@ -161,7 +164,6 @@ const [openDropdown, setOpenDropdown] = useState(null);
         (a, b) => new Date(b.date) - new Date(a.date)
       );
       setComments(sorted || []);
-      
     } catch (error) {
       console.log(error);
     }
@@ -211,19 +213,22 @@ const [openDropdown, setOpenDropdown] = useState(null);
       // alert("Comment added");
      
       setComments((prev) => [
-        { id: `c-${Date.now()}`, commentedBy:profile, message: newComment.trim() },
+        {
+          _id: `${Date.now()}`,
+          commentedBy: profile,
+          message: newComment.trim(),
+        },
         ...prev,
       ]);
-        toast.success("Comment Added");
+      console.log(comments);
+      toast.success("Comment Added");
       setNewComment("");
     } catch (error) {
       console.log(error);
-    }finally{
-      setLoadingAdd(false)
+    } finally {
+      setLoadingAdd(false);
     }
-    
   };
- 
   // Member selects files to submit
   const handleSubmissionFilesChange = (e) => {
     const files = Array.from(e.target.files || []);
@@ -306,7 +311,6 @@ const [openDropdown, setOpenDropdown] = useState(null);
         payload
       );
 
-    
       if (data?.task) setTask(data.task);
       else await fetchTask();
 
@@ -325,6 +329,44 @@ const [openDropdown, setOpenDropdown] = useState(null);
     }
   };
 
+  const deleteComment = async (commentId) => {
+    // Handle delete
+    console.log("Delete comment:", commentId);
+    try {
+      const { data } = await axiosInstance.delete(
+        `comment/${task?._id}/comment/${commentId}/delete`
+      );
+      console.log(data);
+      setComments(data?.all_comment.reverse());
+      toast.success("Comment deleted");
+      setOpenDropdown(null);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  const handleEdit = async (commentId) => {
+    try {
+      const { data } = await axiosInstance.put(
+        `/comment/${task?._id}/comment/${commentId}/edit-comment`,
+        {
+          newText: editText,
+        }
+      );
+console.log(commentId)
+      console.log(data);
+      const updatedComment=data?.updated_comment
+      setComments((prev) =>
+        prev.map((comment) =>
+          comment._id === commentId ? updatedComment : comment
+        )
+      );
+    } catch (error) {
+      console.log(error);
+    }
+  };
+console.log(comments)
+  const isChanged = (commentText) => commentText !== editText?.trim();
   if (!task) {
     return (
       <div className="space-y-6">
@@ -482,7 +524,10 @@ const [openDropdown, setOpenDropdown] = useState(null);
               rows={3}
             />
             <div className="mt-2 flex justify-end">
-              <button type="submit" className="px-4 border border-white text-gray-300 bg-slate-700 rounded-xl">
+              <button
+                type="submit"
+                className="px-4 border border-white text-gray-300 bg-slate-700 rounded-xl"
+              >
                 {loadingAdd ? (
                   <>
                     <div className="flex w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
@@ -495,103 +540,143 @@ const [openDropdown, setOpenDropdown] = useState(null);
             </div>
           </form>
 
-    <div className="space-y-3">
-  {comments?.length === 0 ? (
-    <p className="text-sm text-gray-500 dark:text-gray-400">
-      No comments yet.
-    </p>
-  ) : (
-    comments?.map((c) => (
-      <div
-        key={c._id}
-        className={`${
-          c?.commentedBy?._id === profile._id ? "ml-auto" : "mr-auto"
-        } max-w-[80%] relative group`}
-      >
-        <div
-          className={`${
-            c?.commentedBy?._id === profile._id
-              ? "bg-slate-700 text-white"
-              : "bg-gray-50 dark:bg-gray-700/50"
-          } px-4 py-3 rounded-2xl relative`}
-        >
-          <div className="flex items-start justify-between gap-3">
-            <div className="flex-1">
-              <p
-                className={`text-xs ${
-                  c?.commentedBy?._id === profile._id
-                    ? "text-blue-100"
-                    : "text-gray-500 dark:text-gray-400"
-                } mb-1 font-medium`}
-              >
-                @{c?.commentedBy?.name}
+          <div className="space-y-1">
+            {comments?.length === 0 ? (
+              <p className="text-sm text-gray-500 dark:text-gray-400">
+                No comments yet.
               </p>
-              <p
-                className={`text-sm ${
-                  c?.commentedBy?._id === profile._id
-                    ? "text-white"
-                    : "text-gray-900 dark:text-gray-100"
-                }`}
-              >
-                {c.message}
-              </p>
-            </div>
-
-            {/* Three Dot Menu - Only for user's own comments */}
-            {c?.commentedBy?._id === profile._id && (
-              <div className="relative">
-                <button
-                  onClick={() =>
-                    setOpenDropdown(openDropdown === c._id ? null : c._id)
-                  }
-                  className="p-1 rounded-full hover:bg-white/20 transition-colors"
+            ) : (
+              comments?.map((c) => (
+                <div
+                  key={c?._id}
+                  className={`${
+                    c?.commentedBy?._id === profile._id ? "justify-end" : "justify-start"
+                  } flex relative group`}
                 >
-                  <MoreVertical className="w-4 h-4" />
-                </button>
+                  <div
+                    className={`${
+                      c?.commentedBy?._id === profile._id
+                        ? "bg-slate-700 text-white"
+                        : "bg-gray-50 dark:bg-gray-700/50"
+                    } px-4 py-3 rounded-2xl relative`}
+                  >
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="flex-1">
+                        <p
+                          className={`text-xs ${
+                            c?.commentedBy?._id === profile._id
+                              ? "text-blue-100"
+                              : "text-gray-500 dark:text-gray-400"
+                          } mb-1 font-medium`}
+                        >
+                          @{c?.commentedBy?.name}
+                        </p>
+                        <p
+                          className={`text-sm ${
+                            c?.commentedBy?._id === profile._id
+                              ? "text-white"
+                              : "text-gray-900 dark:text-gray-100"
+                          }`}
+                        >
+                          {!editField[c?._id] ? (
+                            c?.message
+                          ) : (
+                            <div className="flex transition-all duration-300 w-full space-x-1">
+                              <div className="flex flex-grow  rounded focus-within:border-b-2  bg-red-800/10 transition-all duration-100 border-red-800 overflow-auto justify-start items-center">
+                                <textarea
+                                  name="editText"
+                                  placeholder="Type new Comment"
+                                  value={editText}
+                                  onBlur={() =>
+                                    setTimeout(() => {
+                                      setEditField({
+                                        [c._id]: false,
+                                      });
+                                    }, 300)
+                                  }
+                                  autoFocus
+                                  onChange={(e) => {
+                                    setEditText(e.target.value);
+                                  }}
+                                  className="input resize-y h-[30px] bg-transparent focus:outline-none flex-grow  rounded-md  "
+                                />
+                              </div>
 
-                {/* Dropdown Menu */}
-                {openDropdown === c._id && (
-                  <>
-                    {/* Backdrop to close dropdown */}
-                    <div
-                      className="fixed inset-0 z-10"
-                      onClick={() => setOpenDropdown(null)}
-                    />
-                    
-                    <div className="absolute right-0 top-8 z-20 w-32 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 py-1">
-                      <button
-                        onClick={() => {
-                          // Handle edit
-                          console.log("Edit comment:", c._id);
-                          setOpenDropdown(null);
-                        }}
-                        className="w-full px-4 py-2 text-left text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center gap-2 transition-colors"
-                      >
-                        <Edit2 className="w-4 h-4" />
-                        Edit
-                      </button>
-                      <button
-                        onClick={() => {
-                          // Handle delete
-                          console.log("Delete comment:", c._id);
-                          setOpenDropdown(null);
-                        }}
-                        className="w-full px-4 py-2 text-left text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 flex items-center gap-2 transition-colors"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                        Delete
-                      </button>
+                              <button
+                                disabled={!isChanged(c?.message)}
+                                onClick={() => {
+                                  handleEdit(c?._id);
+                                }}
+                                className={` ${
+                                  isChanged(c.message)
+                                    ? "bg-green-500/20 text-green-500 hover:bg-green-900/40"
+                                    : "bg-gray-400/20 text-gray-400"
+                                } active:scale-95  p-1 rounded  cursor-pointer duration-300 `}
+                              >
+                                <IoCheckmarkDoneSharp size={20} />
+                              </button>
+                            </div>
+                          )}
+                        </p>
+                      </div>
+
+                      {/* Three Dot Menu - Only for user's own comments */}
+                      {c?.commentedBy?._id === profile._id && (
+                        <div className="relative">
+                          <button
+                            onClick={() =>
+                              setOpenDropdown(
+                                openDropdown === c._id ? null : c._id
+                              )
+                            }
+                            className="p-1 rounded-full hover:bg-white/20 transition-colors"
+                          >
+                            <MoreVertical className="w-4 h-4" />
+                          </button>
+
+                          {/* Dropdown Menu */}
+                          {openDropdown === c._id && (
+                            <>
+                              {/* Backdrop to close dropdown */}
+                              <div
+                                className="fixed inset-0 z-10"
+                                onClick={() => setOpenDropdown(null)}
+                              />
+                              {console.log(editField)}
+                              <div className="absolute right-0 top-8 z-20 w-32 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 py-1">
+                                <button
+                                  onClick={() => {
+                                    // Handle edit
+                                    setEditText(c?.message);
+                                    setEditField({
+                                      [c?._id]: !editField[c?._id],
+                                    });
+                                    console.log("Edit comment:", c._id);
+                                    setOpenDropdown(null);
+                                  }}
+                                  className="w-full px-4 py-2 text-left text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center gap-2 transition-colors"
+                                >
+                                  <Edit2 className="w-4 h-4" />
+                                  Edit
+                                </button>
+                                <button
+                                  onClick={() => deleteComment(c?._id)}
+                                  className="w-full px-4 py-2 text-left text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 flex items-center gap-2 transition-colors"
+                                >
+                                  <Trash2 className="w-4 h-4" />
+                                  Delete
+                                </button>
+                              </div>
+                            </>
+                          )}
+                        </div>
+                      )}
                     </div>
-                  </>
-                )}
-              </div>
+                  </div>
+                </div>
+              ))
             )}
           </div>
-        </div>
-      </div>
-    ))
-  )}
-</div>
         </Card>
 
         {/* Right: two stacked rows for Files */}
