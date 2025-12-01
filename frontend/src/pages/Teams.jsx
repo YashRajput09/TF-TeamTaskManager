@@ -20,6 +20,7 @@ import axiosInstance from "./utility/axiosInstance";
 import toast from "react-hot-toast";
 import { useAuth } from "../context/AuthProvider";
 import ConfirmDialog from "../UI/reusable-components/ConfirmDialog";
+import DeleteButton from "../UI/reusable-components/DeleteButton";
 
 // Helper to read ?team= from URL
 const useQuery = () => new URLSearchParams(useLocation().search);
@@ -385,8 +386,25 @@ const Teams = () => {
             </button>
           )}
           <div>
-            <h1 className="text-xl md:text-2xl lg:text-3xl font-bold text-gray-900 dark:text-white">
+            <h1 className="flex gap-3 text-xl md:text-2xl lg:text-3xl font-bold text-gray-900 dark:text-white">
               {teamData?.name}
+              <div className="rounded-md overflow-hidden">
+               <DeleteButton
+                          onDelete={async () => {
+                            await axiosInstance.delete(`/group/delete-group/${teams?._id}`);
+                            toast.success("Group deleted successfully");
+                            // setOpenDropdown(null);
+                            // fetchGroups(); // Refresh the list
+                          }}
+                          title="Delete Group"
+                          message="Are you sure you want to delete this group? All tasks and data associated with this group will be permanently removed."
+                          itemName={teams.name}
+                          confirmText="Delete Group"
+                          variant="icon"
+                          size="sm"
+                          className="w-full justify-start px-4 py-2 text-left text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-none"
+                        />
+                        </div>
             </h1>
             <div className="flex flex-col md:flex-row gap-1 items-start md:items-center">
               <span className=" flex items-center gap-1 text-gray-600 dark:text-gray-400">
@@ -589,6 +607,21 @@ const Teams = () => {
                     Assigned to me
                   </label>
                 )}
+                    {/* <DeleteButton
+                          onDelete={async () => {
+                            await axiosInstance.delete(`/group/delete-team/${teams._id}`);
+                            toast.success("Group deleted successfully");
+                            // setOpenDropdown(null);
+                            // fetchGroups(); // Refresh the list
+                          }}
+                          title="Delete Group"
+                          message="Are you sure you want to delete this group? All tasks and data associated with this group will be permanently removed."
+                          itemName={teams.name}
+                          confirmText="Delete Group"
+                          variant="icon"
+                          size="sm"
+                          className="w-full justify-start px-4 py-2 text-left text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-none"
+                        /> */}
               </div>
             </div>
 
