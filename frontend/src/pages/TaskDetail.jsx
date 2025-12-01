@@ -497,7 +497,7 @@ const [openDropdown, setOpenDropdown] = useState(null);
             </div>
           </form>
 
-    <div className="space-y-3">
+    <div className="space-y-1">
   {comments?.length === 0 ? (
     <p className="text-sm text-gray-500 dark:text-gray-400">
       No comments yet.
@@ -507,17 +507,17 @@ const [openDropdown, setOpenDropdown] = useState(null);
       <div
         key={c._id}
         className={`${
-          c?.commentedBy?._id === profile._id ? "ml-auto" : "mr-auto"
-        } max-w-[80%] relative group`}
+          c?.commentedBy?._id === profile._id ? "justify-end" : "justify-start"
+        }  relative group `}
       >
         <div
           className={`${
             c?.commentedBy?._id === profile._id
               ? "bg-slate-700 text-white"
               : "bg-gray-50 dark:bg-gray-700/50"
-          } px-4 py-3 rounded-2xl relative`}
+          } px-3 py-2 rounded-2xl relative`}
         >
-          <div className="flex items-start justify-between gap-3">
+          <div className="flex items-start justify-between gap-1">
             <div className="flex-1">
               <p
                 className={`text-xs ${
