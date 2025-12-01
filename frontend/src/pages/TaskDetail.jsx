@@ -960,5 +960,5 @@ console.log(comments)
         </div>
       </div>
     </div>
-  );
+  )
 }
