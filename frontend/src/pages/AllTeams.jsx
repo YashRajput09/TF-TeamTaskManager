@@ -2,8 +2,10 @@ import React, { useState, useEffect } from "react";
 import Card from "../components/Card";
 import axiosInstance from "./utility/axiosInstance";
 import { useNavigate } from "react-router-dom";
-import { CheckCircle, Clock, MoreVertical, TrendingUp } from "lucide-react";
+import { CheckCircle, Clock, MoreVertical, TrendingUp, Trash2 } from "lucide-react";
 import { useAuth } from "../context/AuthProvider";
+import DeleteButton from "../UI/reusable-components/DeleteButton";
+import toast from "react-hot-toast";
 
 const AllTeams = () => {
   const navigate = useNavigate();
@@ -11,6 +13,7 @@ const AllTeams = () => {
 
   const [teams, setTeams] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [openDropdown, setOpenDropdown] = useState(null);
 
   const randomColors = [
     "bg-purple-500",
@@ -60,6 +63,7 @@ const AllTeams = () => {
               _id: group._id,
               name: group.name,
               members: group.members || [],
+              owner: group.owner || group.createdBy, // Add owner field
               color:
                 randomColors[Math.floor(Math.random() * randomColors.length)],
               activeTasks: active,
@@ -67,11 +71,11 @@ const AllTeams = () => {
               progress,
             };
           } catch (err) {
-            // In case task fetch fails
             return {
               _id: group._id,
               name: group.name,
               members: group.members || [],
+              owner: group.owner || group.createdBy,
               color:
                 randomColors[Math.floor(Math.random() * randomColors.length)],
               activeTasks: 0,
@@ -97,6 +101,11 @@ const AllTeams = () => {
 
   const handleSelect = (id) => {
     navigate(`/teams/${id}`);
+  };
+
+  // Check if user is owner
+  const isOwner = (team) => {
+    return team.owner === profile._id || team.owner?._id === profile._id;
   };
 
   // --------------------------
@@ -140,12 +149,56 @@ const AllTeams = () => {
                   </p>
                 </div>
               </div>
-              <button
-                className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700"
-                onClick={(e) => e.stopPropagation()}
-              >
-                <MoreVertical className="w-5 h-5 text-gray-600 dark:text-gray-400" />
-              </button>
+
+              {/* Three Dot Menu - Only for owner */}
+              {isOwner(team) && (
+                <div className="relative">
+                  <button
+                    className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setOpenDropdown(openDropdown === team._id ? null : team._id);
+                    }}
+                  >
+                    <MoreVertical className="w-5 h-5 text-gray-600 dark:text-gray-400" />
+                  </button>
+
+                  {/* Dropdown Menu */}
+                  {openDropdown === team._id && (
+                    <>
+                      {/* Backdrop to close dropdown */}
+                      <div
+                        className="fixed inset-0 z-10"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setOpenDropdown(null);
+                        }}
+                      />
+                      
+                      <div 
+                        className="absolute right-8 top-0 z-20 w-32 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 py-1"
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        <DeleteButton
+                          onDelete={async () => {
+                            await axiosInstance.delete(`/group/delete-team/${team._id}`);
+                            toast.success("Group deleted successfully");
+                            setOpenDropdown(null);
+                            fetchGroups(); // Refresh the list
+                          }}
+                          title="Delete Group"
+                          message="Are you sure you want to delete this group? All tasks and data associated with this group will be permanently removed."
+                          itemName={team.name}
+                          confirmText="Delete Group"
+                          variant="icon"
+                          size="sm"
+                          className="w-full justify-start px-4 py-2 text-left text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-none"
+                        />
+                      </div>
+                    </>
+                  )}
+                </div>
+              )}
             </div>
 
             {/* Stats */}
@@ -155,7 +208,7 @@ const AllTeams = () => {
                 <p className="text-lg font-bold text-gray-900 dark:text-white">
                   {team.activeTasks}
                 </p>
-                <p className="text-xs text-gray-600">Active</p>
+                <p className="text-xs text-gray-600 dark:text-gray-400">Active</p>
               </div>
 
               <div className="text-center p-3 rounded-lg bg-gray-50 dark:bg-gray-700/50">
@@ -163,7 +216,7 @@ const AllTeams = () => {
                 <p className="text-lg font-bold text-gray-900 dark:text-white">
                   {team.completedTasks}
                 </p>
-                <p className="text-xs text-gray-600">Completed</p>
+                <p className="text-xs text-gray-600 dark:text-gray-400">Completed</p>
               </div>
 
               <div className="text-center p-3 rounded-lg bg-gray-50 dark:bg-gray-700/50">
@@ -171,21 +224,21 @@ const AllTeams = () => {
                 <p className="text-lg font-bold text-gray-900 dark:text-white">
                   {team.progress}%
                 </p>
-                <p className="text-xs text-gray-600">Progress</p>
+                <p className="text-xs text-gray-600 dark:text-gray-400">Progress</p>
               </div>
             </div>
 
             {/* Progress Bar */}
             <div>
               <div className="flex items-center justify-between text-sm mb-2">
-                <span className="text-gray-600">Overall Progress</span>
-                <span className="font-semibold text-white">
+                <span className="text-gray-600 dark:text-gray-400">Overall Progress</span>
+                <span className="font-semibold text-gray-900 dark:text-white">
                   {team.progress}%
                 </span>
               </div>
               <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2 overflow-hidden">
                 <div
-                  className={`h-full ${team.color}`}
+                  className={`h-full ${team.color} transition-all duration-300`}
                   style={{ width: `${team.progress}%` }}
                 />
               </div>
