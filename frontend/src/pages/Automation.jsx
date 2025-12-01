@@ -13,6 +13,8 @@ import axiosInstance from "./utility/axiosInstance";
 // import ToggleAnalyzeResults from "../components/ToggleAnalyzeResults";
 import SmallToggle from "../components/SmallToggle";
 import { useEffect } from "react";
+import toast from "react-hot-toast";
+import { useNavigate } from "react-router-dom";
 
 const Automation = ({ profile }) => {
   const [analysis, setAnalysis] = useState(null);
@@ -21,9 +23,10 @@ const Automation = ({ profile }) => {
   const [redistributing, setRedistributing] = useState(false);
   const [mode, setMode] = useState("analyze");
 
+  const navigate = useNavigate();
   useEffect(() => {
-    if(mode==="analyze"){
-      setAnalysis(null)
+    if (mode === "analyze") {
+      setAnalysis(null);
     }
     // mode === "analyze" ? setAnalysis(null) : setAnalysis();
   }, [mode]);
@@ -32,7 +35,6 @@ const Automation = ({ profile }) => {
     analysis === null ? setMode("analyze") : setMode("results");
   }, [analysis]);
 
-  console.log(userGroups);
   const analyzeWorkload = async (groupId) => {
     setLoading(true);
     try {
@@ -54,6 +56,7 @@ const Automation = ({ profile }) => {
     }
   };
 
+
   const autoRedistribute = async (groupId) => {
     setRedistributing(true);
     try {
@@ -71,8 +74,10 @@ const Automation = ({ profile }) => {
           }),
         }
       );
-      console.log(data);
-      alert(`Redistribution completed: ${data.message}`);
+      
+      // alert(`Redistribution completed: ${data.message}`);
+      toast.success(`Redistribution completed: ${data.message}`)
+      navigate("/dashboard");
     } catch (error) {
       console.error("Redistribution failed:", error);
     } finally {
@@ -133,13 +138,16 @@ const Automation = ({ profile }) => {
               {/* //dummy data  */}
               <div className="space-y-1 ">
                 {userGroups &&
-                  userGroups?.map((group) => (
+                  userGroups
+                  ?.filter(group => group.createdBy === profile?._id)
+                  ?.map((group) => (
                     <div
                       key={group._id}
                       className="w-full text-left p-3 rounded-lg bg-gray-50 dark:bg-gray-700/50 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
                     >
+                
                       <div className="flex items-center justify-between">
-                        {console.log(group._id)}
+                       
                         <div className="flex items-center space-x-3">
                           <div className={`w-8 h-8 rounded-lg`} />
                           <div>
@@ -228,10 +236,11 @@ const Automation = ({ profile }) => {
                   </div>
                 ))}
               </div>
-
+             {/* { console.log("analysis")}
+             { console.log(analysis?.groupId)} */}
               {/* Auto Redistribute Button */}
               <button
-                onClick={() => autoRedistribute("692ad56ff2bb87381d42b37d")}
+                onClick={() => autoRedistribute(analysis.groupId)}
                 disabled={redistributing}
                 className="btn-secondary w-full flex items-center justify-center space-x-2 mt-4"
               >

@@ -256,7 +256,7 @@ const Teams = () => {
     getAllUsers();
     getSingleGroup();
     getGroupTask();
-  }, [showAdd, showRemove]);
+  }, [showAdd, showRemove,confirm]);
 
   useEffect(() => {
     const id = Number(query.get("team")) || null;

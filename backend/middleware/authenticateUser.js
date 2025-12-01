@@ -26,7 +26,6 @@ export const isAuthenticated = async (req, res, next) => {
     
     req.user = user;
     next();
-    
   } catch (error) {
     console.log('🔐 Auth Error:', error.message);
     return res.status(401).json({ message: "Unauthorized - Invalid token" });
