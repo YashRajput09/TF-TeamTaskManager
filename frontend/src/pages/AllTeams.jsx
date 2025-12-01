@@ -181,14 +181,14 @@ const AllTeams = () => {
                       >
                         <DeleteButton
                           onDelete={async () => {
-                            await axiosInstance.delete(`/group/delete-team/${team._id}`);
+                            await axiosInstance.delete(`/group/delete-group/${team?._id}`);
                             toast.success("Group deleted successfully");
                             setOpenDropdown(null);
                             fetchGroups(); // Refresh the list
                           }}
                           title="Delete Group"
                           message="Are you sure you want to delete this group? All tasks and data associated with this group will be permanently removed."
-                          itemName={team.name}
+                          itemName={team?.name}
                           confirmText="Delete Group"
                           variant="icon"
                           size="sm"

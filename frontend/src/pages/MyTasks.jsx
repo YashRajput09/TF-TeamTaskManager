@@ -253,6 +253,7 @@ const MyTasks = () => {
                   }
                   return task.status !=="Completed";
                 })
+                ?.reverse()
                 ?.map((task) => (
                   <Card key={task.id} hover className="cursor-pointer">
                    
@@ -423,12 +424,14 @@ const MyTasks = () => {
                 </p>
               </Card>
             ) : (
-              createdTasks?.map((task) => (
+              createdTasks
+              ?.reverse()
+              ?.map((task) => (
                 <Card key={task.id} hover className="cursor-pointer">
                  
                   <div className="flex flex-col  space-y-4 ">
                     {/* Task Info */}
-                    <Link to={`/tasks/${task._id}`} className="flex-1 min-w-0">
+                    <Link to={`/tasks/${task?._id}`} className="flex-1 min-w-0">
                       <div className="flex items-start space-x-3">
                         {/* <input
                           type="checkbox"
@@ -453,28 +456,28 @@ const MyTasks = () => {
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center">
                             <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
-                              {task.title}
+                              {task?.title}
                             </h3>
                             <div className="flex items-center space-x-2 md:ml-4">
                               <span
                                 className={`px-3 py-1 rounded-lg text-xs font-medium ${getPriorityColor(
-                                  task.priority
+                                  task?.priority
                                 )}`}
                               >
-                                {task.priority}
+                                {task?.priority}
                               </span>
                               <span
                                 className={`px-3 py-1 rounded-lg text-xs font-medium ${getStatusColor(
-                                  task.status
+                                  task?.status
                                 )}`}
                               >
-                                {task.status}
+                                {task?.status}
                               </span>
                             </div>
                           </div>
 
                           <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">
-                            {task.description}
+                            {task?.description}
                           </p>
                           <div className="mt-3 flex flex-wrap items-center gap-3 text-sm text-gray-600 dark:text-gray-400">
                             <div className="flex items-center space-x-1">

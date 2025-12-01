@@ -169,14 +169,16 @@ export const autoRedistributeTasks = async (req, res) => {
           plan.taskId,
           { assignedTo: plan.newAssigneeId },
           { new: true }
-        ).populate("assignedTo", "name");
 
+        ).populate("assignedTo", "name");
+        
         if (task) {
+          const previousTaskData = await Task.findById(plan.taskId);
+          const previousAssigneeId = previousTaskData?.assignedTo?.toString();
+
           // 🆕⏬ ADD THIS BLOCK
           // ---------------------------------------------
           // Get previous assignment (before change)
-          const previousTaskData = await Task.findById(plan.taskId);
-          const previousAssigneeId = previousTaskData?.assignedTo?.toString();
 
           // Remove from previous user (if not same)
           if (previousAssigneeId && previousAssigneeId !== plan.newAssigneeId) {
@@ -204,6 +206,7 @@ export const autoRedistributeTasks = async (req, res) => {
             status: "success",
           });
         }
+        
       } catch (error) {
         results.failedReassignments++;
         details.push({

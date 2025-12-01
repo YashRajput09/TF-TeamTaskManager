@@ -102,7 +102,9 @@ export default function AssignedTasks() {
             <p className="text-gray-600 dark:text-gray-400">No tasks assigned by you.</p>
           </Card>
         ) : (
-          tasks?.map(task => (
+          tasks
+          ?.reverse()
+          ?.map(task => (
             <Card
               key={task.id}
               hover
