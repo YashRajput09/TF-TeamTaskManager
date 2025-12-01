@@ -541,45 +541,10 @@ console.log(comments)
             </div>
           </form>
 
-    <div className="space-y-1">
-  {comments?.length === 0 ? (
-    <p className="text-sm text-gray-500 dark:text-gray-400">
-      No comments yet.
-    </p>
-  ) : (
-    comments?.map((c) => (
-      <div
-        key={c._id}
-        className={`${
-          c?.commentedBy?._id === profile._id ? "justify-end" : "justify-start"
-        }  relative group `}
-      >
-        <div
-          className={`${
-            c?.commentedBy?._id === profile._id
-              ? "bg-slate-700 text-white"
-              : "bg-gray-50 dark:bg-gray-700/50"
-          } px-3 py-2 rounded-2xl relative`}
-        >
-          <div className="flex items-start justify-between gap-1">
-            <div className="flex-1">
-              <p
-                className={`text-xs ${
-                  c?.commentedBy?._id === profile._id
-                    ? "text-blue-100"
-                    : "text-gray-500 dark:text-gray-400"
-                } mb-1 font-medium`}
-              >
-                @{c?.commentedBy?.name}
-              </p>
-              <p
-                className={`text-sm ${
-                  c?.commentedBy?._id === profile._id
-                    ? "text-white"
-                    : "text-gray-900 dark:text-gray-100"
-                }`}
-              >
-                {c.message}
+          <div className="space-y-3">
+            {comments?.length === 0 ? (
+              <p className="text-sm text-gray-500 dark:text-gray-400">
+                No comments yet.
               </p>
             ) : (
               comments?.map((c) => (
