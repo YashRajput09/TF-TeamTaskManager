@@ -181,7 +181,7 @@ const AllTeams = () => {
                       >
                         <DeleteButton
                           onDelete={async () => {
-                            await axiosInstance.delete(`/group/delete-team/${team._id}`);
+                            await axiosInstance.delete(`/group/delete-group/${team?._id}`);
                             toast.success("Group deleted successfully");
                             setOpenDropdown(null);
                             fetchGroups(); // Refresh the list
