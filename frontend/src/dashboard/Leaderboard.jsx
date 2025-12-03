@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Trophy, Award, TrendingUp, Clock, Zap } from 'lucide-react';
+import { Button } from "@/components/ui/button"
 
 const Leaderboard = () => {
   const [darkMode, setDarkMode] = useState(false);
@@ -78,6 +79,7 @@ const Leaderboard = () => {
           </p>
           
           {/* Dark Mode Toggle */}
+          <Button variant="outline">Button shadcn/ui</Button>
           <button
             onClick={() => setDarkMode(!darkMode)}
             style={{
