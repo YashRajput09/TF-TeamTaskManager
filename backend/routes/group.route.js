@@ -15,8 +15,4 @@ router.get("/get-allUserGroup/:userId",isAuthenticated,getUserGroups);
 //delete group
 router.delete("/delete-group/:groupId",isAuthenticated,deleteGroup);
 
-
-
-
 export default router;
-

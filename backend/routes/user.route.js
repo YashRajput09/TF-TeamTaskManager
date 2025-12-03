@@ -1,6 +1,6 @@
 import express from 'express';
-import {isAuthenticated} from '../middleware/authenticateUser.js'
-import {signUpUser, logInUser, logOutUser, getMyProfile, getAllUsers, updateUserProfile} from '../controller/user.controller.js';
+import {isAuthenticated, isAdmin} from '../middleware/authenticateUser.js'
+import {signUpUser, logInUser, logOutUser, getMyProfile, getAllUsers, updateUserProfile, searchUser, sendGroupJoinRequest, respondGroupJoinRequest, getMyGroupInvites } from '../controller/user.controller.js';
 import { resetPassword, sendOtp, validateOtp } from '../controller/password.controller.js';
 
 const router = express.Router();
@@ -15,7 +15,14 @@ router.put("/update-profile", isAuthenticated, updateUserProfile);
 //Email verification and forgot password route
 router.post("/forgot-password",sendOtp);
 router.post("/verifyotp",validateOtp);
-router.post("/reset-password",resetPassword)
+router.post("/reset-password",resetPassword);
+
+router.get("/api/search", searchUser);
+
+router.post("/:groupId/invite", isAuthenticated, isAdmin, sendGroupJoinRequest);
+
+router.post("/request/:requestId/respond", isAuthenticated, respondGroupJoinRequest);
+router.get("/my-group/invites", isAuthenticated, getMyGroupInvites)
 
 
 export default router;

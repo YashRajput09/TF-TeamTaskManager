@@ -10,8 +10,12 @@ const ICONS = {
   task_rejected: "❌",
   added_to_team: "👥",
   removed_from_team: "🚫",
+  group_invite: "📨",
+  group_accept: "👍",
+  group_reject: "🙅",
   default: "🔔",
 };
+
 
 /**
  * Send notification (DB + socket.io)
