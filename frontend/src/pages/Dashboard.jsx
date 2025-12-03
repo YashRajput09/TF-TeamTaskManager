@@ -231,7 +231,9 @@ const Dashboard = () => {
                 No tasks assigned to you yet.
               </p>
             ) : (
-              recent?.map((task) => (
+              recent
+              ?.reverse()
+              ?.map((task) => (
                 <div
                   key={task.id}
                   className="flex items-center justify-between p-4 rounded-lg bg-gray-50 dark:bg-gray-700/50 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors cursor-pointer"
@@ -308,7 +310,9 @@ const Dashboard = () => {
           </div>
 
           <div className="space-y-3">
-            {teams?.map((t) => (
+            {teams
+            ?.reverse()
+            ?.map((t) => (
               <div
               // <Link
                 key={t.id}

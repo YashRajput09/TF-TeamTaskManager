@@ -7,6 +7,7 @@ import { groupModel } from "../models/group.model.js";
 // ❌ userModel + sendTelegramMessage were used for direct chat sending
 // ✅ now we reuse your central notification service
 import { sendTaskNotification } from "../services/telegramNotification.js";
+import User from "../models/user_model.js";
 
 // AI Workload Analysis
 export const analyzeWorkload = async (req, res) => {
@@ -165,32 +166,54 @@ export const autoRedistributeTasks = async (req, res) => {
 
     for (const plan of redistributionPlan) {
       try {
+        const previousTaskData = await Task.findById(plan.taskId);
+        const previousAssigneeId = previousTaskData?.assignedTo?.toString();
+
+        console.log(previousTaskData)
+        // Remove from previous user (if not same)
+        if (previousAssigneeId && previousAssigneeId !== plan.newAssigneeId) {
+          await User.findByIdAndUpdate(previousAssigneeId, {
+            $pull: { assignedTasks: plan.taskId },
+          });
+        }
+
+        // Add to new user
+      const newData=  await User.findByIdAndUpdate(plan.newAssigneeId, {
+          $addToSet: { assignedTasks: plan.taskId },
+        });
+        console.log(newData)
+      } catch (error) {
+        console.log(error);
+      }
+    }
+
+    for (const plan of redistributionPlan) {
+      try {
         const task = await Task.findByIdAndUpdate(
           plan.taskId,
           { assignedTo: plan.newAssigneeId },
           { new: true }
-
         ).populate("assignedTo", "name");
-        
+
         if (task) {
-          const previousTaskData = await Task.findById(plan.taskId);
-          const previousAssigneeId = previousTaskData?.assignedTo?.toString();
+          // const previousTaskData = await Task.findById(plan.taskId);
+          // const previousAssigneeId = previousTaskData?.assignedTo?.toString();
 
-          // 🆕⏬ ADD THIS BLOCK
-          // ---------------------------------------------
-          // Get previous assignment (before change)
+          // // 🆕⏬ ADD THIS BLOCK
+          // // ---------------------------------------------
+          // // Get previous assignment (before change)
 
-          // Remove from previous user (if not same)
-          if (previousAssigneeId && previousAssigneeId !== plan.newAssigneeId) {
-            await User.findByIdAndUpdate(previousAssigneeId, {
-              $pull: { assignedTasks: plan.taskId },
-            });
-          }
+          // // Remove from previous user (if not same)
+          // if (previousAssigneeId && previousAssigneeId !== plan.newAssigneeId) {
+          //   await User.findByIdAndUpdate(previousAssigneeId, {
+          //     $pull: { assignedTasks: plan.taskId },
+          //   });
+          // }
 
-          // Add to new user
-          await User.findByIdAndUpdate(plan.newAssigneeId, {
-            $addToSet: { assignedTasks: plan.taskId },
-          });
+          // // Add to new user
+          // await User.findByIdAndUpdate(plan.newAssigneeId, {
+          //   $addToSet: { assignedTasks: plan.taskId },
+          // });
           // ---------------------------------------------
 
           results.tasksReassigned++;
@@ -206,7 +229,6 @@ export const autoRedistributeTasks = async (req, res) => {
             status: "success",
           });
         }
-        
       } catch (error) {
         results.failedReassignments++;
         details.push({
