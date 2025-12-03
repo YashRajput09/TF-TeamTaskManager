@@ -98,7 +98,7 @@ const Sidebar = ({ isOpen, onClose }) => {
           </div>
 
           {/* Nav (scrollable) */}
-          <nav className="flex-1 overflow-y-auto  p-4 space-y-1">
+          <nav className="flex-1 overflow-y-auto sidebar-scroll p-4 space-y-1">
             {menuItems.map((item) => {
               const Icon = item.icon;
               const active = isActive(item.path);
