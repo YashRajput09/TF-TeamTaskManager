@@ -12,6 +12,7 @@ export default function AddMemberSearchModal({
   const [user, setUser] = useState(null);
   const [status, setStatus] = useState(""); // none | member | invited
   const [loading, setLoading] = useState(false);
+  const [loadingSend,setLoadingSend]=useState(false)
 
   // 🔍 LIVE SEARCH WHEN USER TYPES
   useEffect(() => {
@@ -57,7 +58,7 @@ export default function AddMemberSearchModal({
     try {
       
       if (!userId) return;
-      
+      setLoadingSend(true)
       const res = await axiosInstance.post(`/user/${groupId}/invite`, {
         userId: userId,
       });
@@ -68,6 +69,8 @@ export default function AddMemberSearchModal({
       console.log(error);
       toast.error("Invitation failed")
       
+    }finally{
+      setLoadingSend(false)
     }
   };
 
@@ -168,7 +171,7 @@ export default function AddMemberSearchModal({
                         onClick={() => sendInvite(user?._id)}
                         className="px-4 py-2 text-white rounded-xl flex items-center gap-2"
                       >
-                        <UserPlus className="w-4 h-4" />
+                       {!loadingSend ? <UserPlus className="w-4 h-4" /> : "Sending..."} 
                       </button>
                     )}
                   </div>

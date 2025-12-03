@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import axios from "../pages/utility/axiosInstance.js";
 import { Users, Check, X, Clock } from "lucide-react";
 import toast from "react-hot-toast";
+import axiosInstance from "../pages/utility/axiosInstance.js";
 
 export default function InvitePanel() {
   const [invites, setInvites] = useState([]);
@@ -26,7 +27,7 @@ export default function InvitePanel() {
   const handleRespond = async (id, action) => {
     try {
        setLoading(true);
-      const res = await axios.post(`/user/request/${id}/respond`, { action });
+      const res = await axiosInstance.post(`/user/request/${id}/respond`, { action });
 
       toast.success(
         action === "accept"

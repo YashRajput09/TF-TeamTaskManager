@@ -73,7 +73,7 @@ export const signUpUser = async(req, res) =>{
     await newUser.save();
 
     if (newUser) {
-      const token = await createTokenAndSaveCookie(newUser._id, res);
+      const token = await createTokenAndSaveCookie(newUser._id, res,true);
       return res
         .status(200)
         .json({
@@ -92,6 +92,7 @@ export const signUpUser = async(req, res) =>{
 // Login User
 export const logInUser = async (req, res) => {
   const { email, password } = req.body;
+  console.log(email,password)
   try {
     if (!email || !password) {
       return res.status(400).json({ message: "Please fill required fields" });
@@ -104,7 +105,7 @@ export const logInUser = async (req, res) => {
     if (!user || !isValidPassword) {
       return res.status(400).json({ message: "Invalid email or password" });
     }
-    const token = await createTokenAndSaveCookie(user._id, res);
+    const token = await createTokenAndSaveCookie(user._id, res,true);
     // console.log(token);
 req.user = user;
     res.status(200).json({
@@ -300,6 +301,10 @@ export const respondGroupJoinRequest = async (req, res) => {
     await groupModel.findByIdAndUpdate(reqData.group._id, {
       $push: { members: loggedUserId },
     });
+
+    await User.findByIdAndUpdate(loggedUserId,{
+      $push:{groups : reqData?.group._id}
+    })
 
     await pushNotification({
       userId: reqData.invitedBy,

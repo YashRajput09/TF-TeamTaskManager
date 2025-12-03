@@ -23,7 +23,6 @@ import ConfirmDialog from "../UI/reusable-components/ConfirmDialog";
 import DeleteButton from "../UI/reusable-components/DeleteButton";
 import AddMemberSearchModal from "../UI/reusable-components/AddMember";
 
-
 // Helper to read ?team= from URL
 const useQuery = () => new URLSearchParams(useLocation().search);
 
@@ -339,7 +338,6 @@ const Teams = () => {
     return base;
   }, [teamData, visibleTasks, profile, onlyMine]);
 
-
   const handleDelete = async (taskId) => {
     // const isConfirm = await handleConfirmation();
 
@@ -448,14 +446,13 @@ const Teams = () => {
               </button> */}
 
               <button
-  onClick={() => setShowAdd(true)}
-  className="px-3 py-1 md:py-2 rounded-xl backdrop-blur-md bg-white/10 border border-white/20 
+                onClick={() => setShowAdd(true)}
+                className="px-3 py-1 md:py-2 rounded-xl backdrop-blur-md bg-white/10 border border-white/20 
      text-white shadow-lg hover:bg-white/20 transition flex items-center gap-2"
->
-  <UserPlus className="w-4 h-4" />
-  Add
-</button>
-
+              >
+                <UserPlus className="w-4 h-4" />
+                Add
+              </button>
 
               <button
                 onClick={() => setShowRemove(true)}
@@ -884,7 +881,7 @@ const Teams = () => {
         </InlineModal>
       )}
 
-      {showAdd && teamData && (
+      {/* {showAdd && teamData && (
         <InlineModal
           title={`Add Member to ${teamData?.name}`}
           onClose={() => setShowAdd(false)}
@@ -894,16 +891,15 @@ const Teams = () => {
             onCancel={() => setShowAdd(false)}
           />
         </InlineModal>
+      )} */}
+
+      {showAdd && (
+        <AddMemberSearchModal
+          groupId={teamId}
+          existingMembers={teamData?.members}
+          onClose={() => setShowAdd(false)}
+        />
       )}
-
-      {/* {showAdd && (
-  <AddMemberSearchModal
-    groupId={teamId}
-    existingMembers={teamData?.members}
-    onClose={() => setShowAdd(false)}
-  />
-)} */}
-
 
       {showRemove && teamData && (
         <InlineModal
