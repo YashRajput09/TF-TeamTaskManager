@@ -135,109 +135,121 @@ const Settings = () => {
       </div>
 
       {/* Profile Settings */}
-      <Card>
-        <div className="flex items-center space-x-3 mb-6">
-          <User className="w-5 h-5 text-primary-600 dark:text-primary-400" />
-          <h2 className="text-xl font-bold text-gray-900 dark:text-white">
-            Profile Settings
-          </h2>
+ <Card>
+  <div className="w-full flex justify-center">
+    <div className="flex flex-col items-center w-full max-w-3xl p-6 rounded-xl shadow-xl bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
+
+      {/* Header */}
+      <div className="flex items-center space-x-3 mb-8">
+        <User className="w-5 h-5 text-primary-600 dark:text-primary-400" />
+        <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
+          Profile Settings
+        </h2>
+      </div>
+
+      {/* Profile Picture */}
+      <div className="flex flex-col items-center mb-6">
+        <div
+          onClick={openFilePicker}
+          className="w-40 h-40 rounded-full overflow-hidden cursor-pointer hover:opacity-90 transition-all shadow-md border"
+          title="Click to change photo"
+        >
+          {previewUrl ? (
+            <img
+              src={previewUrl}
+              alt="Preview"
+              className="w-full h-full object-cover"
+            />
+          ) : profile.profileImage ? (
+            <img
+              src={profile.profileImage}
+              alt="Profile"
+              className="w-full h-full object-cover"
+            />
+          ) : (
+            <div className="w-full h-full flex items-center justify-center bg-gray-200 dark:bg-gray-700 text-gray-500 text-3xl font-semibold">
+              {profile.name ? profile.name.charAt(0) : "U"}
+            </div>
+          )}
         </div>
 
-        <div className="space-y-6">
-          {/* Profile Picture */}
-          <div className="flex items-center space-x-6">
-            <div
-              onClick={openFilePicker}
-              className="w-20 h-20 rounded-full overflow-hidden cursor-pointer hover:opacity-80 transition-all"
-              title="Click to change photo"
-            >
-              {previewUrl ? (
-                <img
-                  src={previewUrl}
-                  alt="Preview"
-                  className="w-full h-full object-cover"
-                />
-              ) : profile.profileImage ? (
-                <img
-                  src={profile.profileImage}
-                  alt="Profile"
-                  className="w-full h-full object-cover"
-                />
-              ) : (
-                <div className="w-full h-full flex items-center justify-center bg-gray-200 dark:bg-gray-700 text-gray-500 text-xl font-semibold">
-                  {profile.name ? profile.name.charAt(0) : "U"}
-                </div>
-              )}
-            </div>
-            <input
-              type="file"
-              ref={fileInputRef}
-              className="hidden"
-              accept="image/png, image/jpeg"
-              onChange={handleImageChange}
-            />
-            <div>
-              <p className="text-sm text-gray-600 dark:text-gray-400">
-                Click photo to change (JPG or PNG, max 2MB)
-              </p>
-            </div>
-          </div>
+        <input
+          type="file"
+          ref={fileInputRef}
+          className="hidden"
+          accept="image/png, image/jpeg"
+          onChange={handleImageChange}
+        />
 
-          {/* Name */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-              Full Name
-            </label>
-            <input
-              type="text"
-              name="name"
-              value={profile.name}
-              onChange={handleProfileChange}
-              className="input-field"
-            />
-          </div>
+        <p className="text-sm text-gray-600 dark:text-gray-400 mt-3">
+          Click photo to change (JPG/PNG up to 2MB)
+        </p>
+      </div>
 
-          {/* Email */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-              Email
-            </label>
-            <input
-              type="email"
-              name="email"
-              value={profile.email}
-              onChange={handleProfileChange}
-              className="input-field"
-            />
-          </div>
+      {/* Full Name */}
+      <div className="w-full mb-4">
+        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+          Full Name
+        </label>
+        <input
+          type="text"
+          name="name"
+          value={profile.name}
+          onChange={handleProfileChange}
+          className="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 
+                     bg-white dark:bg-gray-700 text-gray-900 dark:text-white 
+                     focus:ring-2 focus:ring-primary-500 outline-none"
+        />
+      </div>
 
-          {/* Bio */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-              Bio
-            </label>
-            <textarea
-              name="bio"
-              value={profile.bio}
-              onChange={handleProfileChange}
-              rows={3}
-              className="input-field resize-none"
-            />
-          </div>
+      {/* Email */}
+      <div className="w-full mb-4">
+        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+          Email
+        </label>
+        <input
+          type="email"
+          name="email"
+          value={profile.email}
+          onChange={handleProfileChange}
+          className="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 
+                     bg-white dark:bg-gray-700 text-gray-900 dark:text-white 
+                     focus:ring-2 focus:ring-primary-500 outline-none"
+        />
+      </div>
 
-          {/* Save Button */}
-          <div className="flex justify-end pt-4 border-t border-gray-200 dark:border-gray-700">
-            <button
-              onClick={handleSaveProfile}
-              disabled={loading}
-              className="btn-primary flex items-center space-x-2"
-            >
-              <Save className="w-4 h-4" />
-              <span>{loading ? "Saving..." : "Save Profile"}</span>
-            </button>
-          </div>
-        </div>
-      </Card>
+      {/* Bio */}
+      <div className="w-full mb-4">
+        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+          Bio
+        </label>
+        <textarea
+          name="bio"
+          value={profile.bio}
+          onChange={handleProfileChange}
+          rows={3}
+          className="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 
+                     bg-white dark:bg-gray-700 text-gray-900 dark:text-white 
+                     focus:ring-2 focus:ring-primary-500 outline-none resize-none"
+        />
+      </div>
+
+      {/* Save Button */}
+      <div className="w-full mt-4 border-t pt-4">
+        <button
+          onClick={handleSaveProfile}
+          disabled={loading}
+          className="w-full flex items-center justify-center space-x-2 bg-primary-600 hover:bg-primary-700 
+                     text-white px-4 py-2 rounded-lg shadow-md transition-all disabled:bg-gray-400"
+        >
+          <Save className="w-4 h-4" />
+          <span>{loading ? "Saving..." : "Save Profile"}</span>
+        </button>
+      </div>
+    </div>
+  </div>
+</Card>
+
 
       {/* Notification Settings */}
       <Card>

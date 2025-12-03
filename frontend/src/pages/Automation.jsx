@@ -149,13 +149,13 @@ const Automation = ({ profile }) => {
                       <div className="flex items-center justify-between">
                        
                         <div className="flex items-center space-x-3">
-                          <div className={`w-8 h-8 rounded-lg`} />
+                          {/* <div className={`w-2 h-2 rounded-lg`} /> */}
                           <div>
                             <p className="text-sm font-semibold text-gray-900 dark:text-white">
                               {group?.name}
                             </p>
                             <p className="text-xs text-gray-600 dark:text-gray-400">
-                              {group?.members?.length} members • 3 active
+                              {group?.members?.length} members
                             </p>
                           </div>
                           <div className="flex items-center space-x-2">
@@ -168,7 +168,7 @@ const Automation = ({ profile }) => {
                             <span className="text-xs ml-auto font-medium text-gray-700 dark:text-gray-300">
                               <button
                                 onClick={() => analyzeWorkload(group?._id)}
-                                className="bg-red-700/70 px-4 py-1 rounded-md"
+                                className="bg-green-700 px-4 py-1 rounded-md"
                               >
                                 Analyze
                               </button>

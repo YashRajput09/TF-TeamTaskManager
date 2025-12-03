@@ -38,7 +38,7 @@ const Layout = () => {
       <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
       
       {/* Main Content Area */}
-      <div className="flex-1 flex flex-col min-h-screen lg:ml-64">
+      <div className="flex-1 flex flex-col min-h-screen w-full ml-0 lg:ml-64">
         {/* Header */}
         <Header 
           toggleDarkMode={toggleDarkMode} 
