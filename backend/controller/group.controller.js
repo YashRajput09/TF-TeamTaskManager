@@ -1,4 +1,3 @@
-import express from "express";
 import { groupModel } from "../models/group.model.js";
 import User from "../models/user_model.js";
 import mongoose from "mongoose";
@@ -182,10 +181,6 @@ export const getSingleGroup = async (req, res) => {
     return res.status(404).json({ messaage: "Internal Server Error", error });
   }
 };
-
-// controllers/groupController.js
-
-
 
 export const deleteGroup = async (req, res) => {
   const { groupId } = req.params;

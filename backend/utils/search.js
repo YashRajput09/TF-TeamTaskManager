@@ -19,3 +19,17 @@ export const generateGroupSearchQuery = (searchQuery) => {
     ],
   };
 };
+
+
+export const generateUserSearchQuery = (searchQuery) => {
+   const query = {
+    $or: [
+      { name: { $regex: searchQuery, $options: "i" } },
+      { email: { $regex: searchQuery, $options: "i" } }
+    ]
+  };
+    if (!isNaN(searchQuery)) {
+    query.$or.push({ mobileNumber: Number(searchQuery) });
+  }
+  return query;
+}

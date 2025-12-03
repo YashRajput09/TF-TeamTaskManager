@@ -1,12 +1,9 @@
-import express from "express";
 import cloudinary from "../config/cloudConfig.js";
 import { groupModel } from "../models/group.model.js";
 import { Task } from "../models/task.modal.js";
 import { generateSearchQuery } from "../utils/search.js";
 import User from "../models/user_model.js";
 import { sendTaskNotification } from "../services/telegramNotification.js";
-import Notification from "../models/notification.model.js";
-import { io } from "../app.js";
 import { pushNotification } from "../utils/sendNotification.js";
 
 export const searchTasks = async (req, res) => {

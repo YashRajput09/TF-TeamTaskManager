@@ -21,6 +21,8 @@ import toast from "react-hot-toast";
 import { useAuth } from "../context/AuthProvider";
 import ConfirmDialog from "../UI/reusable-components/ConfirmDialog";
 import DeleteButton from "../UI/reusable-components/DeleteButton";
+import AddMemberSearchModal from "../UI/reusable-components/AddMember";
+
 
 // Helper to read ?team= from URL
 const useQuery = () => new URLSearchParams(useLocation().search);
@@ -337,10 +339,6 @@ const Teams = () => {
     return base;
   }, [teamData, visibleTasks, profile, onlyMine]);
 
-  //{can also use sweetalert2 by npm }
-  const handleConfirmation = async () => {
-    return window.confirm("Are you sure you want to delete this task?");
-  };
 
   const handleDelete = async (taskId) => {
     // const isConfirm = await handleConfirmation();
@@ -440,14 +438,24 @@ const Teams = () => {
 
           {isOwner(teamData) && (
             <>
-              <button
+              {/* <button
                 onClick={() => setShowAdd(true)}
                 className="px-3 py-1 md:py-2 rounded-xl backdrop-blur-md bg-white/10 border border-white/20 
                    text-white shadow-lg hover:bg-white/20 transition flex items-center gap-2"
               >
                 <UserPlus className="w-4 h-4" />
                 Add
-              </button>
+              </button> */}
+
+              <button
+  onClick={() => setShowAdd(true)}
+  className="px-3 py-1 md:py-2 rounded-xl backdrop-blur-md bg-white/10 border border-white/20 
+     text-white shadow-lg hover:bg-white/20 transition flex items-center gap-2"
+>
+  <UserPlus className="w-4 h-4" />
+  Add
+</button>
+
 
               <button
                 onClick={() => setShowRemove(true)}
@@ -887,6 +895,15 @@ const Teams = () => {
           />
         </InlineModal>
       )}
+
+      {/* {showAdd && (
+  <AddMemberSearchModal
+    groupId={teamId}
+    existingMembers={teamData?.members}
+    onClose={() => setShowAdd(false)}
+  />
+)} */}
+
 
       {showRemove && teamData && (
         <InlineModal

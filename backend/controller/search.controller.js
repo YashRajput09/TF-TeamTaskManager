@@ -1,6 +1,7 @@
 import { Task } from "../models/task.modal.js";
 import { groupModel } from "../models/group.model.js";
-import { generateSearchQuery, generateGroupSearchQuery } from "../utils/search.js";
+import { userModel } from "../models/user_model.js";
+import { generateSearchQuery, generateGroupSearchQuery, generateUserSearchQuery } from "../utils/search.js";
 
 /**
  * 🔍 Combined Search Controller
@@ -16,19 +17,27 @@ export const globalSearch = async (req, res) => {
     // Generate filters
     const taskQuery = generateSearchQuery(searchQuery);
     const groupQuery = generateGroupSearchQuery(searchQuery);
+    const userQuery = generateUserSearchQuery(searchQuery);
+
+    // if(userQuery){
+    //   await userModel.find(taskQuery).select("name email mobileNumber")
+    // }
 
     // Run both searches in parallel
-    const [tasks, groups] = await Promise.all([
+    const [tasks, groups, users] = await Promise.all([
       Task.find(taskQuery).select("title category status createdBy"),
       groupModel.find(groupQuery).select("name description members"),
+      userModel.find(userQuery).select("name email mobileNumber"),
     ]);
+
 
     return res.status(200).json({
       success: true,
-      totalResults: tasks.length + groups.length,
+      totalResults: tasks.length + groups.length + users.length,
       results: {
         tasks,
         groups,
+        users,
       },
     });
   } catch (error) {

@@ -11,6 +11,8 @@ import {
 } from "lucide-react";
 import axiosInstance from "./utility/axiosInstance";
 
+import InvitePanel from "../UI/InvitePanel";
+
 const Dashboard = () => {
   const navigate = useNavigate();
 
@@ -23,7 +25,7 @@ const Dashboard = () => {
     const allUserTask = async () => {
       try {
         const { data } = await axiosInstance.get(`/task/get-user-task`);
-   
+
         setUserAssignedTask(data?.assignedTasks);
         setUserCreatedTask(data?.createdTasks);
       } catch (error) {
@@ -32,7 +34,7 @@ const Dashboard = () => {
     };
     const getUserGroups = async () => {
       const { data } = await axiosInstance.get(`/user/myprofile`);
-      
+
       setUserGroups(data?.groups);
     };
 
@@ -89,19 +91,17 @@ const Dashboard = () => {
     color: g.color || "bg-blue-500",
   }));
 
-  
   // Normalize assigned tasks for "My Recent Tasks"
   const recent = userAssignedTask.map((t, idx) => ({
     id: t.id || t._id || idx + 1,
     title: t.title || t.name || "Untitled Task",
-    team: t.group[0 ]?.name || t.team || t.teamName || "Team",
+    team: t.group[0]?.name || t.team || t.teamName || "Team",
     priority: t.priority || "Medium",
     dueDate: t.deadline || t.dueDate || "",
     status: t.status || "Pending",
     description: t.description || "",
     assignee: t.assignedTo?.name || t.assignee || "",
     raw: t,
-    
   }));
 
   // date formate
@@ -146,13 +146,13 @@ const Dashboard = () => {
 
   const handleAccept = async (task_id) => {
     try {
-      
       const { data } = await axiosInstance.put(
-        `/task/update-status/${task_id}` ,{status:"In-progress"}
+        `/task/update-status/${task_id}`,
+        { status: "In-progress" }
       );
-     
+
       // alert("task accepted ");
-      toast.success("Accepted")
+      toast.success("Accepted");
     } catch (error) {
       console.log(error);
     }
@@ -176,6 +176,10 @@ const Dashboard = () => {
             <span>Last 30 days</span>
           </button>
         </div>
+      </div>
+      <div className="space-y-1">
+        <InvitePanel />
+        {/* rest of your page */}
       </div>
 
       {/* Stats Grid */}
@@ -231,9 +235,7 @@ const Dashboard = () => {
                 No tasks assigned to you yet.
               </p>
             ) : (
-              recent
-              ?.reverse()
-              ?.map((task) => (
+              recent?.reverse()?.map((task) => (
                 <div
                   key={task.id}
                   className="flex items-center justify-between p-4 rounded-lg bg-gray-50 dark:bg-gray-700/50 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors cursor-pointer"
@@ -249,12 +251,11 @@ const Dashboard = () => {
                     >
                       {task.title}
                     </h3>
-                   
+
                     <div className="mt-1 flex items-center space-x-3 text-xs text-gray-600 dark:text-gray-400">
                       <span>{task?.team}</span>
                       <span>•</span>
                       <span>
-                       
                         {/* {task.dueDate ? `Due ${task.dueDate}` : "No due date"} */}
                         {(() => {
                           const due = formatDueDate(task.dueDate);
@@ -271,7 +272,6 @@ const Dashboard = () => {
                     </div>
                   </div>
                   <div className="flex items-center space-x-2 ml-4">
-                   
                     {task.status === "Assigned" && (
                       <button
                         onClick={() => {
@@ -310,13 +310,11 @@ const Dashboard = () => {
           </div>
 
           <div className="space-y-3">
-            {teams
-            ?.reverse()
-            ?.map((t) => (
+            {teams?.reverse()?.map((t) => (
               <div
-              // <Link
+                // <Link
                 key={t.id}
-                onClick={()=>navigate(`/teams/${t.id}`)}
+                onClick={() => navigate(`/teams/${t.id}`)}
                 // to={`/teams/${t._id}`}
                 className="w-full text-left p-3 rounded-lg bg-gray-50 dark:bg-gray-700/50 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
               >
