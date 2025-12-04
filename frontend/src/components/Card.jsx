@@ -44,7 +44,7 @@ export default function Card({
       onMouseLeave={onLeave}
       className={cn(
         // base glass card
-        'card-3d rounded-2xl p-6 backdrop-blur-xl transition-all duration-300',
+        'card-3d rounded-2xl p-6 pb-0 backdrop-blur-xl transition-all duration-300',
         gradient
           ? 'bg-linear-to-br from-white/90 to-white/70 dark:from-gray-800/90 dark:to-gray-800/70'
           : 'bg-white/80 dark:bg-gray-800/80',
