@@ -80,9 +80,9 @@ const Sidebar = ({ isOpen, onClose }) => {
       >
         <div className="flex flex-col h-full">
           {/* Header */}
-          <div className="flex items-center justify-between p-6 border-b border-gray-200/50 dark:border-gray-700/50">
+          <div className="flex items-center justify-between p-5 border-b border-gray-200/50 dark:border-gray-700/50">
             <div className="flex items-center space-x-2">
-              <div className="w-10   rounded-lg gradient-primary flex items-center justify-center shadow">
+              <div className="w-10  rounded-lg gradient-primary flex items-center justify-center shadow">
                 {/* <BrandIcon className="w-5 h-5 text-white" /> */}
                 {/* <img src="TaskManagerLogo.png" alt="TeamTaskManager" srcset="" /> */}
                 <img src="MainLogo3.png" alt="TeamTaskManager" srcset="" />
