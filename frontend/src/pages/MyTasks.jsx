@@ -287,30 +287,30 @@ const MyTasks = () => {
       </Card>
 
       {/* Mobile Toggle - Only visible on mobile */}
-      <div className="lg:hidden">
-        <Card>
+      <div className="lg:hidden px-0">
+        <Card className="bg-red-800 px-0 rounded-full py-0">
           <div className="flex items-center space-x-2">
             <button
               onClick={() => setMobileView("assigned")}
               className={`
-                flex-1 px-4 py-2 rounded-lg text-sm font-medium transition-all
+                flex-1 px-1 py-1 flex justify-center items-center  rounded-full text-sm font-medium transition-all
                 ${
                   mobileView === "assigned"
-                    ? "gradient-primary text-white shadow-sm"
-                    : "bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300"
+                    ? "gradient-primary bg-blue-900/40 text-blue-500   shadow-sm"
+                    : " text-gray-700 dark:text-gray-300"
                 }
               `}
             >
-              Assigned Tasks ({filteredTasks.length})
+              Assigned Tasks  ({filteredTasks.length}) 
             </button>
             <button
               onClick={() => setMobileView("created")}
               className={`
-                flex-1 px-4 py-2 rounded-lg text-sm font-medium transition-all
+                flex-1 px-2 py-1 flex justify-center items-center rounded-full text-sm font-medium transition-all
                 ${
                   mobileView === "created"
-                    ? "gradient-primary text-white shadow-sm"
-                    : "bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300"
+                    ? "gradient-primary bg-blue-900/40 text-blue-500  shadow-sm"
+                    : " text-gray-700 dark:text-gray-300"
                 }
               `}
             >

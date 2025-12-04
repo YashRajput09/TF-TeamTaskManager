@@ -128,7 +128,13 @@ app.get("/",(req,res)=>{
 import { Server } from "socket.io";
 
 const io = new Server(server, {
-    cors: { origin: allowedOrigins, credentials: true },
+    cors: { origin: (origin, callback) => {
+        if (!origin || allowedOrigins.includes(origin)) {
+            callback(null, true);
+        } else {
+            callback(new Error('Not allowed by CORS'));
+        }
+    }, credentials: true },
 });
 
 io.on("connection", (socket) => {
@@ -173,7 +179,7 @@ async function dbConnection() {
         //telegram reminder runner 
         startReminderScheduler();
         
-        app.listen(port, () => {
+        server.listen(port, () => {
             console.log(`🚀 Server running on port: ${port}`);
         });
         
