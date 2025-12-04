@@ -223,6 +223,7 @@ const Teams = () => {
 
   const [searchMember, setSearchMember] = useState("");
   const [onlyMine, setOnlyMine] = useState(false);
+  const [viewSelection, setViewSelection] = useState("tasks");
 
   const { teamId } = useParams();
   useEffect(() => {
@@ -467,10 +468,380 @@ const Teams = () => {
         </div>
       </div>
 
-      {/* Content */}
-    
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Members */}
+      {/* Desktop View */}
+      <div className="hidden lg:grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Members */}
+        <Card className="lg:col-span-1">
+          <div className="flex gap-2 items-center justify-between mb-4">
+            <h2 className="text-lg font-bold text-gray-900 dark:text-white">
+              Members <span className="font-normal italic">({teamData?.members?.length})</span>
+            </h2>
+            <div className="relative">
+              <Search className="w-4 h-4 absolute right-4 top-2.5 text-gray-500" />
+              <input
+                value={searchMember}
+                onChange={(e) => setSearchMember(e.target.value)}
+                placeholder="Search member..."
+                className="pl-2 py-2 rounded-md bg-gray-50 dark:bg-gray-700/50 text-sm outline-none"
+              />
+            </div>
+          </div>
+          <ul className="divide-y divide-gray-200 dark:divide-gray-700">
+            {teamData?.members?.map((m) => (
+              <li key={m.id} className="py-3 flex items-center justify-between">
+                <div className="flex items-center space-x-3">
+                  {/* <div className={`w-8 h-8 rounded-lg ${selectedTeam.color}`} /> */}
+                  <div>
+                    <p className="text-sm font-semibold text-gray-900 dark:text-white">
+                      {m.name}{" "}
+                      {teamData?.createdBy?._id === m?._id ? (
+                        <i>(Admin)</i>
+                      ) : (
+                        ""
+                      )}{" "}
+                      {m._id === profile._id ? <i>(You)</i> : ""}
+                    </p>
+                    <p className="text-xs text-gray-600 dark:text-gray-400">
+                      {m.role}
+                    </p>
+                  </div>
+                </div>
+              </li>
+            ))}
+            {teamData?.members?.length === 0 && (
+              <p className="text-sm text-gray-500 dark:text-gray-400 py-6 text-center">
+                No members found.
+              </p>
+            )}
+          </ul>
+          <div
+            className="absolute right-4 bottom-4 z-20 bg-red-900/60 hover:bg-red-800/40 text-red-500 rounded-lg shadow-lg py-1 "
+            onClick={(e) => e.stopPropagation()}
+          >
+            <DeleteButton
+              onDelete={async () => {
+                await axiosInstance.delete(`group/${teamId}/self-leave`);
+                toast.success("Group leaved Successfully");
+                navigate("/dashboard");
+              }}
+              title="Leave Team"
+              message="Are you sure you want to leave this team? All tasks and data associated with this group will be permanently removed."
+              itemName={teamData?.name}
+              confirmText="Leave"
+              variant="icon"
+              size="sm"
+              className="w-full justify-start px-4  text-left text-sm text-red-400 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-none"
+            />
+          </div>
+          {/* <button onClick={()=>{
+
+              }} className=" px-4 py-0.5  ml-auto rounded-md bg-red-900/70 hover:bg-red-800/50 text-red-500">
+                Leave Team
+              </button> */}
+        </Card>
+
+        {/* Tasks */}
+        <Card className="lg:col-span-2">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
+              <ListChecks className="w-5 h-5" /> Tasks <span className="italic font-normal">({visibleTasks?.length})</span>
+            </h2>
+            <div className="flex items-center gap-3">
+              {!isOwner(teamData) && (
+                <label className="flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300">
+                  <input
+                    type="checkbox"
+                    checked={onlyMine}
+                    onChange={(e) => setOnlyMine(e.target.checked)}
+                  />
+                  Assigned to me
+                </label>
+              )}
+              {/* <DeleteButton
+                          onDelete={async () => {
+                            await axiosInstance.delete(`/group/delete-team/${teams._id}`);
+                            toast.success("Group deleted successfully");
+                            // setOpenDropdown(null);
+                            // fetchGroups(); // Refresh the list
+                          }}
+                          title="Delete Group"
+                          message="Are you sure you want to delete this group? All tasks and data associated with this group will be permanently removed."
+                          itemName={teams.name}
+                          confirmText="Delete Group"
+                          variant="icon"
+                          size="sm"
+                          className="w-full justify-start px-4 py-2 text-left text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-none"
+                        /> */}
+            </div>
+          </div>
+
+          {/* FILTERS */}
+          <div className="flex flex-wrap gap-3 mb-6">
+            {/* STATUS FILTER */}
+            <div className="relative group">
+              <button className="flex items-center gap-2 px-4 py-2 rounded-full bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 hover:border-blue-400 dark:hover:border-blue-500 transition-all shadow-sm hover:shadow-md">
+                <svg
+                  className="w-4 h-4 text-gray-600 dark:text-gray-400"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"
+                  />
+                </svg>
+                <span className="text-xs font-medium text-gray-700 dark:text-gray-300">
+                  Status:{" "}
+                  <span className="text-blue-600 dark:text-blue-400">
+                    {statusFilter === "all" ? "All" : statusFilter}
+                  </span>
+                </span>
+                <svg
+                  className="w-4 h-4 text-gray-400 group-hover:rotate-180 transition-transform"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M19 9l-7 7-7-7"
+                  />
+                </svg>
+              </button>
+
+              {/* Dropdown */}
+              <div className="absolute top-full left-0 mt-2 w-64 bg-white dark:bg-gray-800 rounded-2xl shadow-2xl border border-gray-200 dark:border-gray-700 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50 p-2">
+                <div className="flex flex-wrap gap-2">
+                  {[
+                    "all",
+                    "Assigned",
+                    "Pending",
+                    "In-progress",
+                    "Completed",
+                  ].map((s) => (
+                    <button
+                      key={s}
+                      onClick={() => setStatusFilter(s)}
+                      className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all ${
+                        statusFilter === s
+                          ? "bg-blue-500 text-white"
+                          : "bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-blue-100 dark:hover:bg-gray-600"
+                      }`}
+                    >
+                      {s === "all" ? "All" : s}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            {/* PRIORITY FILTER */}
+            <div className="relative group">
+              <button className="flex items-center gap-2 px-4 py-2 rounded-full bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 hover:border-purple-400 dark:hover:border-purple-500 transition-all shadow-sm hover:shadow-md">
+                <svg
+                  className="w-4 h-4 text-gray-600 dark:text-gray-400"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M3 21v-4m0 0V5a2 2 0 012-2h6.5l1 1H21l-3 6 3 6h-8.5l-1-1H5a2 2 0 00-2 2zm9-13.5V9"
+                  />
+                </svg>
+                <span className="text-xs font-medium text-gray-700 dark:text-gray-300">
+                  Priority:{" "}
+                  <span className="text-purple-600 dark:text-purple-400">
+                    {priorityFilter === "all" ? "All" : priorityFilter}
+                  </span>
+                </span>
+                <svg
+                  className="w-4 h-4 text-gray-400 group-hover:rotate-180 transition-transform"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M19 9l-7 7-7-7"
+                  />
+                </svg>
+              </button>
+
+              {/* Dropdown */}
+              <div className="absolute top-full left-0 mt-2 w-48 bg-white dark:bg-gray-800 rounded-2xl shadow-2xl border border-gray-200 dark:border-gray-700 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50 p-2">
+                <div className="flex flex-wrap gap-2">
+                  {["all", "High", "Medium", "Low"].map((p) => (
+                    <button
+                      key={p}
+                      onClick={() => setPriorityFilter(p)}
+                      className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all ${
+                        priorityFilter === p
+                          ? "bg-purple-500 text-white"
+                          : "bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-purple-100 dark:hover:bg-gray-600"
+                      }`}
+                    >
+                      {p === "all" ? "All" : p}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead>
+                <tr className="border-b border-gray-200 dark:border-gray-700">
+                  <th className="text-left py-3 px-4 text-xs font-semibold text-gray-700 dark:text-gray-300">
+                    Title
+                  </th>
+                  <th className="text-left py-3 px-4 text-xs font-semibold text-gray-700 dark:text-gray-300">
+                    Assignee
+                  </th>
+                  <th className="text-left py-3 px-4 text-xs font-semibold text-gray-700 dark:text-gray-300">
+                    Status
+                  </th>
+                  <th className="text-left py-3 px-4 text-xs font-semibold text-gray-700 dark:text-gray-300">
+                    Priority
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                {visibleTask
+                  ?.filter((task) => {
+                    // status filter
+                    if (statusFilter !== "all" && task.status !== statusFilter)
+                      return false;
+
+                    // priority filter
+                    if (
+                      priorityFilter !== "all" &&
+                      task.priority !== priorityFilter
+                    )
+                      return false;
+
+                    return true;
+                  })
+                  .reverse()
+                  .map((task) => (
+                    <tr
+                      key={task?._id}
+                      className="border-b border-gray-100 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700/50  rounded-md transition-colors"
+                    >
+                      <td
+                        onClick={() => navigate(`/tasks/${task?._id}`)}
+                        className="py-3 px-4 text-sm text-gray-900 hover:underline cursor-pointer dark:text-white"
+                      >
+                        {task.title}
+                      </td>
+                      <td className="py-3 px-4 text-sm text-gray-700 dark:text-gray-300">
+                        {task?.assignedTo?.name}
+                      </td>
+                      <td className="py-3 px-4">
+                        <span
+                          className={`px-2 py-1 rounded-md text-xs font-medium ${
+                            task.status === "Completed"
+                              ? "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400"
+                              : task.status === "In-progress"
+                              ? "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400"
+                              : "bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300"
+                          }`}
+                        >
+                          {task?.status}
+                        </span>
+                      </td>
+                      <td className="py-3 px-4">
+                        <span
+                          className={`px-2 py-1 rounded-md text-xs font-medium ${
+                            task.priority === "Critical"
+                              ? "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400"
+                              : task.priority === "High"
+                              ? "bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400"
+                              : task.priority === "Medium"
+                              ? "bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400"
+                              : "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400"
+                          }`}
+                        >
+                          {task?.priority}
+                        </span>
+                      </td>
+                      {isOwner(teamData) && (
+                        <td>
+                          <Trash2
+                            // onClick={() => handleDelete(task?._id)}
+                            onClick={() => {
+                              openConfirm({
+                                title: "Delete Task?",
+                                message:
+                                  "Are you sure you want to delete this task?",
+                                confirmText: "Delete",
+                                onConfirm: () => handleDelete(task._id),
+                              });
+                            }}
+                            className="w-4 mr-2 text-red-700 opacity-75 cursor-pointer hover:opacity-100 hover:text-600"
+                          />
+                        </td>
+                      )}
+                    </tr>
+                  ))}
+              </tbody>
+            </table>
+            {visibleTasks?.length === 0 && (
+              <p className="text-sm text-gray-500 dark:text-gray-400 py-6 text-center">
+                No tasks to show.
+              </p>
+            )}
+          </div>
+        </Card>
+      </div>
+
+      {/* Toggle Button for Mobile View */}
+      <div className="lg:hidden ">
+        <Card className="bg-none py-0 px-0 rounded-full">
+          <div className="flex items-center space-x-2">
+            <button
+              onClick={() => setViewSelection("tasks")}
+              className={`
+                flex-1 flex justify-center items-center gap-1 px-2 py-1 rounded-full text-lg font-medium transition-all
+                ${
+                  viewSelection === "tasks"
+                    ? "gradient-primary bg-blue-900/40 text-blue-500 shadow-sm"
+                    : " text-gray-700 dark:text-gray-300"
+                }
+              `}
+            >
+              <ListChecks className="w-4 h-4" /> Tasks <span className="italic font-normal">({visibleTasks?.length})</span> 
+              {/* ({filteredTasks.length}) */}
+            </button>
+            <button
+              onClick={() => setViewSelection("members")}
+              className={`
+                flex-1 px-4 py-2 rounded-full text-sm font-medium transition-all
+                ${
+                  viewSelection === "members"
+                    ? "gradient-primary bg-blue-900/40 text-blue-500 shadow-sm"
+                    : " text-gray-700 dark:text-gray-300"
+                }
+              `}
+            >
+              Members <span className="italic font-normal">({teamData?.members?.length})</span> 
+            </button>
+          </div>
+        </Card>
+      </div>
+
+      {/* Mobile view */}
+      <div className="lg:hidden space-y-4">
+        {viewSelection === "members" ? (
           <Card className="lg:col-span-1">
             <div className="flex gap-2 items-center justify-between mb-4">
               <h2 className="text-xl font-bold text-gray-900 dark:text-white">
@@ -523,12 +894,9 @@ const Teams = () => {
             >
               <DeleteButton
                 onDelete={async () => {
-                  await axiosInstance.delete(
-                   `group/${teamId}/self-leave`
-                  );
+                  await axiosInstance.delete(`group/${teamId}/self-leave`);
                   toast.success("Group leaved Successfully");
                   navigate("/dashboard");
-                
                 }}
                 title="Leave Team"
                 message="Are you sure you want to leave this team? All tasks and data associated with this group will be permanently removed."
@@ -545,25 +913,25 @@ const Teams = () => {
                 Leave Team
               </button> */}
           </Card>
-
-          {/* Tasks */}
-          <Card className="lg:col-span-2">
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
-                <ListChecks className="w-5 h-5" /> Tasks
-              </h2>
-              <div className="flex items-center gap-3">
-                {!isOwner(teamData) && (
-                  <label className="flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300">
-                    <input
-                      type="checkbox"
-                      checked={onlyMine}
-                      onChange={(e) => setOnlyMine(e.target.checked)}
-                    />
-                    Assigned to me
-                  </label>
-                )}
-                {/* <DeleteButton
+        ) : (
+          <>
+            <Card className="lg:col-span-2">
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
+                  <ListChecks className="w-5 h-5" /> Tasks
+                </h2>
+                <div className="flex items-center gap-3">
+                  {!isOwner(teamData) && (
+                    <label className="flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300">
+                      <input
+                        type="checkbox"
+                        checked={onlyMine}
+                        onChange={(e) => setOnlyMine(e.target.checked)}
+                      />
+                      Assigned to me
+                    </label>
+                  )}
+                  {/* <DeleteButton
                           onDelete={async () => {
                             await axiosInstance.delete(`/group/delete-team/${teams._id}`);
                             toast.success("Group deleted successfully");
@@ -578,241 +946,242 @@ const Teams = () => {
                           size="sm"
                           className="w-full justify-start px-4 py-2 text-left text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-none"
                         /> */}
-              </div>
-            </div>
-
-            {/* FILTERS */}
-            <div className="flex flex-wrap gap-3 mb-6">
-              {/* STATUS FILTER */}
-              <div className="relative group">
-                <button className="flex items-center gap-2 px-4 py-2 rounded-full bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 hover:border-blue-400 dark:hover:border-blue-500 transition-all shadow-sm hover:shadow-md">
-                  <svg
-                    className="w-4 h-4 text-gray-600 dark:text-gray-400"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"
-                    />
-                  </svg>
-                  <span className="text-xs font-medium text-gray-700 dark:text-gray-300">
-                    Status:{" "}
-                    <span className="text-blue-600 dark:text-blue-400">
-                      {statusFilter === "all" ? "All" : statusFilter}
-                    </span>
-                  </span>
-                  <svg
-                    className="w-4 h-4 text-gray-400 group-hover:rotate-180 transition-transform"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M19 9l-7 7-7-7"
-                    />
-                  </svg>
-                </button>
-
-                {/* Dropdown */}
-                <div className="absolute top-full left-0 mt-2 w-64 bg-white dark:bg-gray-800 rounded-2xl shadow-2xl border border-gray-200 dark:border-gray-700 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50 p-2">
-                  <div className="flex flex-wrap gap-2">
-                    {[
-                      "all",
-                      "Assigned",
-                      "Pending",
-                      "In-progress",
-                      "Completed",
-                    ].map((s) => (
-                      <button
-                        key={s}
-                        onClick={() => setStatusFilter(s)}
-                        className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all ${
-                          statusFilter === s
-                            ? "bg-blue-500 text-white"
-                            : "bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-blue-100 dark:hover:bg-gray-600"
-                        }`}
-                      >
-                        {s === "all" ? "All" : s}
-                      </button>
-                    ))}
-                  </div>
                 </div>
               </div>
 
-              {/* PRIORITY FILTER */}
-              <div className="relative group">
-                <button className="flex items-center gap-2 px-4 py-2 rounded-full bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 hover:border-purple-400 dark:hover:border-purple-500 transition-all shadow-sm hover:shadow-md">
-                  <svg
-                    className="w-4 h-4 text-gray-600 dark:text-gray-400"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M3 21v-4m0 0V5a2 2 0 012-2h6.5l1 1H21l-3 6 3 6h-8.5l-1-1H5a2 2 0 00-2 2zm9-13.5V9"
-                    />
-                  </svg>
-                  <span className="text-xs font-medium text-gray-700 dark:text-gray-300">
-                    Priority:{" "}
-                    <span className="text-purple-600 dark:text-purple-400">
-                      {priorityFilter === "all" ? "All" : priorityFilter}
+              {/* FILTERS */}
+              <div className="flex flex-wrap gap-3 mb-6">
+                {/* STATUS FILTER */}
+                <div className="relative group">
+                  <button className="flex items-center gap-2 px-4 py-2 rounded-full bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 hover:border-blue-400 dark:hover:border-blue-500 transition-all shadow-sm hover:shadow-md">
+                    <svg
+                      className="w-4 h-4 text-gray-600 dark:text-gray-400"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"
+                      />
+                    </svg>
+                    <span className="text-xs font-medium text-gray-700 dark:text-gray-300">
+                      Status:{" "}
+                      <span className="text-blue-600 dark:text-blue-400">
+                        {statusFilter === "all" ? "All" : statusFilter}
+                      </span>
                     </span>
-                  </span>
-                  <svg
-                    className="w-4 h-4 text-gray-400 group-hover:rotate-180 transition-transform"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M19 9l-7 7-7-7"
-                    />
-                  </svg>
-                </button>
+                    <svg
+                      className="w-4 h-4 text-gray-400 group-hover:rotate-180 transition-transform"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M19 9l-7 7-7-7"
+                      />
+                    </svg>
+                  </button>
 
-                {/* Dropdown */}
-                <div className="absolute top-full left-0 mt-2 w-48 bg-white dark:bg-gray-800 rounded-2xl shadow-2xl border border-gray-200 dark:border-gray-700 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50 p-2">
-                  <div className="flex flex-wrap gap-2">
-                    {["all", "High", "Medium", "Low"].map((p) => (
-                      <button
-                        key={p}
-                        onClick={() => setPriorityFilter(p)}
-                        className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all ${
-                          priorityFilter === p
-                            ? "bg-purple-500 text-white"
-                            : "bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-purple-100 dark:hover:bg-gray-600"
-                        }`}
-                      >
-                        {p === "all" ? "All" : p}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              </div>
-            </div>
-            <div className="overflow-x-auto">
-              <table className="w-full">
-                <thead>
-                  <tr className="border-b border-gray-200 dark:border-gray-700">
-                    <th className="text-left py-3 px-4 text-xs font-semibold text-gray-700 dark:text-gray-300">
-                      Title
-                    </th>
-                    <th className="text-left py-3 px-4 text-xs font-semibold text-gray-700 dark:text-gray-300">
-                      Assignee
-                    </th>
-                    <th className="text-left py-3 px-4 text-xs font-semibold text-gray-700 dark:text-gray-300">
-                      Status
-                    </th>
-                    <th className="text-left py-3 px-4 text-xs font-semibold text-gray-700 dark:text-gray-300">
-                      Priority
-                    </th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {visibleTask
-                    ?.filter((task) => {
-                      // status filter
-                      if (
-                        statusFilter !== "all" &&
-                        task.status !== statusFilter
-                      )
-                        return false;
-
-                      // priority filter
-                      if (
-                        priorityFilter !== "all" &&
-                        task.priority !== priorityFilter
-                      )
-                        return false;
-
-                      return true;
-                    })
-                    .reverse()
-                    .map((task) => (
-                      <tr
-                        key={task?._id}
-                        className="border-b border-gray-100 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700/50  rounded-md transition-colors"
-                      >
-                        <td
-                          onClick={() => navigate(`/tasks/${task?._id}`)}
-                          className="py-3 px-4 text-sm text-gray-900 hover:underline cursor-pointer dark:text-white"
+                  {/* Dropdown */}
+                  <div className="absolute top-full left-0 mt-2 w-64 bg-white dark:bg-gray-800 rounded-2xl shadow-2xl border border-gray-200 dark:border-gray-700 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50 p-2">
+                    <div className="flex flex-wrap gap-2">
+                      {[
+                        "all",
+                        "Assigned",
+                        "Pending",
+                        "In-progress",
+                        "Completed",
+                      ].map((s) => (
+                        <button
+                          key={s}
+                          onClick={() => setStatusFilter(s)}
+                          className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all ${
+                            statusFilter === s
+                              ? "bg-blue-500 text-white"
+                              : "bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-blue-100 dark:hover:bg-gray-600"
+                          }`}
                         >
-                          {task.title}
-                        </td>
-                        <td className="py-3 px-4 text-sm text-gray-700 dark:text-gray-300">
-                          {task?.assignedTo?.name}
-                        </td>
-                        <td className="py-3 px-4">
-                          <span
-                            className={`px-2 py-1 rounded-md text-xs font-medium ${
-                              task.status === "Completed"
-                                ? "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400"
-                                : task.status === "In-progress"
-                                ? "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400"
-                                : "bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300"
-                            }`}
-                          >
-                            {task?.status}
-                          </span>
-                        </td>
-                        <td className="py-3 px-4">
-                          <span
-                            className={`px-2 py-1 rounded-md text-xs font-medium ${
-                              task.priority === "Critical"
-                                ? "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400"
-                                : task.priority === "High"
-                                ? "bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400"
-                                : task.priority === "Medium"
-                                ? "bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400"
-                                : "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400"
-                            }`}
-                          >
-                            {task?.priority}
-                          </span>
-                        </td>
-                        {isOwner(teamData) && (
-                          <td>
-                            <Trash2
-                              // onClick={() => handleDelete(task?._id)}
-                              onClick={() => {
-                                openConfirm({
-                                  title: "Delete Task?",
-                                  message:
-                                    "Are you sure you want to delete this task?",
-                                  confirmText: "Delete",
-                                  onConfirm: () => handleDelete(task._id),
-                                });
-                              }}
-                              className="w-4 mr-2 text-red-700 opacity-75 cursor-pointer hover:opacity-100 hover:text-600"
-                            />
-                          </td>
-                        )}
-                      </tr>
-                    ))}
-                </tbody>
-              </table>
-              {visibleTasks?.length === 0 && (
-                <p className="text-sm text-gray-500 dark:text-gray-400 py-6 text-center">
-                  No tasks to show.
-                </p>
-              )}
-            </div>
-          </Card>
-        </div>
+                          {s === "all" ? "All" : s}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                </div>
 
+                {/* PRIORITY FILTER */}
+                <div className="relative group">
+                  <button className="flex items-center gap-2 px-4 py-2 rounded-full bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 hover:border-purple-400 dark:hover:border-purple-500 transition-all shadow-sm hover:shadow-md">
+                    <svg
+                      className="w-4 h-4 text-gray-600 dark:text-gray-400"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M3 21v-4m0 0V5a2 2 0 012-2h6.5l1 1H21l-3 6 3 6h-8.5l-1-1H5a2 2 0 00-2 2zm9-13.5V9"
+                      />
+                    </svg>
+                    <span className="text-xs font-medium text-gray-700 dark:text-gray-300">
+                      Priority:{" "}
+                      <span className="text-purple-600 dark:text-purple-400">
+                        {priorityFilter === "all" ? "All" : priorityFilter}
+                      </span>
+                    </span>
+                    <svg
+                      className="w-4 h-4 text-gray-400 group-hover:rotate-180 transition-transform"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M19 9l-7 7-7-7"
+                      />
+                    </svg>
+                  </button>
+
+                  {/* Dropdown */}
+                  <div className="absolute top-full left-0 mt-2 w-48 bg-white dark:bg-gray-800 rounded-2xl shadow-2xl border border-gray-200 dark:border-gray-700 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50 p-2">
+                    <div className="flex flex-wrap gap-2">
+                      {["all", "High", "Medium", "Low"].map((p) => (
+                        <button
+                          key={p}
+                          onClick={() => setPriorityFilter(p)}
+                          className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all ${
+                            priorityFilter === p
+                              ? "bg-purple-500 text-white"
+                              : "bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-purple-100 dark:hover:bg-gray-600"
+                          }`}
+                        >
+                          {p === "all" ? "All" : p}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div className="overflow-x-auto">
+                <table className="w-full">
+                  <thead>
+                    <tr className="border-b border-gray-200 dark:border-gray-700">
+                      <th className="text-left py-3 px-4 text-xs font-semibold text-gray-700 dark:text-gray-300">
+                        Title
+                      </th>
+                      <th className="text-left py-3 px-4 text-xs font-semibold text-gray-700 dark:text-gray-300">
+                        Assignee
+                      </th>
+                      <th className="text-left py-3 px-4 text-xs font-semibold text-gray-700 dark:text-gray-300">
+                        Status
+                      </th>
+                      <th className="text-left py-3 px-4 text-xs font-semibold text-gray-700 dark:text-gray-300">
+                        Priority
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {visibleTask
+                      ?.filter((task) => {
+                        // status filter
+                        if (
+                          statusFilter !== "all" &&
+                          task.status !== statusFilter
+                        )
+                          return false;
+
+                        // priority filter
+                        if (
+                          priorityFilter !== "all" &&
+                          task.priority !== priorityFilter
+                        )
+                          return false;
+
+                        return true;
+                      })
+                      .reverse()
+                      .map((task) => (
+                        <tr
+                          key={task?._id}
+                          className="border-b border-gray-100 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700/50  rounded-md transition-colors"
+                        >
+                          <td
+                            onClick={() => navigate(`/tasks/${task?._id}`)}
+                            className="py-3 px-4 text-sm text-gray-900 hover:underline cursor-pointer dark:text-white"
+                          >
+                            {task.title}
+                          </td>
+                          <td className="py-3 px-4 text-sm text-gray-700 dark:text-gray-300">
+                            {task?.assignedTo?.name}
+                          </td>
+                          <td className="py-3 px-4">
+                            <span
+                              className={`px-2 py-1 rounded-md text-xs font-medium ${
+                                task.status === "Completed"
+                                  ? "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400"
+                                  : task.status === "In-progress"
+                                  ? "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400"
+                                  : "bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300"
+                              }`}
+                            >
+                              {task?.status}
+                            </span>
+                          </td>
+                          <td className="py-3 px-4">
+                            <span
+                              className={`px-2 py-1 rounded-md text-xs font-medium ${
+                                task.priority === "Critical"
+                                  ? "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400"
+                                  : task.priority === "High"
+                                  ? "bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400"
+                                  : task.priority === "Medium"
+                                  ? "bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400"
+                                  : "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400"
+                              }`}
+                            >
+                              {task?.priority}
+                            </span>
+                          </td>
+                          {isOwner(teamData) && (
+                            <td>
+                              <Trash2
+                                // onClick={() => handleDelete(task?._id)}
+                                onClick={() => {
+                                  openConfirm({
+                                    title: "Delete Task?",
+                                    message:
+                                      "Are you sure you want to delete this task?",
+                                    confirmText: "Delete",
+                                    onConfirm: () => handleDelete(task._id),
+                                  });
+                                }}
+                                className="w-4 mr-2 text-red-700 opacity-75 cursor-pointer hover:opacity-100 hover:text-600"
+                              />
+                            </td>
+                          )}
+                        </tr>
+                      ))}
+                  </tbody>
+                </table>
+                {visibleTasks?.length === 0 && (
+                  <p className="text-sm text-gray-500 dark:text-gray-400 py-6 text-center">
+                    No tasks to show.
+                  </p>
+                )}
+              </div>
+            </Card>
+          </>
+        )}
+      </div>
 
       {/* Simple inline modals */}
       {showCreate && (
