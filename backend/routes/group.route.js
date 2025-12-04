@@ -1,5 +1,5 @@
 import expresss from "express"
-import { addMember, createGroup, deleteGroup, getSingleGroup, getUserGroups, removeMember } from "../controller/group.controller.js";
+import { addMember, createGroup, deleteGroup, getSingleGroup, getUserGroups, removeMember, selfLeaveGroup } from "../controller/group.controller.js";
 import { isAuthenticated, isAdmin } from "../middleware/authenticateUser.js";
 
 const router=expresss.Router();
@@ -14,5 +14,6 @@ router.get("/get-allUserGroup/:userId",isAuthenticated,getUserGroups);
 
 //delete group
 router.delete("/delete-group/:groupId",isAuthenticated,deleteGroup);
+router.delete("/:groupId/self-leave",isAuthenticated,selfLeaveGroup)
 
 export default router;

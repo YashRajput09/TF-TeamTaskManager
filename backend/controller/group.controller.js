@@ -339,4 +339,48 @@ export const deleteGroup = async (req, res) => {
   }
 };
 
+// routes
+// router.delete("/group/self-leave/:groupId", protect, selfLeaveGroup);
+
+export const selfLeaveGroup = async (req, res) => {
+  try {
+    const userId = String(req.user?._id);
+    const { groupId } = req.params;
+    if (!userId) return res.status(401).json({ message: "Unauthorized" });
+
+    const group = await groupModel.findById(groupId);
+    if (!group) return res.status(404).json({ message: "Group not found" });
+
+    // find member entry (supports plain ObjectId or { user, role })
+    const memberEntry = (group.members || []).find(m =>
+      String(m && m.user ? m.user : m) === userId
+    );
+    if (!memberEntry) return res.status(400).json({ message: "You are not a member" });
+
+    // Block if creator
+    if (group.createdBy && String(group.createdBy) === userId) {
+      return res.status(403).json({ message: "Group creator cannot leave" });
+    }
+
+    // Block if member has admin/owner role
+    const role = memberEntry && memberEntry.role ? String(memberEntry.role).toLowerCase() : null;
+    if (role === "admin" || role === "owner") {
+      return res.status(403).json({ message: "Admins cannot leave the group" });
+    }
+
+    // remove from group.members
+    const pullFilter = (group.members[0] && group.members[0].user) ? { "members.user": req.user._id } : { members: req.user._id };
+    await groupModel.updateOne({ _id: groupId }, { $pull: pullFilter });
+
+    // remove group from user's groups array
+    await User.updateOne({ _id: req.user._id }, { $pull: { groups: groupId } });
+
+    return res.status(200).json({ message: "Left group successfully" });
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ message: "Server error" });
+  }
+};
+
+
 
