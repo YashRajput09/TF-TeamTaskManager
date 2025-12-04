@@ -58,53 +58,53 @@ export default function Signup() {
       return;
     }
     //Send OTP to email
-    try {
-      const { data } = await axiosInstance.post(`/user/forgot-password`, {
-        email: form.email,
-        context: "register",
-      });
-    
-      setIsModalOpen(true);
-      
-    } catch (error) {
-      console.log(error);
-      toast.error(error?.response?.data?.message);
-    }
-
-    // const formData = new FormData();
-    // Object.keys(form).forEach((key) => {
-    //   formData.append(key, form[key]);
-    // });
-
     // try {
-    //   setSubmitting(true);
-    //   const res = await axiosInstance.post("/user/signup", formData, {
-    //     withCredentials: true,
-    //     headers: { "Content-Type": "multipart/form-data" },
+    //   const { data } = await axiosInstance.post(`/user/forgot-password`, {
+    //     email: form.email,
+    //     context: "register",
     //   });
-
-    //   const userData = res.data?.newUser || res.data?.user;
-    //   toast.success("🎉 Account created successfully!");
-
-    //   // ✅ Auto-login
-    //   setIsAuthenticated(true);
-    //   setProfile(userData);
-    //   localStorage.setItem(
-    //     "auth_user",
-    //     JSON.stringify({
-    //       id: userData._id,
-    //       name: userData.name,
-    //       email: userData.email,
-    //     })
-    //   );
-
-    //   navigate("/dashboard");
+    
+    //   setIsModalOpen(true);
+      
     // } catch (error) {
-    //   console.error("Signup error:", error);
-    //   toast.error(error.response?.data?.message || "Signup failed!");
-    // } finally {
-    //   setSubmitting(false);
+    //   console.log(error);
+    //   toast.error(error?.response?.data?.message);
     // }
+
+    const formData = new FormData();
+    Object.keys(form).forEach((key) => {
+      formData.append(key, form[key]);
+    });
+
+    try {
+      setSubmitting(true);
+      const res = await axiosInstance.post("/user/signup", formData, {
+        withCredentials: true,
+        headers: { "Content-Type": "multipart/form-data" },
+      });
+
+      const userData = res.data?.newUser || res.data?.user;
+      toast.success("🎉 Account created successfully!");
+
+      // ✅ Auto-login
+      setIsAuthenticated(true);
+      setProfile(userData);
+      localStorage.setItem(
+        "auth_user",
+        JSON.stringify({
+          id: userData._id,
+          name: userData.name,
+          email: userData.email,
+        })
+      );
+
+      navigate("/dashboard");
+    } catch (error) {
+      console.error("Signup error:", error);
+      toast.error(error.response?.data?.message || "Signup failed!");
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   const handleSignUp = async (response) => {
