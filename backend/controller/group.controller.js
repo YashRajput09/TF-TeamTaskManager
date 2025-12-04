@@ -2,6 +2,7 @@ import { groupModel } from "../models/group.model.js";
 import User from "../models/user_model.js";
 import mongoose from "mongoose";
 import { Task } from "../models/task.modal.js";
+import groupRequestModel from "../models/group.request.model.js";
 
 export const createGroup = async (req, res) => {
   try {
@@ -89,7 +90,9 @@ export const addMember = async (req, res) => {
     }
 
     return res.status(200).json({
-      message: "Member Added successfully",added, groupId
+      message: "Member Added successfully",
+      added,
+      groupId,
     });
   } catch (error) {
     console.log(error);
@@ -128,7 +131,7 @@ export const removeMember = async (req, res) => {
         (group) => group.toString() !== groupId.toString()
       );
     }
-
+    await groupRequestModel.deleteMany({ user: memberId, group: groupId });
     await find_member.save();
     await find_group.save();
 
@@ -197,7 +200,9 @@ export const deleteGroup = async (req, res) => {
   // helper: find task ids referencing group
   const getTaskIdsForGroup = async (groupDoc, session = null) => {
     const groupObjectId = groupDoc._id;
-    const allTasksArray = Array.isArray(groupDoc.allTasks) ? groupDoc.allTasks : [];
+    const allTasksArray = Array.isArray(groupDoc.allTasks)
+      ? groupDoc.allTasks
+      : [];
 
     const q = {
       $or: [
@@ -215,7 +220,10 @@ export const deleteGroup = async (req, res) => {
   try {
     session = await mongoose.startSession();
   } catch (err) {
-    console.warn("Could not start mongoose session (transactions unavailable):", err.message);
+    console.warn(
+      "Could not start mongoose session (transactions unavailable):",
+      err.message
+    );
     session = null;
   }
 
@@ -235,7 +243,9 @@ export const deleteGroup = async (req, res) => {
       if (String(group.createdBy) !== String(userId)) {
         await session.abortTransaction();
         session.endSession();
-        return res.status(403).json({ message: "Not authorized to delete this group" });
+        return res
+          .status(403)
+          .json({ message: "Not authorized to delete this group" });
       }
 
       const taskIds = await getTaskIdsForGroup(group, session);
@@ -250,7 +260,12 @@ export const deleteGroup = async (req, res) => {
       if (taskIds.length > 0) {
         // Remove task refs from users
         await User.updateMany(
-          { $or: [{ assignedTasks: { $in: taskIds } }, { createdTasks: { $in: taskIds } }] },
+          {
+            $or: [
+              { assignedTasks: { $in: taskIds } },
+              { createdTasks: { $in: taskIds } },
+            ],
+          },
           {
             $pull: {
               assignedTasks: { $in: taskIds },
@@ -274,9 +289,17 @@ export const deleteGroup = async (req, res) => {
       await session.commitTransaction();
       session.endSession();
 
-      return res.status(200).json({ message: "Group deleted (transaction)", deletedTaskCount: taskIds.length });
+      return res
+        .status(200)
+        .json({
+          message: "Group deleted (transaction)",
+          deletedTaskCount: taskIds.length,
+        });
     } catch (err) {
-      console.error("Transaction path failed, aborting transaction. Error:", err);
+      console.error(
+        "Transaction path failed, aborting transaction. Error:",
+        err
+      );
       try {
         await session.abortTransaction();
       } catch (e) {
@@ -294,7 +317,9 @@ export const deleteGroup = async (req, res) => {
     if (!group) return res.status(404).json({ message: "Group not found" });
 
     if (String(group.createdBy) !== String(userId)) {
-      return res.status(403).json({ message: "Not authorized to delete this group" });
+      return res
+        .status(403)
+        .json({ message: "Not authorized to delete this group" });
     }
 
     const taskIds = await getTaskIdsForGroup(group, null);
@@ -308,7 +333,12 @@ export const deleteGroup = async (req, res) => {
     if (taskIds.length > 0) {
       // Remove task refs from users
       await User.updateMany(
-        { $or: [{ assignedTasks: { $in: taskIds } }, { createdTasks: { $in: taskIds } }] },
+        {
+          $or: [
+            { assignedTasks: { $in: taskIds } },
+            { createdTasks: { $in: taskIds } },
+          ],
+        },
         {
           $pull: {
             assignedTasks: { $in: taskIds },
@@ -328,13 +358,18 @@ export const deleteGroup = async (req, res) => {
     // Delete group doc
     await groupModel.deleteOne({ _id: group._id });
 
-    return res.status(200).json({ message: "Group deleted (no transaction)", deletedTaskCount: taskIds.length });
+    return res
+      .status(200)
+      .json({
+        message: "Group deleted (no transaction)",
+        deletedTaskCount: taskIds.length,
+      });
   } catch (err) {
     console.error("Non-transactional delete failed:", err);
     return res.status(500).json({
       message: "Server error while deleting group",
       error: err.message,
-      stack: err.stack?.split("\n").slice(0, 5) // send small stack snippet
+      stack: err.stack?.split("\n").slice(0, 5), // send small stack snippet
     });
   }
 };
@@ -356,19 +391,23 @@ export const selfLeaveGroup = async (req, res) => {
       return res.status(403).json({ message: "Group creator cannot leave" });
     }
     // find member entry (supports plain ObjectId or { user, role })
-    const memberEntry = (group.members || []).find(m =>
-      String(m && m.user ? m.user : m) === userId
+    const memberEntry = (group.members || []).find(
+      (m) => String(m && m.user ? m.user : m) === userId
     );
-    if (!memberEntry) return res.status(400).json({ message: "You are not a member" });
+    if (!memberEntry)
+      return res.status(400).json({ message: "You are not a member" });
 
-
-  
     // remove from group.members
-    const pullFilter = (group.members[0] && group.members[0].user) ? { "members.user": req.user._id } : { members: req.user._id };
+    const pullFilter =
+      group.members[0] && group.members[0].user
+        ? { "members.user": req.user._id }
+        : { members: req.user._id };
     await groupModel.updateOne({ _id: groupId }, { $pull: pullFilter });
 
     // remove group from user's groups array
     await User.updateOne({ _id: req.user._id }, { $pull: { groups: groupId } });
+
+    await groupRequestModel.deleteMany({ user: userId, group: groupId });
 
     return res.status(200).json({ message: "Left group successfully" });
   } catch (err) {
@@ -376,6 +415,3 @@ export const selfLeaveGroup = async (req, res) => {
     return res.status(500).json({ message: "Server error" });
   }
 };
-
-
-
