@@ -152,6 +152,7 @@ const Sidebar = ({ isOpen, onClose }) => {
             </div>
 
             <button
+            disabled={loadingLogout}
               onClick={handleLogout}
               className="w-full flex items-center justify-center space-x-2 mt-2 py-2 rounded-lg text-sm font-medium
               text-red-600 hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-900/20 transition-all duration-200"
