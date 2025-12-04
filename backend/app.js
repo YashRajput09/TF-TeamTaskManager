@@ -126,10 +126,15 @@ app.get("/",(req,res)=>{
 // SOCKET.IO SETUP HERE
 // --------------------------
 import { Server } from "socket.io";
-import { servicedirectory_v1 } from 'googleapis';
 
 const io = new Server(server, {
-    cors: { origin: allowedOrigins, credentials: true },
+    cors: { origin: (origin, callback) => {
+        if (!origin || allowedOrigins.includes(origin)) {
+            callback(null, true);
+        } else {
+            callback(new Error('Not allowed by CORS'));
+        }
+    }, credentials: true },
 });
 
 io.on("connection", (socket) => {
