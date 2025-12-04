@@ -34,11 +34,9 @@ export default function Login() {
       await login(form.email, form.password);
 
       // Navigate to dashboard on success
-
-      const { data } = await axiosInstance.post("/user/login", form);
+      // const { data } = await axiosInstance.post("/user/login", form);
       // pretend API call
-     
-      toast.success("loged in successfully");
+      toast.success("logged in successfully");
       await new Promise((r) => setTimeout(r, 600));
       localStorage.setItem("auth_user", JSON.stringify({ email: form.email }));
       navigate("/dashboard");
