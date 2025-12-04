@@ -119,6 +119,11 @@ export const createTask = async (req, res) => {
         message: `You have been assigned a new task: ${newTask.title}`,
         type: "task_assigned",
       });
+
+      // 📨 Telegram notification on task creation + assignment
+      await sendTaskNotification(assignedTo, newTask);
+      // or populatedTask if you want group name etc:
+      // await sendTaskNotification(assignedTo, populatedTask);
     }
 
     const populatedTask = await newTask.populate("group");
