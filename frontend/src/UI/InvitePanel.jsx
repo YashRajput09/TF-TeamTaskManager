@@ -26,19 +26,21 @@ export default function InvitePanel() {
 
   const handleRespond = async (id, action) => {
     try {
-       setLoading(true);
-      const res = await axiosInstance.post(`/user/request/${id}/respond`, { action });
+      setLoading(true);
+      const res = await axiosInstance.post(`/user/request/${id}/respond`, {
+        action,
+      });
 
       toast.success(
         action === "accept"
           ? "You joined the team 🎉"
           : "Invitation rejected ❌"
       );
-      setLoading(false);  
+      setLoading(false);
       // remove from UI
       setInvites((prev) => prev.filter((i) => i._id !== id));
     } catch (err) {
-      setLoading(false);  
+      setLoading(false);
       toast.error("Action failed");
     }
   };
@@ -56,9 +58,9 @@ export default function InvitePanel() {
         <Users className="w-5 h-5 text-blue-500" />
         Team Invitation
       </h2> */}
-
+      {console.log(invites)}
       <div className="space-y-3">
-        {invites.map((inv) => (
+        {invites?.map((inv) => (
           <div
             key={inv._id}
             className="p-3 rounded-lg bg-gray-50 dark:bg-gray-800 border border-gray-200 
@@ -69,7 +71,7 @@ export default function InvitePanel() {
                Team: {inv.group.name}
               </p> */}
               <p className="text-sm text-gray-900 dark:text-white">
-                Team: {inv.group.name}, Invited by: {inv.invitedBy.name}
+                Team: {inv?.group?.name}, Invited by: {inv?.invitedBy?.name}
               </p>
 
               {/* <div className="flex items-center gap-1 text-xs mt-1 text-gray-500">

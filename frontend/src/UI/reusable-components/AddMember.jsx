@@ -26,7 +26,7 @@ export default function AddMemberSearchModal({
     }, 400); // WAIT 400ms after user stops typing
 
     return () => clearTimeout(timeout);
-  }, [query]);
+  }, [query,loadingSend]);
 
   const handleSearch = async () => {
     if (!query.trim()) return;
