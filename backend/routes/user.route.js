@@ -17,7 +17,7 @@ router.post("/forgot-password",sendOtp);
 router.post("/verifyotp",validateOtp);
 router.post("/reset-password",resetPassword);
 
-router.get("/api/search", searchUser);
+router.get("/api/search/:groupId", searchUser);
 
 router.post("/:groupId/invite", isAuthenticated, isAdmin, sendGroupJoinRequest);
 

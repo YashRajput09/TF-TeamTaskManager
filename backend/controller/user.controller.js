@@ -1,17 +1,18 @@
-import userModel from '../models/user_model.js';
-import {groupModel} from '../models/group.model.js';
-import GroupRequest from '../models/group.request.model.js';
-import  mongoose, { trusted } from 'mongoose';
-import cloudinary from '../config/cloudConfig.js';
-import createTokenAndSaveCookie from '../jwt/authenticateToken.js'
-import bcrypt from 'bcryptjs';
-import User from '../models/user_model.js';
-import { pushNotification } from '../utils/sendNotification.js';
-import { generateUserSearchQuery } from '../utils/search.js';
+import userModel from "../models/user_model.js";
+import { groupModel } from "../models/group.model.js";
+import GroupRequest from "../models/group.request.model.js";
+import mongoose, { trusted } from "mongoose";
+import cloudinary from "../config/cloudConfig.js";
+import createTokenAndSaveCookie from "../jwt/authenticateToken.js";
+import bcrypt from "bcryptjs";
+import User from "../models/user_model.js";
+import { pushNotification } from "../utils/sendNotification.js";
+import { generateUserSearchQuery } from "../utils/search.js";
+import groupRequestModel from "../models/group.request.model.js";
 
 // signup user
-export const signUpUser = async(req, res) =>{
-      try {
+export const signUpUser = async (req, res) => {
+  try {
     if (!req.files || Object.keys(req.files).length === 0) {
       return res
         .status(400)
@@ -26,10 +27,7 @@ export const signUpUser = async(req, res) =>{
       });
     }
 
-   
-
-    const { name, email, password, mobileNumber, bio } =
-      req.body;
+    const { name, email, password, mobileNumber, bio } = req.body;
     if (
       !name ||
       !email ||
@@ -73,26 +71,24 @@ export const signUpUser = async(req, res) =>{
     await newUser.save();
 
     if (newUser) {
-      const token = await createTokenAndSaveCookie(newUser._id, res,true);
-      return res
-        .status(200)
-        .json({
-          message: "User registered successfully",
-          newUser,
-          token: token,
-        });
+      const token = await createTokenAndSaveCookie(newUser._id, res, true);
+      return res.status(200).json({
+        message: "User registered successfully",
+        newUser,
+        token: token,
+      });
     }
     // console.log("New response : ", newUser);
   } catch (error) {
     console.log(error);
     res.status(500).json({ message: "Internal server error", error });
   }
-}
+};
 
 // Login User
 export const logInUser = async (req, res) => {
   const { email, password } = req.body;
-  console.log(email,password)
+  console.log(email, password);
   try {
     if (!email || !password) {
       return res.status(400).json({ message: "Please fill required fields" });
@@ -105,9 +101,9 @@ export const logInUser = async (req, res) => {
     if (!user || !isValidPassword) {
       return res.status(400).json({ message: "Invalid email or password" });
     }
-    const token = await createTokenAndSaveCookie(user._id, res,true);
+    const token = await createTokenAndSaveCookie(user._id, res, true);
     // console.log(token);
-req.user = user;
+    req.user = user;
     res.status(200).json({
       message: "User loggedIn successfully",
       user: {
@@ -139,25 +135,24 @@ export const logOutUser = async (req, res) => {
 
 export const getMyProfile = async (req, res) => {
   // console.log(req);
-  const userId=req.user?._id;
+  const userId = req.user?._id;
 
-  const profileDetails = await User.findById(userId).populate('groups');
+  const profileDetails = await User.findById(userId).populate("groups");
   // console.log(profileDetails);
   res.status(200).json(profileDetails);
 };
 
-export const getAllUsers=async (req,res)=>{
+export const getAllUsers = async (req, res) => {
   try {
+    const allusers = await User.find();
 
-    const allusers=await User.find();
-
-    if(!allusers) return res.status(404).json({message:"NO User found"})
+    if (!allusers) return res.status(404).json({ message: "NO User found" });
 
     return res.status(200).json(allusers);
   } catch (error) {
-console.log(error)
+    console.log(error);
   }
-}
+};
 
 // ✅ Update User Profile
 export const updateUserProfile = async (req, res) => {
@@ -190,11 +185,10 @@ export const updateUserProfile = async (req, res) => {
       };
     }
 
-    const updatedUser = await User.findByIdAndUpdate(
-      userId,
-      updatedFields,
-      { new: true, runValidators: true }
-    );
+    const updatedUser = await User.findByIdAndUpdate(userId, updatedFields, {
+      new: true,
+      runValidators: true,
+    });
 
     if (!updatedUser) {
       return res.status(404).json({ message: "User not found" });
@@ -211,20 +205,38 @@ export const updateUserProfile = async (req, res) => {
 };
 
 // search user
-export const searchUser = async(req, res) => {
+export const searchUser = async (req, res) => {
   try {
-  const searchQuery = req.query.search || "";
-  if(searchQuery){
-    const searchUser = generateUserSearchQuery(searchQuery);
-    const allSearchUsers = await userModel.find(searchUser);
-     return res.status(200).json(allSearchUsers);
-  }else {
-    return res.status(400).json({ message: "Search query is required"}); // Handle missing query
-  }
-   } catch (error) {
+    const searchQuery = req.query.search || "";
+    console.log(req.body)
+
+    const {groupId}=req.params;
+
+    console.log(groupId)
+    if (searchQuery) {
+      const searchUser = generateUserSearchQuery(searchQuery);
+      const allSearchUsers = await userModel.find(searchUser).lean();
+
+      // console.log(allSearchUsers);
+      const allUsers = [];
+      for (const i of allSearchUsers) {
+        const user = i?._id;
+        console.log(user);
+        const find_request = await groupRequestModel
+          .findOne({ user: user, group:groupId  })
+          .lean();
+        console.log(find_request?.status)
+        i.status = find_request?.status ? find_request?.status : null;
+
+      }
+      return res.status(200).json(allSearchUsers);
+    } else {
+      return res.status(400).json({ message: "Search query is required" }); // Handle missing query
+    }
+  } catch (error) {
     console.log(error);
   }
-}
+};
 
 // grp join request
 export const sendGroupJoinRequest = async (req, res) => {
@@ -302,9 +314,9 @@ export const respondGroupJoinRequest = async (req, res) => {
       $push: { members: loggedUserId },
     });
 
-    await User.findByIdAndUpdate(loggedUserId,{
-      $push:{groups : reqData?.group._id}
-    })
+    await User.findByIdAndUpdate(loggedUserId, {
+      $push: { groups: reqData?.group._id },
+    });
 
     await pushNotification({
       userId: reqData.invitedBy,
