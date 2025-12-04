@@ -473,8 +473,8 @@ const Teams = () => {
         {/* Members */}
         <Card className="lg:col-span-1">
           <div className="flex gap-2 items-center justify-between mb-4">
-            <h2 className="text-xl font-bold text-gray-900 dark:text-white">
-              Members
+            <h2 className="text-lg font-bold text-gray-900 dark:text-white">
+              Members <span className="font-normal italic">({teamData?.members?.length})</span>
             </h2>
             <div className="relative">
               <Search className="w-4 h-4 absolute right-4 top-2.5 text-gray-500" />
@@ -544,7 +544,7 @@ const Teams = () => {
         <Card className="lg:col-span-2">
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
-              <ListChecks className="w-5 h-5" /> Tasks
+              <ListChecks className="w-5 h-5" /> Tasks <span className="italic font-normal">({visibleTasks?.length})</span>
             </h2>
             <div className="flex items-center gap-3">
               {!isOwner(teamData) && (
@@ -811,7 +811,7 @@ const Teams = () => {
             <button
               onClick={() => setViewSelection("tasks")}
               className={`
-                flex-1 px-2 py-1 rounded-full text-lg font-medium transition-all
+                flex-1 flex justify-center items-center gap-1 px-2 py-1 rounded-full text-lg font-medium transition-all
                 ${
                   viewSelection === "tasks"
                     ? "gradient-primary bg-blue-900/40 text-blue-500 shadow-sm"
@@ -819,7 +819,7 @@ const Teams = () => {
                 }
               `}
             >
-              Tasks
+              <ListChecks className="w-4 h-4" /> Tasks <span className="italic font-normal">({visibleTasks?.length})</span> 
               {/* ({filteredTasks.length}) */}
             </button>
             <button
@@ -833,8 +833,7 @@ const Teams = () => {
                 }
               `}
             >
-              Members
-              {/* ({filteredCreatedTasks.length}) */}
+              Members <span className="italic font-normal">({teamData?.members?.length})</span> 
             </button>
           </div>
         </Card>
