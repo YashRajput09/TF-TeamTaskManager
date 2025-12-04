@@ -6,7 +6,7 @@ import { io } from "socket.io-client";
 import { useAuth } from "../context/AuthProvider";
 
 const socket = io(import.meta.env.VITE_BACKEND_SOCKET_URL || "http://localhost:3000", {
-  // transports: ["websocket"],
+  transports: ["websocket"],
   withCredentials: true,
 });
 
