@@ -157,7 +157,7 @@ const Sidebar = ({ isOpen, onClose }) => {
             <button
             disabled={loadingLogout}
               onClick={handleLogout}
-              className="w-full flex items-center justify-center space-x-2 mt-2 py-2 rounded-lg text-sm font-medium
+              className="w-full flex items-center gap-2 justify-center space-x-2 mt-2 py-2 rounded-lg text-sm font-medium
               text-red-600 hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-900/20 transition-all duration-200"
             >
               {!loadingLogout ? (
@@ -168,7 +168,7 @@ const Sidebar = ({ isOpen, onClose }) => {
               ) : (
                 <>
                   <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                  Logouting...
+                  Loging Out...
                 </>
               )}
             </button>
