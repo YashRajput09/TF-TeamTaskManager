@@ -825,7 +825,7 @@ const Teams = () => {
             <button
               onClick={() => setViewSelection("members")}
               className={`
-                flex-1 px-4 py-2 rounded-full text-sm font-medium transition-all
+                flex-1 flex justify-center gap-1 items-center px-4 py-2 rounded-full text-sm font-medium transition-all
                 ${
                   viewSelection === "members"
                     ? "gradient-primary bg-blue-900/40 text-blue-500 shadow-sm"
@@ -833,7 +833,7 @@ const Teams = () => {
                 }
               `}
             >
-              Members <span className="italic font-normal">({teamData?.members?.length})</span> 
+             <User className="w-4 h-4" /> Members <span className="italic font-normal">({teamData?.members?.length})</span> 
             </button>
           </div>
         </Card>
