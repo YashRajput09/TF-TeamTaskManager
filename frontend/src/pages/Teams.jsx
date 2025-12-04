@@ -598,6 +598,33 @@ const Teams = () => {
                 </p>
               )}
             </ul>
+            <div
+              className="absolute right-4 bottom-4 z-20 bg-red-900/60 hover:bg-red-800/40 text-red-500 rounded-lg shadow-lg py-1 "
+              onClick={(e) => e.stopPropagation()}
+            >
+              <DeleteButton
+                onDelete={async () => {
+                  await axiosInstance.delete(
+                   `group/${teamId}/self-leave`
+                  );
+                  toast.success("Group leaved Successfully");
+                  navigate("/dashboard");
+                
+                }}
+                title="Leave Team"
+                message="Are you sure you want to leave this team? All tasks and data associated with this group will be permanently removed."
+                itemName={teamData?.name}
+                confirmText="Leave"
+                variant="icon"
+                size="sm"
+                className="w-full justify-start px-4  text-left text-sm text-red-400 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-none"
+              />
+            </div>
+            {/* <button onClick={()=>{
+
+              }} className=" px-4 py-0.5  ml-auto rounded-md bg-red-900/70 hover:bg-red-800/50 text-red-500">
+                Leave Team
+              </button> */}
           </Card>
 
           {/* Tasks */}

@@ -13,6 +13,7 @@ export default function AddMemberSearchModal({
   const [status, setStatus] = useState(""); // none | member | invited
   const [loading, setLoading] = useState(false);
   const [loadingSend,setLoadingSend]=useState(false)
+  const [requestStatus,setRequestStatus]=useState('');
 
   // 🔍 LIVE SEARCH WHEN USER TYPES
   useEffect(() => {
@@ -33,7 +34,8 @@ export default function AddMemberSearchModal({
     setLoading(true);
 
     try {
-      const res = await axiosInstance.get(`/user/api/search?search=${query}`);
+      console.log(groupId)
+      const res = await axiosInstance.get(`/user/api/search/${groupId}?search=${query}`);
       console.log("Search result:", res.data);
 
       const foundUser = Array.isArray(res.data) ? res.data : [];
@@ -165,8 +167,12 @@ export default function AddMemberSearchModal({
                     {alreadyMember ? (
                       <p className="text-green-600 font-extrabold mr-4">
                          ✓
+                      </p>             
+                    ) : user?.status==='pending' ? (
+                      <p>
+                        Pending
                       </p>
-                    ) : (
+                      ) : (
                       <button
                         onClick={() => sendInvite(user?._id)}
                         className="px-4 py-2 text-white rounded-xl flex items-center gap-2"
