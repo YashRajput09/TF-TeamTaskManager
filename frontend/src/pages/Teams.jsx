@@ -375,7 +375,7 @@ const Teams = () => {
         <div className="flex items-center space-x-3">
           {!selectedTeam && (
             <button
-              onClick={() => navigate("/teams")}
+              onClick={() => navigate(-1)}
               className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700"
               title="Back to all teams"
             >
