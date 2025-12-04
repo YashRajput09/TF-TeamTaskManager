@@ -9,10 +9,10 @@ import {
   Settings,
   X,
   ClipboardList, // Assigned Tasks
-  TrendingUp,    // AI Automation
+  TrendingUp, // AI Automation
   Calendar as CalendarIcon, // Calendar page (alias)
   LogOut,
-  CheckSquare as BrandIcon
+  CheckSquare as BrandIcon,
 } from "lucide-react";
 import axiosInstance from "../pages/utility/axiosInstance";
 import toast from "react-hot-toast";
@@ -23,6 +23,7 @@ const Sidebar = ({ isOpen, onClose }) => {
   const location = useLocation();
   const navigate = useNavigate();
   const [profileData, setProfileData] = useState(null);
+  const [loadingLogout, setLoadingLogout] = useState(false);
 
   const menuItems = [
     { path: "/dashboard", icon: LayoutDashboard, label: "Dashboard" },
@@ -130,14 +131,14 @@ const Sidebar = ({ isOpen, onClose }) => {
               <div className="w-10 h-10 rounded-lg gradient-primary flex items-center justify-center shadow">
                 <span className="text-white font-semibold">
                   {profileData?.profileImage?.url ? (
-      <img
-        src={profileData.profileImage.url}
-        alt={profileData?.name || "User"}
-        className="w-full h-full object-cover  rounded-full"
-      />
-    ) : (
-      <span>{(profileData?.name?.[0] || "U").toUpperCase()}</span>
-    )}
+                    <img
+                      src={profileData.profileImage.url}
+                      alt={profileData?.name || "User"}
+                      className="w-full h-full object-cover  rounded-full"
+                    />
+                  ) : (
+                    <span>{(profileData?.name?.[0] || "U").toUpperCase()}</span>
+                  )}
                 </span>
               </div>
               <div className="flex-1 min-w-0">
@@ -155,8 +156,17 @@ const Sidebar = ({ isOpen, onClose }) => {
               className="w-full flex items-center justify-center space-x-2 mt-2 py-2 rounded-lg text-sm font-medium
               text-red-600 hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-900/20 transition-all duration-200"
             >
-              <LogOut className="w-4 h-4" />
-              <span>Logout</span>
+              {!loadingLogout ? (
+                <>
+                  <LogOut className="w-4 h-4" />
+                  <span>Logout</span>
+                </>
+              ) : (
+                <>
+                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                  Logouting...
+                </>
+              )}
             </button>
           </div>
         </div>
