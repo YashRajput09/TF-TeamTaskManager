@@ -15,6 +15,8 @@ import { IoCheckmarkCircle, IoCheckmarkDoneSharp } from "react-icons/io5";
 import { useAuth } from "../context/AuthProvider";
 import toast from "react-hot-toast";
 import { MoreVertical, Edit2, Trash2 } from "lucide-react";
+import { IoIosArrowDown, IoIosArrowDropdown } from "react-icons/io";
+
 
 // 🧠 Utility: Format and colorize due date
 const formatDueDate = (dateString) => {
@@ -91,6 +93,7 @@ export default function TaskDetail() {
   const [processingAction, setProcessingAction] = useState(false);
   // Add state for managing dropdown
   const [openDropdown, setOpenDropdown] = useState(null);
+  const [showMore, setShowMore] = useState(false);
 
   // helper to know if current user is task creator (admin for this task)
   const isTaskAdmin =
@@ -211,7 +214,7 @@ export default function TaskDetail() {
       );
 
       // alert("Comment added");
-     
+
       setComments((prev) => [
         {
           _id: `${Date.now()}`,
@@ -353,9 +356,9 @@ export default function TaskDetail() {
           newText: editText,
         }
       );
-console.log(commentId)
+      console.log(commentId);
       console.log(data);
-      const updatedComment=data?.updated_comment
+      const updatedComment = data?.updated_comment;
       setComments((prev) =>
         prev.map((comment) =>
           comment._id === commentId ? updatedComment : comment
@@ -365,7 +368,7 @@ console.log(commentId)
       console.log(error);
     }
   };
-console.log(comments)
+  console.log(comments);
   const isChanged = (commentText) => commentText !== editText?.trim();
   if (!task) {
     return (
@@ -496,13 +499,27 @@ console.log(comments)
       </div>
 
       {/* Description */}
-      <Card className="">
+      <Card className="py-2">
         <h2 className="text-lg font-bold text-gray-900 dark:text-white">
           Description
         </h2>
-        <p className="mt-2 text-gray-700 dark:text-gray-300">
+        <p
+          className={`${
+            showMore ? "" : " line-clamp-2"
+          }  text-gray-700 dark:text-gray-300 transition-all duration-300`}
+        >
           {task.description || "No description provided."}
         </p>
+        <button
+          onClick={() => setShowMore(!showMore)}
+          className="flex  text-orange-700 px-2 py-1 rounded-md font-semibold hover:underline items-center text-sm gap-[2px]  ml-auto mr-4"
+        >
+          <IoIosArrowDown
+            className={`${showMore ? "rotate-180" : ""} duration-500 `}
+            size={20}
+          />
+          {showMore ? "Show Less" : "Show More"}{" "}
+        </button>
       </Card>
 
       {/* Content: two-column layout; right column has two rows (Admin files, Member files). Left column = Comments */}
@@ -550,7 +567,9 @@ console.log(comments)
                 <div
                   key={c?._id}
                   className={`${
-                    c?.commentedBy?._id === profile._id ? "justify-end" : "justify-start"
+                    c?.commentedBy?._id === profile._id
+                      ? "justify-end"
+                      : "justify-start"
                   } flex relative group`}
                 >
                   <div
@@ -776,11 +795,7 @@ console.log(comments)
 
           {/* Member Files */}
           <Card className="p-6">
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-lg font-bold text-gray-900 dark:text-white flex items-center gap-2">
-                <Paperclip className="w-5 h-5" /> Files shared by Members
-              </h2>
-
+            <div className="flex flex-col lg:flex-row items-center justify-between mb-4">
               {/* Members can upload to members files; admin cannot */}
               {/* {viewerRole !== "admin" && (
                 <div className="flex items-center gap-2">
@@ -805,10 +820,8 @@ console.log(comments)
               )} */}
               {/* Member submission area - visible to members (not admin) */}
               {!isTaskAdmin && (
-                <div className="mb-4 border rounded p-3 bg-gray-50 dark:bg-gray-800">
-                  <h3 className="text-sm font-semibold mb-2">
-                    Submit your work
-                  </h3>
+                <div className="order-1 md:order-2 mb-2 border rounded p-2 bg-gray-50 dark:bg-gray-800">
+                  <h3 className="text-sm font-semibold ">Submit your work</h3>
 
                   <label className="block text-xs text-gray-500 mb-2">
                     Attach files
@@ -837,7 +850,7 @@ console.log(comments)
                     placeholder="Optional message (notes for admin)"
                     value={submissionNote}
                     onChange={(e) => setSubmissionNote(e.target.value)}
-                    className="w-full rounded-md bg-white dark:bg-gray-700/50 px-3 py-2 mb-2 text-sm"
+                    className="w-full rounded-md bg-white dark:bg-gray-700/50 px-2 py-2 mb-1 text-sm"
                     rows={3}
                   />
 
@@ -862,6 +875,9 @@ console.log(comments)
                   </div>
                 </div>
               )}
+              <h2 className="text-lg order-2 md:order-1 justify-start font-bold text-gray-900 dark:text-white flex items-center gap-2">
+                <Paperclip className="w-5 h-5" /> Files shared by Members
+              </h2>
             </div>
 
             {memberFiles.length === 0 ? (
