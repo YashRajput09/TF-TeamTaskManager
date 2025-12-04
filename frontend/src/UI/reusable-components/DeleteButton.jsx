@@ -1,6 +1,7 @@
 // components/DeleteButton.jsx
 import React, { useState } from "react";
 import { Trash2, Loader2, AlertTriangle } from "lucide-react";
+import toast from "react-hot-toast";
 
 const DeleteButton = ({
   onDelete,
@@ -22,6 +23,7 @@ const DeleteButton = ({
       setShowModal(false);
     } catch (error) {
       console.error("Delete error:", error);
+      toast.error(error?.response?.data?.message)
     } finally {
       setLoading(false);
     }
@@ -55,9 +57,9 @@ const DeleteButton = ({
         className={`flex items-center gap-1.5 rounded-md font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${sizeClasses[size]} ${variantClasses[variant]} ${className}`}
         type="button"
       >
-        <Trash2 className={iconSizeClasses[size]} />
+    {  title==='Delete Group' &&  <Trash2 className={iconSizeClasses[size]} />}
         {variant !== "icon" && <span>Delete</span>}
-        Delete Group
+       {title} 
       </button>
 
       {/* Delete Confirmation Modal */}
@@ -110,7 +112,7 @@ const DeleteButton = ({
                 {loading ? (
                   <>
                     <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                    <span className="text-xs sm:text-sm">Deleting...</span>
+                    <span className="text-xs sm:text-sm">{confirmText}ing...</span>
                   </>
                 ) : (
                   confirmText
