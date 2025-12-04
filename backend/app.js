@@ -69,13 +69,14 @@ app.use(cors({
 );
 
 
-// if (process.env.NODE_ENV === "production") {
-//   bot.launch().then(() => console.log("🤖 Telegram bot running in production"));
-// } else {
-//   console.log("⚠ Telegram bot disabled in development to avoid 409 conflict");
-// }
+if (process.env.NODE_ENV === "production") {
+  bot.launch().then(() => console.log("🤖 Telegram bot running in production"));
+} else {
+  console.log("⚠ Telegram bot disabled in development to avoid 409 conflict");
+}
 
-bot.launch().then(() => console.log("🤖 Telegram bot running in production"));
+// bot.launch().then(() => console.log("🤖 Telegram bot running in production"));
+
 // Graceful shutdown
 process.once('SIGINT', () => bot.stop('SIGINT'));
 process.once('SIGTERM', () => bot.stop('SIGTERM'));
