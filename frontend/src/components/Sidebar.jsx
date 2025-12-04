@@ -82,12 +82,13 @@ const Sidebar = ({ isOpen, onClose }) => {
           {/* Header */}
           <div className="flex items-center justify-between p-6 border-b border-gray-200/50 dark:border-gray-700/50">
             <div className="flex items-center space-x-2">
-              <div className="w-9 h-9 rounded-lg gradient-primary flex items-center justify-center shadow">
+              <div className="w-10   rounded-lg gradient-primary flex items-center justify-center shadow">
                 {/* <BrandIcon className="w-5 h-5 text-white" /> */}
-                <img src="TaskManagerLogo.png" alt="TeamTaskManager" srcset="" />
+                {/* <img src="TaskManagerLogo.png" alt="TeamTaskManager" srcset="" /> */}
+                <img src="MainLogo3.png" alt="TeamTaskManager" srcset="" />
               </div>
-              <span className="text-xl font-bold bg-linear-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-                TeamTask
+              <span className="text-xl font-bold bg-linear-to-r from-cyan-600 to-cyan-500 bg-clip-text text-transparent">
+                TaskManager
               </span>
             </div>
             <button
