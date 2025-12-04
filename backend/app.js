@@ -126,6 +126,7 @@ app.get("/",(req,res)=>{
 // SOCKET.IO SETUP HERE
 // --------------------------
 import { Server } from "socket.io";
+import { servicedirectory_v1 } from 'googleapis';
 
 const io = new Server(server, {
     cors: { origin: allowedOrigins, credentials: true },
@@ -173,7 +174,7 @@ async function dbConnection() {
         //telegram reminder runner 
         startReminderScheduler();
         
-        app.listen(port, () => {
+        server.listen(port, () => {
             console.log(`🚀 Server running on port: ${port}`);
         });
         
