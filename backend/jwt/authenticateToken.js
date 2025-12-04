@@ -9,12 +9,21 @@ const createTokenAndSaveCookies = async (userId, res, rememberMe = false) => {
     });
     
     const isProduction = process.env.NODE_ENV === "production";
+    // console.log(isProduction);
 
     // FIXED: For localhost development, use this configuration:
+    // res.cookie("jwttoken", token, {
+    //     httpOnly:  isProduction ? true : false, // Protect from XSS attacks
+    //     sameSite: isProduction ? "None" : "Lax", // Changed from 'none' to 'lax' for localhost
+    //     secure: isProduction ? true : false,   // false for localhost (HTTP)
+    //     maxAge: rememberMe ? 7 * 24 * 60 * 60 * 1000 : 7 * 24 * 60 * 60 * 1000, // 7 days or 1 hour
+    //     path: '/',
+    // });
+    
     res.cookie("jwttoken", token, {
-        httpOnly:  isProduction ? true : false, // Protect from XSS attacks
-        sameSite: isProduction ? "None" : "Lax", // Changed from 'none' to 'lax' for localhost
-        secure: isProduction ? true : false,   // false for localhost (HTTP)
+        httpOnly: true, // Protect from XSS attacks
+        sameSite: "None", // Changed from 'none' to 'lax' for localhost
+        secure: true,   // false for localhost (HTTP)
         maxAge: rememberMe ? 7 * 24 * 60 * 60 * 1000 : 7 * 24 * 60 * 60 * 1000, // 7 days or 1 hour
         path: '/',
     });
