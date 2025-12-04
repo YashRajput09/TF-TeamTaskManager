@@ -468,88 +468,7 @@ const Teams = () => {
       </div>
 
       {/* Content */}
-      {selectedTeam ? (
-        // All Teams Grid (overview)
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {teams.map((team) => (
-            <Card key={team.id} hover className="cursor-pointer">
-              {/* ✅ MOVED onClick TO INNER WRAPPER */}
-              <div onClick={() => handleSelect(team.id)} className="space-y-4">
-                {/* Team Header */}
-                <div className="flex items-start justify-between">
-                  <div className="flex items-center space-x-3">
-                    <div className={`w-12 h-12 ${team.color} rounded-xl`} />
-                    <div>
-                      <h3 className="text-lg font-bold text-gray-900 dark:text-white">
-                        {team.name}
-                      </h3>
-                      <p className="text-sm text-gray-600 dark:text-gray-400">
-                        {team.members.length} members
-                      </p>
-                    </div>
-                  </div>
-                  <button
-                    className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
-                    onClick={(e) => e.stopPropagation()} // prevent opening detail when clicking kebab
-                  >
-                    <MoreVertical className="w-5 h-5 text-gray-600 dark:text-gray-400" />
-                  </button>
-                </div>
-
-                {/* Team Stats */}
-                <div className="grid grid-cols-3 gap-4">
-                  <div className="text-center p-3 rounded-lg bg-gray-50 dark:bg-gray-700/50">
-                    <Clock className="w-5 h-5 mx-auto mb-1 text-blue-500" />
-                    <p className="text-lg font-bold text-gray-900 dark:text-white">
-                      {team.activeTasks}
-                    </p>
-                    <p className="text-xs text-gray-600 dark:text-gray-400">
-                      Active
-                    </p>
-                  </div>
-                  <div className="text-center p-3 rounded-lg bg-gray-50 dark:bg-gray-700/50">
-                    <CheckCircle className="w-5 h-5 mx-auto mb-1 text-green-500" />
-                    <p className="text-lg font-bold text-gray-900 dark:text-white">
-                      {team.completedTasks}
-                    </p>
-                    <p className="text-xs text-gray-600 dark:text-gray-400">
-                      Completed
-                    </p>
-                  </div>
-                  <div className="text-center p-3 rounded-lg bg-gray-50 dark:bg-gray-700/50">
-                    <TrendingUp className="w-5 h-5 mx-auto mb-1 text-purple-500" />
-                    <p className="text-lg font-bold text-gray-900 dark:text-white">
-                      {team.progress}%
-                    </p>
-                    <p className="text-xs text-gray-600 dark:text-gray-400">
-                      Progress
-                    </p>
-                  </div>
-                </div>
-
-                {/* Progress Bar */}
-                <div>
-                  <div className="flex items-center justify-between text-sm mb-2">
-                    <span className="text-gray-600 dark:text-gray-400">
-                      Overall Progress
-                    </span>
-                    <span className="font-semibold text-gray-900 dark:text-white">
-                      {team.progress}%
-                    </span>
-                  </div>
-                  <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2 overflow-hidden">
-                    <div
-                      className={`h-full ${team.color} transition-all duration-500`}
-                      style={{ width: `${team.progress}%` }}
-                    />
-                  </div>
-                </div>
-              </div>
-            </Card>
-          ))}
-        </div>
-      ) : (
-        // Team Detail
+    
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Members */}
           <Card className="lg:col-span-1">
@@ -893,7 +812,7 @@ const Teams = () => {
             </div>
           </Card>
         </div>
-      )}
+
 
       {/* Simple inline modals */}
       {showCreate && (
