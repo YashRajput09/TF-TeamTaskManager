@@ -55,6 +55,7 @@ const Sidebar = ({ isOpen, onClose }) => {
   }, []);
 
   const handleLogout = async () => {
+    setLoadingLogout(true)
     try {
       await axiosInstance.post("/user/logout", {}, { withCredentials: true });
       localStorage.removeItem("auth_user");
@@ -65,6 +66,8 @@ const Sidebar = ({ isOpen, onClose }) => {
     } catch (error) {
       console.error("Logout failed:", error);
       toast.error("Logout failed. Try again!");
+    }finally{
+      setLoadingLogout(false)
     }
   };
 

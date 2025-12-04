@@ -12,7 +12,6 @@ export const AuthProvider = ({ children }) => {
   // Fetch user profile using cookie-based authentication
   const fetchProfile = async () => {
     try {
-      
       const response = await axiosInstance.get("/user/myprofile", {
         withCredentials: true,
         headers: { "Content-Type": "application/json" },
@@ -55,6 +54,16 @@ export const AuthProvider = ({ children }) => {
         }
       );
 
+      const data = response.data;
+
+      // ⭐ 1) SAVE TOKEN IMMEDIATELY (if backend returns a token)
+      if (data.token) {
+        localStorage.setItem("auth_token", data.token);
+        axiosInstance.defaults.headers.common[
+          "Authorization"
+        ] = `Bearer ${data.token}`;
+      }
+
       // Fetch user profile after successful login
       await fetchProfile();
       return response.data;
@@ -67,11 +76,7 @@ export const AuthProvider = ({ children }) => {
   // Logout user and clear context
   const logout = async () => {
     try {
-      await axiosInstance.post(
-        "/user/logout",
-        {},
-        { withCredentials: true }
-      );
+      await axiosInstance.post("/user/logout", {}, { withCredentials: true });
     } catch (error) {
       console.error("Logout error:", error);
     } finally {
@@ -84,14 +89,10 @@ export const AuthProvider = ({ children }) => {
   // Signup new user and refresh profile
   const signup = async (userData) => {
     try {
-      const response = await axiosInstance.post(
-        "/user/signup",
-        userData,
-        {
-          withCredentials: true,
-          headers: { "Content-Type": "multipart/form-data" },
-        }
-      );
+      const response = await axiosInstance.post("/user/signup", userData, {
+        withCredentials: true,
+        headers: { "Content-Type": "multipart/form-data" },
+      });
 
       // Fetch user profile after signup
       await fetchProfile();
