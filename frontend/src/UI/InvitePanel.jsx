@@ -40,8 +40,9 @@ export default function InvitePanel() {
       // remove from UI
       setInvites((prev) => prev.filter((i) => i._id !== id));
     } catch (err) {
+      console.log(err)
       setLoading(false);
-      toast.error("Action failed");
+      toast.error(err?.response?.data?.message||"Action failed");
     }
   };
 

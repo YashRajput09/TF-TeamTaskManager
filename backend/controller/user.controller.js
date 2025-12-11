@@ -208,11 +208,11 @@ export const updateUserProfile = async (req, res) => {
 export const searchUser = async (req, res) => {
   try {
     const searchQuery = req.query.search || "";
-    console.log(req.body)
+    console.log(req.body);
 
-    const {groupId}=req.params;
+    const { groupId } = req.params;
 
-    console.log(groupId)
+    console.log(groupId);
     if (searchQuery) {
       const searchUser = generateUserSearchQuery(searchQuery);
       const allSearchUsers = await userModel.find(searchUser).lean();
@@ -223,11 +223,10 @@ export const searchUser = async (req, res) => {
         const user = i?._id;
         console.log(user);
         const find_request = await groupRequestModel
-          .findOne({ user: user, group:groupId  })
+          .findOne({ user: user, group: groupId })
           .lean();
-        console.log(find_request?.status)
+        console.log(find_request?.status);
         i.status = find_request?.status ? find_request?.status : null;
-
       }
       return res.status(200).json(allSearchUsers);
     } else {
@@ -252,8 +251,17 @@ export const sendGroupJoinRequest = async (req, res) => {
     if (group.createdBy.toString() !== adminId.toString())
       return res.status(403).json({ message: "Only admin can invite" });
 
+    //check if already requested
+    const alreadyRequest = GroupRequest.findOne({
+      group: groupId,
+      user: userId,
+    });
+    console.log(alreadyRequest)
+    if (alreadyRequest) return res.status(400).json({ message: "Already Requested" });
+
     // Check if user already in group
-    if (group.members.includes(userId))
+    console.log(group.members);
+    if (group?.members?.includes(userId))
       return res.status(400).json({ message: "User already in group" });
 
     // Create join request
@@ -291,6 +299,15 @@ export const respondGroupJoinRequest = async (req, res) => {
     if (reqData.user.toString() !== loggedUserId.toString())
       return res.status(403).json({ message: "Not allowed" });
 
+    console.log(reqData?.group?.members);
+    if (
+      reqData?.group?.members?.some(
+        (m) => m.toString() === loggedUserId.toString()
+      )
+    )
+      return res.status(400).json({ message: "You already in group" });
+
+    console.log("object");
     if (action === "reject") {
       reqData.status = "rejected";
       await reqData.save();
