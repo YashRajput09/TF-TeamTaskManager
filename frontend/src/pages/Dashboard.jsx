@@ -12,6 +12,7 @@ import {
 import axiosInstance from "./utility/axiosInstance";
 
 import InvitePanel from "../UI/InvitePanel";
+import toast from "react-hot-toast";
 
 const Dashboard = () => {
   const navigate = useNavigate();
@@ -20,7 +21,8 @@ const Dashboard = () => {
   const [userAssignedTask, setUserAssignedTask] = useState([]);
   const [userCreatedTask, setUserCreatedTask] = useState([]);
   const [userGroups, setUserGroups] = useState([]);
-  const [fetch,setFetch]=useState(false);
+  const [fetch, setFetch] = useState(false);
+  const [loadAccept, setLoadAccept] = useState(false);
 
   useEffect(() => {
     const allUserTask = async () => {
@@ -147,6 +149,7 @@ const Dashboard = () => {
 
   const handleAccept = async (task_id) => {
     try {
+      setLoadAccept(true);
       const { data } = await axiosInstance.put(
         `/task/update-status/${task_id}`,
         { status: "In-progress" }
@@ -154,8 +157,11 @@ const Dashboard = () => {
 
       // alert("task accepted ");
       toast.success("Accepted");
+      setFetch(!fetch);
     } catch (error) {
       console.log(error);
+    } finally {
+      setLoadAccept(false);
     }
   };
 
@@ -179,7 +185,7 @@ const Dashboard = () => {
         </div>
       </div>
       <div className="space-y-1">
-        <InvitePanel onAccept={()=>setFetch(!fetch)}/>
+        <InvitePanel onAccept={() => setFetch(!fetch)} />
         {/* rest of your page */}
       </div>
 
@@ -275,12 +281,21 @@ const Dashboard = () => {
                   <div className="flex items-center space-x-2 ml-4">
                     {task.status === "Assigned" && (
                       <button
+                      disabled={loadAccept}
                         onClick={() => {
                           handleAccept(task?.id);
                         }}
                         className="px-2 py-1 rounded-md text-xs hover:opacity-60 font-medium  text-green-700  dark:text-green-400"
                       >
-                        {"Accept"}
+                        {console.log(loadAccept)}
+                        {loadAccept ? (
+                          <>
+                            <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                          </>
+                        ) : (
+                          "Accept"
+                        )}
+                        
                       </button>
                     )}
                     <span className="px-2 py-1 rounded-md text-xs font-medium bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400">
