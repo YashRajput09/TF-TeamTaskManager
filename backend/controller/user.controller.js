@@ -252,24 +252,32 @@ export const sendGroupJoinRequest = async (req, res) => {
       return res.status(403).json({ message: "Only admin can invite" });
 
     //check if already requested
-    const alreadyRequest = GroupRequest.findOne({
+    const alreadyRequest = await GroupRequest.findOne({
       group: groupId,
       user: userId,
     });
-    console.log(alreadyRequest)
-    if (alreadyRequest) return res.status(400).json({ message: "Already Requested" });
+    console.log(alreadyRequest);
+    if (alreadyRequest?.status === "pending")
+      return res.status(400).json({ message: "Already Requested" });
 
     // Check if user already in group
     console.log(group.members);
     if (group?.members?.includes(userId))
       return res.status(400).json({ message: "User already in group" });
 
+    let request;
     // Create join request
-    const request = await GroupRequest.create({
-      group: groupId,
-      user: userId,
-      invitedBy: adminId,
-    });
+    if (!alreadyRequest) {
+       request = await GroupRequest.create({
+        group: groupId,
+        user: userId,
+        invitedBy: adminId,
+      });
+    }else{
+      alreadyRequest.status='pending'
+      request=alreadyRequest;
+      await alreadyRequest.save();
+    }
 
     // Send Notification
     await pushNotification({
