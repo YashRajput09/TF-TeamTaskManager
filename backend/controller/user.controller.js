@@ -268,15 +268,25 @@ export const sendGroupJoinRequest = async (req, res) => {
     let request;
     // Create join request
     if (!alreadyRequest) {
-       request = await GroupRequest.create({
+      request = await GroupRequest.create({
         group: groupId,
         user: userId,
         invitedBy: adminId,
+        history: {
+          status: "Invitation Created",
+        },
       });
-    }else{
-      alreadyRequest.status='pending'
-      request=alreadyRequest;
-      await alreadyRequest.save();
+    } else {
+      alreadyRequest.status = "pending";
+      if (!alreadyRequest.history) {
+        alreadyRequest.history = [];
+      }
+      alreadyRequest.history.push({
+        date: Date.now(),
+        status: "invitation Send",
+      });
+      request = alreadyRequest;
+      await alreadyRequest.save({ strict: false });
     }
 
     // Send Notification
@@ -315,9 +325,15 @@ export const respondGroupJoinRequest = async (req, res) => {
     )
       return res.status(400).json({ message: "You already in group" });
 
-    console.log("object");
+    if (!reqData.history) {
+      reqData.history = [];
+    }
     if (action === "reject") {
       reqData.status = "rejected";
+      reqData?.history?.push({
+        date: Date.now(),
+        status: "Invitatin Rejected",
+      });
       await reqData.save();
 
       await pushNotification({
@@ -332,6 +348,10 @@ export const respondGroupJoinRequest = async (req, res) => {
 
     // ACCEPT
     reqData.status = "accepted";
+    reqData?.history?.push({
+      date: Date.now(),
+      status: "Invitatin Accepted",
+    });
     await reqData.save();
     console.log("reqData: ", reqData);
 

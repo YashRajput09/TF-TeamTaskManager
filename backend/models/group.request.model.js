@@ -2,14 +2,31 @@ import mongoose from "mongoose";
 
 const groupRequestSchema = new mongoose.Schema(
   {
-    group: { type: mongoose.Schema.Types.ObjectId, ref: "Group", required: true },
+    group: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Group",
+      required: true,
+    },
     user: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
-    invitedBy: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
+    invitedBy: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      required: true,
+    },
     status: {
       type: String,
       enum: ["pending", "accepted", "rejected"],
       default: "pending",
     },
+    history: [
+      {
+        date: {
+          type: Date,
+          default: Date.now(),
+        },
+        status: String,
+      },
+    ],
   },
   { timestamps: true }
 );
