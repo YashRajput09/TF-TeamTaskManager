@@ -20,6 +20,7 @@ const Dashboard = () => {
   const [userAssignedTask, setUserAssignedTask] = useState([]);
   const [userCreatedTask, setUserCreatedTask] = useState([]);
   const [userGroups, setUserGroups] = useState([]);
+  const [fetch,setFetch]=useState(false);
 
   useEffect(() => {
     const allUserTask = async () => {
@@ -41,7 +42,7 @@ const Dashboard = () => {
     // Call both in parallel
     allUserTask();
     getUserGroups();
-  }, []);
+  }, [fetch]);
 
   // Stats
   const stats = [
@@ -178,7 +179,7 @@ const Dashboard = () => {
         </div>
       </div>
       <div className="space-y-1">
-        <InvitePanel />
+        <InvitePanel onAccept={()=>setFetch(!fetch)}/>
         {/* rest of your page */}
       </div>
 

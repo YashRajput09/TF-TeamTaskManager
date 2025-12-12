@@ -4,7 +4,7 @@ import { Users, Check, X, Clock } from "lucide-react";
 import toast from "react-hot-toast";
 import axiosInstance from "../pages/utility/axiosInstance.js";
 
-export default function InvitePanel() {
+export default function InvitePanel({onAccept}) {
   const [invites, setInvites] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -37,6 +37,10 @@ export default function InvitePanel() {
           : "Invitation rejected ❌"
       );
       setLoading(false);
+      if(onAccept){
+        onAccept();
+      }
+      
       // remove from UI
       setInvites((prev) => prev.filter((i) => i._id !== id));
     } catch (err) {
