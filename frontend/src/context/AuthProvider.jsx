@@ -55,7 +55,8 @@ export const AuthProvider = ({ children }) => {
       );
 
       const data = response.data;
-
+      setIsAuthenticated(true);
+      fetchProfile();
       // ⭐ 1) SAVE TOKEN IMMEDIATELY (if backend returns a token)
       if (data.token) {
         localStorage.setItem("auth_token", data.token);
