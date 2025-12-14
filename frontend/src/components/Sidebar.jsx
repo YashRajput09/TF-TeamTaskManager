@@ -43,9 +43,7 @@ const Sidebar = ({ isOpen, onClose }) => {
   useEffect(() => {
     const fetchProfile = async () => {
       try {
-        const res = await axiosInstance.get("/user/myprofile", {
-          withCredentials: true,
-        });
+        const res = await axiosInstance.get("/user/myprofile");
         setProfileData(res.data);
       } catch (error) {
         console.error("❌ Error fetching profile:", error);

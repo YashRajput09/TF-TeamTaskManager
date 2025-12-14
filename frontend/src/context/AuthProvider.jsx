@@ -11,12 +11,10 @@ export const AuthProvider = ({ children }) => {
 
   // Fetch user profile using cookie-based authentication
   const fetchProfile = async () => {
+    const token = localStorage.getItem("auth_token");
     try {
-      const response = await axiosInstance.get("/user/myprofile", {
-        withCredentials: true,
-        headers: { "Content-Type": "application/json" },
-      });
-
+    
+      const response = await axiosInstance.get("/user/myprofile");
       setIsAuthenticated(true);
       setProfile(response.data);
 
@@ -36,7 +34,7 @@ export const AuthProvider = ({ children }) => {
       );
       setIsAuthenticated(false);
       setProfile(null);
-      localStorage.removeItem("auth_user");
+      // localStorage.removeItem("auth_user");
     } finally {
       setLoading(false);
     }
@@ -56,7 +54,6 @@ export const AuthProvider = ({ children }) => {
 
       const data = response.data;
       setIsAuthenticated(true);
-      fetchProfile();
       // ⭐ 1) SAVE TOKEN IMMEDIATELY (if backend returns a token)
       if (data.token) {
         localStorage.setItem("auth_token", data.token);

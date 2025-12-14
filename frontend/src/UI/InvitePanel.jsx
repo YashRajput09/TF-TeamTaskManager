@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-import axios from "../pages/utility/axiosInstance.js";
 import { Users, Check, X, Clock } from "lucide-react";
 import toast from "react-hot-toast";
 import axiosInstance from "../pages/utility/axiosInstance.js";
@@ -10,7 +9,7 @@ export default function InvitePanel({onAccept}) {
 
   const fetchInvites = async () => {
     try {
-      const res = await axios.get("/user/my-group/invites");
+      const res = await axiosInstance.get("/user/my-group/invites");
       console.log(res.data);
 
       setInvites(res.data.invites || []);
